@@ -45,4 +45,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function records()
+    {
+        return $this->hasMany(Record::class);
+    }
 }
