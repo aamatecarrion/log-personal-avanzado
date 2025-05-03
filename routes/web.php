@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\MapPageController;
 use App\Http\Controllers\RecordController;
+use App\Http\Controllers\RecordPageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -9,7 +11,19 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::resource('records', RecordController::class);
+Route::middleware(['auth'])->group(function () {
+    Route::get('/records', [RecordPageController::class, 'index'])->name('records.view');
+    Route::get('/map', [MapPageController::class, 'index'])->name('map.view');
+
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::get('/records', [RecordController::class, 'index'])->name('records.index');
+        Route::post('/records', [RecordController::class, 'store'])->name('records.store');
+        Route::get('/records/{record}', [RecordController::class, 'show'])->name('records.show');
+        Route::put('/records/{record}', [RecordController::class, 'update'])->name('records.update');
+        Route::delete('/records/{record}', [RecordController::class, 'destroy'])->name('records.destroy');
+    });
+});
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -1,3 +1,4 @@
+import { RecordsMap } from '@/components/records-map';
 import { RecordsTable } from '@/components/records-table';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
@@ -7,18 +8,15 @@ import { Head } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Records',
-        href: '/records',
+        title: 'Map',
+        href: '/map',
     },
 ];
-
-export default function Records() {
+export default function Map() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Records" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <RecordsTable></RecordsTable>
-            </div>
+            <Head title="Map" />
+            <RecordsMap></RecordsMap>
         </AppLayout>
     );
 }

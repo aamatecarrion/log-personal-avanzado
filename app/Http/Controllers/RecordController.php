@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Record;
 use App\Models\User;
+use Carbon\Carbon;
 use Inertia\Inertia;
 
 class RecordController extends Controller
@@ -13,13 +14,32 @@ class RecordController extends Controller
     public function index()
     {   
         if (!Auth::check()) {
-            return Inertia::render('auth/Login');
+            return response()->json(['message' => 'Unauthorized'], 401); // Maneja el caso de no autenticación
         }
-    
-        $records = Auth::user()->records()->paginate(10);
-    
-        return Inertia::render('records', [
-            'records' => $records,
-        ]);
+
+        // Obtener los registros del usuario autenticado
+        $records = Record::where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+
+        // Si no hay registros, puedes devolver un array vacío
+        if ($records->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // Transformar los registros a un formato específico antes de devolverlos
+        $formattedRecords = $records->map(function ($record) {
+            return [
+                'id' => $record->id,
+                'title' => $record->title,
+                'description' => $record->description,
+                'latitude' => $record->latitude,
+                'longitude' => $record->longitude,
+                'created_at' => $record->created_at->format('Y-m-d H:i'),
+                'updated_at' => $record->updated_at,
+                'date_diff' => Carbon::parse($record->created_at)->diffForHumans(),
+            ];
+        });
+
+        // Retornar los registros correctamente formateados
+        return response()->json($formattedRecords);
     }
 }
