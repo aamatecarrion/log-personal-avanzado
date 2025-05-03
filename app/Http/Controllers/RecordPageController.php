@@ -28,11 +28,15 @@ class RecordPageController extends Controller
             'description' => $record->description,
             'latitude' => $record->latitude,
             'longitude' => $record->longitude,
-            'created_at' => $record->created_at->format('Y-m-d H:i:s'),
+            'created_at' => $record->created_at,
             'updated_at' => $record->updated_at,
             'date_diff' => Carbon::parse($record->created_at)->diffForHumans(),
         ];
 
         return Inertia::render('records.show', ['record' => $formattedRecord]);
+    }
+    public function create()
+    {   
+        return Inertia::render('records.create');
     }
 }

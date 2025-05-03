@@ -33,7 +33,7 @@ class RecordController extends Controller
                 'description' => $record->description,
                 'latitude' => $record->latitude,
                 'longitude' => $record->longitude,
-                'created_at' => $record->created_at->format('Y-m-d H:i'),
+                'created_at' => $record->created_at,
                 'updated_at' => $record->updated_at,
                 'date_diff' => Carbon::parse($record->created_at)->diffForHumans(),
             ];
@@ -41,5 +41,16 @@ class RecordController extends Controller
 
         // Retornar los registros correctamente formateados
         return response()->json($formattedRecords);
+    }
+
+    public function store(Request $request)
+    {
+        Record::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'user_id' => Auth::id(),
+        ]);
     }
 }

@@ -50,7 +50,7 @@ export function RecordsTable() {
 
     records.forEach((record) => {
       const dayTitle = formatDate(record.created_at)
-      const recordWithLocalTime = { ...record, created_at: formatTime(record.created_at) }
+      const recordWithLocalTime = { ...record, local_time: formatTime(record.created_at) }
       if (!groups[dayTitle]) groups[dayTitle] = []
       groups[dayTitle].push(recordWithLocalTime)
     })
@@ -76,7 +76,7 @@ export function RecordsTable() {
                   <TableBody>
                     {records.map((record) => (
                       <TableRow key={record.id} onClick={() => router.visit(`/records/${record.id}`)} className="cursor-pointer">
-                        <TableCell className="text-left w-[60px]">{record.created_at}</TableCell>
+                        <TableCell className="text-left w-[60px]">{record.local_time}</TableCell>
                         <TableCell className="font-medium text-left">{record.title}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>

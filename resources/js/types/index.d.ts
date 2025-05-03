@@ -13,6 +13,7 @@ export interface Record {
     longitude: number;
     created_at: string;
     updated_at: string;
+    local_time: string;
     date_diff: string;
 }
 

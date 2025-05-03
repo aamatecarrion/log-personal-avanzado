@@ -13,6 +13,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/records', [RecordPageController::class, 'index'])->name('records.view');
+    Route::get('/records/create', [RecordPageController::class, 'create'])->name('records.create');
     Route::get('/records/{record}', [RecordPageController::class, 'show'])->name('records.show');
     Route::get('/map', [MapPageController::class, 'index'])->name('map.view');
 
