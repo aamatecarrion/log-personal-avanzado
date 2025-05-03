@@ -6,45 +6,33 @@
 
 namespace App\Models\Base;
 
-use App\Models\Image;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Record
+ * Class Favorite
  * 
  * @property int $id
  * @property int $user_id
  * @property string $title
- * @property string|null $description
- * @property float|null $latitude
- * @property float|null $longitude
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * 
  * @property User $user
- * @property Image|null $image
  *
  * @package App\Models\Base
  */
-class Record extends Model
+class Favorite extends Model
 {
-	protected $table = 'records';
+	protected $table = 'favorites';
 
 	protected $casts = [
-		'user_id' => 'int',
-		'latitude' => 'float',
-		'longitude' => 'float'
+		'user_id' => 'int'
 	];
 
 	public function user()
 	{
 		return $this->belongsTo(User::class);
-	}
-
-	public function image()
-	{
-		return $this->hasOne(Image::class);
 	}
 }
