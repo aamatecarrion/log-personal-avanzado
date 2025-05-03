@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
 import { useRecordsStore } from "@/store/recordsStore";
 import { Record } from "@/types";
+import { router } from "@inertiajs/react";
 
 
 export function RecordsMap() {
@@ -27,10 +28,10 @@ export function RecordsMap() {
   }, [fetchedRecords]);
 
   return (
-    <div style={{ height: "100%", width: "100%" }}>
+    <div style={{ height: "100%", width: "100%", zIndex: 0 }}>
       <MapContainer
         center={[37.62, -0.99]}
-        zoom={12}
+        zoom={13}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
       >
@@ -44,7 +45,7 @@ export function RecordsMap() {
           return (
             <Marker key={record.id} position={position}>
               <Popup>
-                <div className="cursor-pointer" onClick={() => console.log(record)}>
+                <div className="cursor-pointer" onClick={() => router.visit(`/records/${record.id}`)}>
                   <h3>{record.title}</h3>
                   <p>{record.description}</p>
                   <small>{record.date_diff}</small>
