@@ -43,6 +43,27 @@ class RecordController extends Controller
         return response()->json($formattedRecords);
     }
 
+    public function show($id)
+    {
+        $record = Record::where('user_id', Auth::id())->where('id', $id)->firstOrFail();
+
+        if (!$record) {
+            abort(404);
+        }
+
+        $formattedRecord = [
+            'id' => $record->id,
+            'title' => $record->title,
+            'description' => $record->description,
+            'latitude' => $record->latitude,
+            'longitude' => $record->longitude,
+            'created_at' => $record->created_at,
+            'updated_at' => $record->updated_at,
+            'date_diff' => Carbon::parse($record->created_at)->diffForHumans(),
+        ];
+
+        return response()->json($formattedRecord);
+    }
     public function store(Request $request)
     {
         Record::create([

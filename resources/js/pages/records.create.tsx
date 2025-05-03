@@ -8,7 +8,7 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { Record, type BreadcrumbItem } from '@/types';
 import { Textarea } from '@headlessui/react';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,17 +21,32 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-
 export default function RecordsCreate() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, clearErrors } = useForm({
         title: '',
         description: '',
     })
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        post('/api/records') // Ruta del controlador de Laravel con Inertia
+    const validate = () => {
+        let valid = true;
+        clearErrors();
+        
+        if (!data.title) {
+            errors.title = 'Title is required';
+            valid = false;
+        }
+
+        return valid;
     }
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (validate()) {
+            post('/api/records');
+            router.visit('/records');
+        }
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Records" />
@@ -43,7 +58,7 @@ export default function RecordsCreate() {
                     <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <Label htmlFor="title">Título</Label>
+                            <Label htmlFor="title">Title</Label>
                             <Input
                                 id="title"
                                 value={data.title}
@@ -52,12 +67,13 @@ export default function RecordsCreate() {
                             {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
                         </div>
                         <div>
-                            <Label htmlFor='description'>Description</Label>
-                            <Textarea
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea className={"w-full border border-gray-300 rounded-md p-2 focus:outline-none"}
                                 id="description"
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
                             />
+                            {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
                         </div>
                         <Button type="submit" disabled={processing}>
                             Crear
@@ -69,3 +85,4 @@ export default function RecordsCreate() {
         </AppLayout>
     );
 }
+

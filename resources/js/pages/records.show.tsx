@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
+import { useRecordsStore } from '@/store/recordsStore';
 import { Record, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,24 +35,36 @@ function formatDate(dateString: string) {
     return formattedDate
   }
 export default function RecordsShow() {
-    const { record } = usePage<{ record: Record }>().props;
+    console.log(usePage().props.id)
+    const [recordId, setRecordId] = useState(usePage().props.id as string);
+    console.log("record_id", recordId)
+    const record = useRecordsStore((state) => state.selectedRecord);
+    const setSelectedRecord = useRecordsStore((state) => state.setSelectedRecord);
+
+    useEffect(() => {
+        setSelectedRecord(recordId);
+    }, [setSelectedRecord, recordId]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Records" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{record.title}</CardTitle>
+                        <CardTitle>{record?.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p>{formatDate(record.created_at)} <span className="float-right">{record.date_diff}</span></p>
-                        <br />
-                        <p>Location: {record.latitude}, {record.longitude}</p>
-                        <br />
-                        <p>{record.description}</p>
-
-                        
-                        
+                        {record && (
+                            <>
+                                <p>{formatDate(record.created_at)} <span className="float-right">{record.date_diff}</span></p>
+                                <br />
+                                {record.latitude && record.longitude && (
+                                    <p>Location: {record.latitude}, {record.longitude}</p>
+                                )}
+                                <br />
+                                <p>{record.description}</p>
+                            </>
+                        )}
                     </CardContent>
                 </Card>
             </div>

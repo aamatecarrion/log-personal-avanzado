@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\MapPageController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RecordPageController;
@@ -23,6 +24,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/records/{record}', [RecordController::class, 'show'])->name('records.show');
         Route::put('/records/{record}', [RecordController::class, 'update'])->name('records.update');
         Route::delete('/records/{record}', [RecordController::class, 'destroy'])->name('records.destroy');
+
+        Route::get('/preferences', [ConfigController::class, 'index'])->name('preferences.index');
     });
 });
 
