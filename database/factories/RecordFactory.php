@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,11 @@ class RecordFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => User::where('email', 'antonio@localhost')->first()->id,
+            'title' => $this->faker->sentence(rand(1, 3),false),
+            'description' => $this->faker->optional()->text(),
+            'latitude' => $this->faker->latitude(37.579, 37.650),
+            'longitude' => $this->faker->longitude(-0.94, -1.04),
         ];
     }
 }

@@ -5,6 +5,17 @@ export interface Auth {
     user: User;
 }
 
+export interface Record {
+    id: number;
+    title: string;
+    description: string;
+    latitude: number;
+    longitude: number;
+    created_at: string;
+    updated_at: string;
+    date_diff: string;
+}
+
 export interface BreadcrumbItem {
     title: string;
     href: string;

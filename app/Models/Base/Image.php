@@ -8,6 +8,7 @@ namespace App\Models\Base;
 
 use App\Models\Record;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Image extends Model
 {
+	use HasFactory;
 	protected $table = 'images';
 
 	protected $casts = [
