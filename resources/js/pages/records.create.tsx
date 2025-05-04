@@ -6,9 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { Record, type BreadcrumbItem } from '@/types';
+import { useRecordsStore } from '@/store/recordsStore';
+import { Record, Config, type BreadcrumbItem } from '@/types';
 import { Textarea } from '@headlessui/react';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { config } from 'process';
+import { useEffect } from 'react';
+import { useStore } from 'zustand';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -46,6 +50,25 @@ export default function RecordsCreate() {
             router.visit('/records');
         }
     }
+    const fetchConfig = useRecordsStore((state) => state.fetchConfig);
+    const updateConfig = useRecordsStore((state) => state.updateConfig);
+    const config = useRecordsStore((state) => state.config);
+
+    useEffect(() => {
+        if ("geolocation" in navigator && config?.ask_location_permission) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              console.log("Lat:", position.coords.latitude);
+              console.log("Lng:", position.coords.longitude);
+            },
+            (error) => {
+              console.error("Error obteniendo ubicación:", error);
+            }
+          );
+        } else {
+          console.warn("Geolocalización no está disponible en este navegador.");
+        }
+      }, [config?.ask_location_permission]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

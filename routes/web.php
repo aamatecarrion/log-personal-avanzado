@@ -25,7 +25,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/records/{record}', [RecordController::class, 'update'])->name('records.update');
         Route::delete('/records/{record}', [RecordController::class, 'destroy'])->name('records.destroy');
 
-        Route::get('/preferences', [ConfigController::class, 'index'])->name('preferences.index');
+        Route::get('/config', [ConfigController::class, 'index'])->name('preferences.index');
+        Route::put('/config', [ConfigController::class, 'update'])->name('preferences.update');
     });
 });
 

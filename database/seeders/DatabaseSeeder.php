@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Config;
 use App\Models\Record;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -21,7 +22,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'antonio@localhost',
             'password' => bcrypt('123456')
         ]);
-
+        Config::create([
+            'user_id' => User::where('email', 'antonio@localhost')->first()->id,
+            'ask_location_permission' => true
+        ]);
+        
         Record::factory(200)->create();
     }
 }

@@ -17,6 +17,10 @@ export interface Record {
     date_diff: string;
 }
 
+export interface Config {
+    user_id: number;
+    ask_location_permission: boolean;
+}
 export interface BreadcrumbItem {
     title: string;
     href: string;

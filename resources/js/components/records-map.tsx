@@ -9,8 +9,9 @@ import { router } from "@inertiajs/react";
 export function RecordsMap() {
 
   const [filteredRecords, setFilteredRecords] = useState<Record[]>([]);
+  
   const fetchRecords = useRecordsStore((state) => state.fetchRecords);
-  const fetchedRecords = useRecordsStore((state) => state.records);
+  const records = useRecordsStore((state) => state.records);
 
   // Cargar los registros cuando el componente se monta
   useEffect(() => {
@@ -19,13 +20,13 @@ export function RecordsMap() {
 
   // Filtramos solo los registros que tienen latitud y longitud
   useEffect(() => {
-    if (fetchedRecords) {
-      const filteredRecords = fetchedRecords.filter(
+    if (records) {
+      const filteredRecords = records.filter(
         (record) => record.latitude && record.longitude
       );
       setFilteredRecords(filteredRecords);
     }
-  }, [fetchedRecords]);
+  }, [records]);
 
   return (
     <div style={{ height: "100%", width: "100%", zIndex: 0 }}>

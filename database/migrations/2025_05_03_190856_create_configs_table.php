@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('configs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade')->unique();
-            $table->boolean('location_allowed')->default(false);
+            $table->boolean('ask_location_permission')->default(true);
             $table->timestamps();
         });
     }

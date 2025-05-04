@@ -1,3 +1,4 @@
+import { MapShow } from '@/components/map-show';
 import { RecordsTable } from '@/components/records-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
@@ -35,10 +36,10 @@ function formatDate(dateString: string) {
     return formattedDate
   }
 export default function RecordsShow() {
-    console.log(usePage().props.id)
+
     const [recordId, setRecordId] = useState(usePage().props.id as string);
-    console.log("record_id", recordId)
-    const record = useRecordsStore((state) => state.selectedRecord);
+    const selectedRecord = useRecordsStore((state) => state.selectedRecord);
+
     const setSelectedRecord = useRecordsStore((state) => state.setSelectedRecord);
 
     useEffect(() => {
@@ -49,20 +50,25 @@ export default function RecordsShow() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Records" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <Card>
+                <Card className={selectedRecord?.latitude && selectedRecord?.longitude ? "h-full" : ""}>
                     <CardHeader>
-                        <CardTitle>{record?.title}</CardTitle>
+                        <CardTitle>{selectedRecord?.title}</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                        {record && (
+                    <CardContent className="flex-1 flex flex-col">
+                        {selectedRecord && (
                             <>
-                                <p>{formatDate(record.created_at)} <span className="float-right">{record.date_diff}</span></p>
+                                <p>{formatDate(selectedRecord.created_at)} <span className="float-right">{selectedRecord.date_diff}</span></p>
                                 <br />
-                                {record.latitude && record.longitude && (
-                                    <p>Location: {record.latitude}, {record.longitude}</p>
+                                {selectedRecord.latitude && selectedRecord.longitude && (
+                                    <p>Location: {selectedRecord.latitude}, {selectedRecord.longitude}</p>
                                 )}
                                 <br />
-                                <p>{record.description}</p>
+                                <p>{selectedRecord.description}</p>
+                                {selectedRecord.latitude && selectedRecord.longitude && (
+                                    <div className="flex-1">
+                                        <MapShow />
+                                    </div>
+                                )}
                             </>
                         )}
                     </CardContent>
