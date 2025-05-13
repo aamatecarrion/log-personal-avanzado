@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('images', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('record_id')->unique()->nullable()->references('id')->on('records')->onDelete('set null');
             $table->text('generated_description')->nullable();
             $table->decimal('file_latitude', 10, 8)->nullable();

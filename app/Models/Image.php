@@ -11,6 +11,7 @@ class Image extends Model
     use HasFactory;
     protected $fillable = [
         'record_id',
+        'user_id',
         'generated_description',
         'file_latitude',
         'file_longitude',

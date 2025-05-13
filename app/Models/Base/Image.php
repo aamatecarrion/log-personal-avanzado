@@ -7,6 +7,7 @@
 namespace App\Models\Base;
 
 use App\Models\Record;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * Class Image
  * 
  * @property int $id
+ * @property int $user_id
  * @property int|null $record_id
  * @property string|null $generated_description
  * @property float|null $file_latitude
@@ -26,6 +28,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property Carbon|null $updated_at
  * 
  * @property Record|null $record
+ * @property User $user
  *
  * @package App\Models\Base
  */
@@ -35,6 +38,7 @@ class Image extends Model
 	protected $table = 'images';
 
 	protected $casts = [
+		'user_id' => 'int',
 		'record_id' => 'int',
 		'file_latitude' => 'float',
 		'file_longitude' => 'float',
@@ -44,5 +48,10 @@ class Image extends Model
 	public function record()
 	{
 		return $this->belongsTo(Record::class);
+	}
+
+	public function user()
+	{
+		return $this->belongsTo(User::class);
 	}
 }

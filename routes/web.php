@@ -6,8 +6,11 @@ use App\Http\Controllers\ImagePageController;
 use App\Http\Controllers\MapPageController;
 use App\Http\Controllers\RecordController;
 use App\Http\Controllers\RecordPageController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -18,7 +21,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/records', [RecordPageController::class, 'index'])->name('records.view');
     Route::get('/records/create', [RecordPageController::class, 'create'])->name('records.create');
     Route::get('/records/{record}', [RecordPageController::class, 'show'])->name('records.show');
+    
     Route::get('/images/upload', [ImagePageController::class, 'upload'])->name('images.upload');
+    Route::get('/images', [ImagePageController::class, 'index'])->name('images.index');
+    Route::get('/image/{image}', [ImageController::class, 'show'])->name('images.show');
+
     Route::get('/map', [MapPageController::class, 'index'])->name('map.view');
 
     Route::prefix('api')->name('api.')->group(function () {

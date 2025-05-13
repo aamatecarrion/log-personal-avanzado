@@ -17,6 +17,20 @@ export interface Record {
     date_diff: string;
 }
 
+export interface Image {
+    id: number;
+    record_id: number | null;
+    user_id: number;
+    generated_description: string | null;
+    file_latitude: number | null;
+    file_longitude: number | null;
+    file_date: date | null;
+    original_filename: string;
+    image_path: string;
+    created_at: date | null;
+    updated_at: date | null;
+}
+
 export interface Config {
     user_id: number;
     ask_location_permission: boolean;

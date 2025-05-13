@@ -60,4 +60,8 @@ class User extends Authenticatable
     public function config(){
         return $this->hasOne(Config::class);
     }
+    public function images(): HasMany
+    {
+        return $this->hasMany(Image::class);
+    }
 }

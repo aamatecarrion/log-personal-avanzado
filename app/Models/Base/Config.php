@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * 
  * @property int $id
  * @property int $user_id
- * @property bool $location_allowed
+ * @property bool $ask_location_permission
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * 
@@ -31,7 +31,7 @@ class Config extends Model
 
 	protected $casts = [
 		'user_id' => 'int',
-		'location_allowed' => 'bool'
+		'ask_location_permission' => 'bool'
 	];
 
 	public function user()
