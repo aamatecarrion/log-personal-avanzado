@@ -11,18 +11,18 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '',
     },
 ];
-export default function Images({ images }: { images: Image[] }) {
+export default function ImagesShow({ images }: { images: Image[] }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Images" />
             <div className="p-4">
-                <div className="flex flex-row flex-start flex-wrap gap-4">
+                <div className="flex flex-row">
                     {images.map((image: Image) => (
-                        <div key={image.id} className="overflow-hidden">
+                        <div key={image.id} className="overflow-overlay rounded-lg shadow hover:shadow-lg transition-all duration-200 border">
                             <img
                                 src={route('images.show', image.id)}
                                 alt={`Imagen ${image.id}`}
-                                className="w-full h-60 object-cover"
+                                className="w-full h-60 object-cover transition-transform duration-200"
                             />
                         </div>
                     ))}

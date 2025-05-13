@@ -55,6 +55,7 @@ export default function ImagesUpload() {
     e.preventDefault();
     post(route('api.images.store'), {
       forceFormData: true,
+      showProgress: false,
       onSuccess: () => {
         setData({ images: [] });
         setPreviews([]);
