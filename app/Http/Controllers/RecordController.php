@@ -46,7 +46,9 @@ class RecordController extends Controller
     public function show($id)
     {
         $record = Record::where('user_id', Auth::id())->where('id', $id)->firstOrFail();
-
+        $record->load('image');
+        
+        
         if (!$record) {
             abort(404);
         }
@@ -60,6 +62,14 @@ class RecordController extends Controller
             'created_at' => $record->created_at,
             'updated_at' => $record->updated_at,
             'date_diff' => Carbon::parse($record->created_at)->diffForHumans(),
+            'image' => $record->image ? [
+                'id' => $record->image->id,
+                'original_filename' => $record->image->original_filename,
+                'image_path' => $record->image->image_path,
+                'file_date' => $record->image->file_date,
+                'file_latitude' => $record->image->file_latitude,
+                'file_longitude' => $record->image->file_longitude,
+            ] : null,
         ];
 
         return response()->json($formattedRecord);

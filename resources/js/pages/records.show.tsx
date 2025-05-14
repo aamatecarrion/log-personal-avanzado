@@ -6,7 +6,7 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { useRecordsStore } from '@/store/recordsStore';
 import { Record, type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -56,7 +56,7 @@ export default function RecordsShow() {
                     </CardHeader>
                     <CardContent className="flex-1 flex flex-col">
                         {selectedRecord && (
-                            <>
+                            <>  
                                 <p>{formatDate(selectedRecord.created_at)} <span className="float-right">{selectedRecord.date_diff}</span></p>
                                 <br />
                                 {selectedRecord.latitude && selectedRecord.longitude && (
@@ -64,6 +64,19 @@ export default function RecordsShow() {
                                 )}
                                 <br />
                                 <p>{selectedRecord.description}</p>
+                                <div className="overflow-auto">
+                                    
+                                            {selectedRecord.image && (
+                                                <div onClick={() => { selectedRecord.image && router.visit(route('images.show', selectedRecord.image.id), { method: 'get' })}} className="overflow-hidden cursor-pointer">
+                                                    <img
+                                                        src={route('api.images.show', selectedRecord.image.id)}
+                                                        alt={`Imagen ${selectedRecord.image.id}`}
+                                                        className="w-60 h-60 object-cover"
+                                                    />
+                                                </div>
+                                            )}
+                                    </div>
+                                <br />
                                 {selectedRecord.latitude && selectedRecord.longitude && (
                                     <div className="flex-1">
                                         <MapShow />

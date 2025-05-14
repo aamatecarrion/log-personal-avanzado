@@ -6,20 +6,75 @@ use App\Models\Image;
 use App\Models\Record;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
-use PhpExif\Reader\Reader;
-
 
 class ImageController extends Controller
 {
-    private function gps2Num($coordPart)
+    public function store(Request $request)
     {
-        $parts = explode('/', $coordPart);
-        if (count($parts) <= 0) return 0;
-        if (count($parts) === 1) return floatval($parts[0]);
-        return floatval($parts[0]) / floatval($parts[1]);
+        $validatedData = $request->validate([
+            'images.*' => 'required|image',
+        ], [
+            'images.*.required' => 'No se han seleccionado imágenes',
+            'images.*.image' => 'El archivo seleccionado no es una imagen',
+        ]);
+
+        $savedImages = [];
+
+        foreach ($request->file('images') as $file) {
+            $path = $file->store('images', 'private');
+            $absolutePath = $file->getPathname();
+
+            $exif = @exif_read_data($absolutePath);
+
+            $dateTaken = null;
+            $latitude = null;
+            $longitude = null;
+
+            if ($exif && isset($exif['DateTimeOriginal'])) {
+                $dateTaken = date('Y:m:d H:i:s', strtotime($exif['DateTimeOriginal']));
+            }
+
+            if (
+                isset($exif['GPSLatitude'], $exif['GPSLatitudeRef'], $exif['GPSLongitude'], $exif['GPSLongitudeRef'])
+            ) {
+                $latitude = $this->convertGpsToDecimal($exif['GPSLatitude'], $exif['GPSLatitudeRef']);
+                $longitude = $this->convertGpsToDecimal($exif['GPSLongitude'], $exif['GPSLongitudeRef']);
+            }
+
+            $record = Record::create([
+                'user_id' => Auth::id(),
+                'title' => 'Imagen: ' . $file->getClientOriginalName(),
+                'description' => null,
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+            ]);
+
+            $savedImages[] = Image::create([
+                'user_id' => Auth::id(),
+                'record_id' => $record->id,
+                'original_filename' => $file->getClientOriginalName(),
+                'image_path' => $path,
+                'file_date' => $dateTaken,
+                'file_latitude' => $latitude,
+                'file_longitude' => $longitude,
+            ]);
+        }
+
+        return redirect()->route('images.upload')->with([
+            'success' => 'Imágenes subidas correctamente.',
+            'saved_images' => $savedImages,
+        ]);
     }
+
+    public function show(Image $image)
+    {
+        if ($image->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return response()->file(storage_path('app/private/' . $image->image_path));
+    }
+
     private function convertGpsToDecimal($coord, $ref)
     {
         $degrees = count($coord) > 0 ? $this->gps2Num($coord[0]) : 0;
@@ -35,65 +90,11 @@ class ImageController extends Controller
         return $decimal;
     }
 
-
-    public function store(Request $request)
+    private function gps2Num($coordPart)
     {
-        $request->validate([
-            'image' => 'required|image',
-        ]);
-
-        $file = $request->file('image');
-        $path = $file->store('images', 'public');
-        $absolutePath = $file->getPathname();
-
-        $exif = @exif_read_data($absolutePath);
-
-        $dateTaken = null;
-        $latitude = null;
-        $longitude = null;
-
-        if ($exif && isset($exif['DateTimeOriginal'])) {
-            $dateTaken = date('Y-m-d', strtotime($exif['DateTimeOriginal']));
-        }
-
-        if (isset($exif['GPSLatitude'], $exif['GPSLatitudeRef'], $exif['GPSLongitude'], $exif['GPSLongitudeRef'])) {
-            $latitude = $this->convertGpsToDecimal($exif['GPSLatitude'], $exif['GPSLatitudeRef']);
-            $longitude = $this->convertGpsToDecimal($exif['GPSLongitude'], $exif['GPSLongitudeRef']);
-        }
-
-        // Crear el record asociado
-        $record = Record::create([
-            'user_id' => Auth::id(),
-            'title' => 'Registro de imagen: ' . $file->getClientOriginalName(),
-            'description' => null,
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-        ]);
-
-        // Guardar imagen y enlazar al record
-        $image = Image::create([
-            'user_id' => Auth::id(),
-            'record_id' => $record->id,
-            'original_filename' => $file->getClientOriginalName(),
-            'image_path' => $path,
-            'file_date' => $dateTaken,
-            'file_latitude' => $latitude,
-            'file_longitude' => $longitude,
-        ]);
-
-        return response()->json([
-            'image' => $image,
-            'record' => $record,
-        ]);
-    }
-    public function show(Image $image)
-    {
-        // Asegúrate de que el usuario solo accede a sus propias imágenes
-        if ($image->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        // Devuelve el archivo como imagen
-        return response()->file(storage_path('app/private/' . $image->image_path));
+        $parts = explode('/', $coordPart);
+        if (count($parts) <= 0) return 0;
+        if (count($parts) === 1) return floatval($parts[0]);
+        return floatval($parts[0]) / floatval($parts[1]);
     }
 }

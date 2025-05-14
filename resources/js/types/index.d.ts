@@ -15,6 +15,7 @@ export interface Record {
     updated_at: string;
     local_time: string;
     date_diff: string;
+    image: Image | null;
 }
 
 export interface Image {
