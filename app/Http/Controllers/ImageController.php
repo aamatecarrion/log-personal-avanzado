@@ -3,41 +3,87 @@
 namespace App\Http\Controllers;
 
 use App\Models\Image;
+use App\Models\Record;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
+use PhpExif\Reader\Reader;
+
 
 class ImageController extends Controller
 {
+    private function gps2Num($coordPart)
+    {
+        $parts = explode('/', $coordPart);
+        if (count($parts) <= 0) return 0;
+        if (count($parts) === 1) return floatval($parts[0]);
+        return floatval($parts[0]) / floatval($parts[1]);
+    }
+    private function convertGpsToDecimal($coord, $ref)
+    {
+        $degrees = count($coord) > 0 ? $this->gps2Num($coord[0]) : 0;
+        $minutes = count($coord) > 1 ? $this->gps2Num($coord[1]) : 0;
+        $seconds = count($coord) > 2 ? $this->gps2Num($coord[2]) : 0;
+
+        $decimal = $degrees + ($minutes / 60) + ($seconds / 3600);
+
+        if ($ref === 'S' || $ref === 'W') {
+            $decimal = -$decimal;
+        }
+
+        return $decimal;
+    }
+
+
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'images.*' => 'required|image',
-        ], [
-            'images.*.required' => 'No se han seleccionado im genes',
-            'images.*.image' => 'El archivo seleccionado no es una im gen'
+        $request->validate([
+            'image' => 'required|image',
         ]);
 
-        if (!$validatedData) {
-            return back()->withErrors([
-                'images' => 'No se han seleccionado imágenes'
-            ]);
+        $file = $request->file('image');
+        $path = $file->store('images', 'public');
+        $absolutePath = $file->getPathname();
+
+        $exif = @exif_read_data($absolutePath);
+
+        $dateTaken = null;
+        $latitude = null;
+        $longitude = null;
+
+        if ($exif && isset($exif['DateTimeOriginal'])) {
+            $dateTaken = date('Y-m-d', strtotime($exif['DateTimeOriginal']));
         }
 
-        $savedImages = [];
-
-        foreach ($request->file('images') as $image) {
-            $path = $image->store('images', 'private'); // guarda en storage/app/private/images
-
-            $savedImages[] = Image::create([
-                'user_id' => Auth::user()->id,
-                'original_filename' => $image->getClientOriginalName(),
-                'image_path' => $path,
-            ]);
+        if (isset($exif['GPSLatitude'], $exif['GPSLatitudeRef'], $exif['GPSLongitude'], $exif['GPSLongitudeRef'])) {
+            $latitude = $this->convertGpsToDecimal($exif['GPSLatitude'], $exif['GPSLatitudeRef']);
+            $longitude = $this->convertGpsToDecimal($exif['GPSLongitude'], $exif['GPSLongitudeRef']);
         }
 
-        return redirect()->route('images.upload')->with([
-            'success' => 'Images uploaded successfully.',
-            'saved_images' => $savedImages,
+        // Crear el record asociado
+        $record = Record::create([
+            'user_id' => Auth::id(),
+            'title' => 'Registro de imagen: ' . $file->getClientOriginalName(),
+            'description' => null,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+        ]);
+
+        // Guardar imagen y enlazar al record
+        $image = Image::create([
+            'user_id' => Auth::id(),
+            'record_id' => $record->id,
+            'original_filename' => $file->getClientOriginalName(),
+            'image_path' => $path,
+            'file_date' => $dateTaken,
+            'file_latitude' => $latitude,
+            'file_longitude' => $longitude,
+        ]);
+
+        return response()->json([
+            'image' => $image,
+            'record' => $record,
         ]);
     }
     public function show(Image $image)

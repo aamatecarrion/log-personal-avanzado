@@ -8,24 +8,33 @@ import { Head, usePage } from '@inertiajs/react';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Images',
-        href: '',
+        href: '/images',
+    },
+    {
+        title: 'Image',
+        href: "",
     },
 ];
-export default function ImagesShow({ images }: { images: Image[] }) {
+export default function ImagesShow({ image }: { image: Image }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Images" />
-            <div className="p-4">
-                <div className="flex flex-row">
-                    {images.map((image: Image) => (
-                        <div key={image.id} className="overflow-overlay rounded-lg shadow hover:shadow-lg transition-all duration-200 border">
-                            <img
-                                src={route('api.images.show', image.id)}
-                                alt={`Imagen ${image.id}`}
-                                className="w-full h-60 object-cover transition-transform duration-200"
-                            />
+            <div className="p-4 flex flex-row gap-4">
+                <div className="overflow-auto">
+                    <img
+                        src={route('api.images.show', image.id)}
+                        alt={`Imagen ${image.id}`}
+                        className="h-[50vh] object-cover"
+                    />
+                </div>
+                <div className="flex flex-row gap-4">
+                    <div className="flex flex-col gap-2">
+                        <h2 className="text-lg font-semibold">Metadata</h2>
+                        <div className="flex flex-col gap-1">
+                            <span><strong>Created at:</strong> {image.created_at}</span>
+                            <span><strong>Updated at:</strong> {image.updated_at}</span>
                         </div>
-                    ))}
+                    </div>
                 </div>
             </div>
         </AppLayout>

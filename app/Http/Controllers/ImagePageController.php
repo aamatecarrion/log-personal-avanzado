@@ -23,4 +23,15 @@ class ImagePageController extends Controller
     {
         return inertia('images.upload');
     }
+    
+    public function show(Image $image)
+    {   
+        // Ensure the user can only access their own images
+        if ($image->user_id !== Auth::id()) {
+            abort(403);
+        }
+        return inertia('images.show')->with([
+            'image' => $image,
+        ]);
+    }
 }

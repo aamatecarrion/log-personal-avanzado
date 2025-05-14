@@ -3,7 +3,7 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, Pagi
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { Image, Record, type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,6 +15,10 @@ export default function Images({ images }: { images: Image[] }) {
     const handleImageClick = (imageId: number) => {
 
         console.log('Image ID:', imageId);
+
+        router.visit(route('images.show', imageId), {
+            method: 'get',
+        });
     };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
