@@ -24,10 +24,10 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/images/upload', [ImagePageController::class, 'upload'])->name('images.upload');
     Route::get('/images', [ImagePageController::class, 'index'])->name('images.index');
-    Route::get('/image/{image}', [ImageController::class, 'show'])->name('images.show');
+    Route::get('/images/{image}', [ImagePageController::class, 'show'])->name('images.show');
 
     Route::get('/map', [MapPageController::class, 'index'])->name('map.view');
-
+    
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/records', [RecordController::class, 'index'])->name('records.index');
         Route::post('/records', [RecordController::class, 'store'])->name('records.store');
@@ -37,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/records/{record}', [RecordController::class, 'destroy'])->name('records.destroy');
         
         Route::post('/images', [ImageController::class, 'store'])->name('images.store');
+        Route::get('/images/{image}', [ImageController::class, 'show'])->name('images.show');
         
         Route::get('/config', [ConfigController::class, 'index'])->name('preferences.index');
         Route::put('/config', [ConfigController::class, 'update'])->name('preferences.update');

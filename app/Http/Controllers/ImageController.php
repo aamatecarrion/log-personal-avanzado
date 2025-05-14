@@ -41,13 +41,13 @@ class ImageController extends Controller
         ]);
     }
     public function show(Image $image)
-{
-    // Asegúrate de que el usuario solo accede a sus propias imágenes
-    if ($image->user_id !== Auth::id()) {
-        abort(403);
-    }
+    {
+        // Asegúrate de que el usuario solo accede a sus propias imágenes
+        if ($image->user_id !== Auth::id()) {
+            abort(403);
+        }
 
-    // Devuelve el archivo como imagen
-    return response()->file(storage_path('app/private/' . $image->image_path));
-}
+        // Devuelve el archivo como imagen
+        return response()->file(storage_path('app/private/' . $image->image_path));
+    }
 }

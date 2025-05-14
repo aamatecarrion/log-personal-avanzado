@@ -12,15 +12,19 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 export default function Images({ images }: { images: Image[] }) {
+    const handleImageClick = (imageId: number) => {
+
+        console.log('Image ID:', imageId);
+    };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Images" />
             <div className="p-4">
                 <div className="flex flex-row flex-start flex-wrap gap-4">
                     {images.map((image: Image) => (
-                        <div key={image.id} className="overflow-hidden">
+                        <div key={image.id} className="overflow-hidden cursor-pointer" onClick={() => handleImageClick(image.id)}>
                             <img
-                                src={route('images.show', image.id)}
+                                src={route('api.images.show', image.id)}
                                 alt={`Imagen ${image.id}`}
                                 className="w-full h-60 object-cover"
                             />

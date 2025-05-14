@@ -20,7 +20,7 @@ export default function ImagesShow({ images }: { images: Image[] }) {
                     {images.map((image: Image) => (
                         <div key={image.id} className="overflow-overlay rounded-lg shadow hover:shadow-lg transition-all duration-200 border">
                             <img
-                                src={route('images.show', image.id)}
+                                src={route('api.images.show', image.id)}
                                 alt={`Imagen ${image.id}`}
                                 className="w-full h-60 object-cover transition-transform duration-200"
                             />
