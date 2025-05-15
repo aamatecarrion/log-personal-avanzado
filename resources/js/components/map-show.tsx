@@ -11,7 +11,7 @@ export function MapShow() {
   const selectedRecord = useRecordsStore((state) => state.selectedRecord);
 
   return (
-    <div className="h-full w-full" >
+    <div className="h-[50vh]" >
       <MapContainer
         center={[selectedRecord?.latitude ?? 37.62, selectedRecord?.longitude ?? -0.99]}
         zoom={13}

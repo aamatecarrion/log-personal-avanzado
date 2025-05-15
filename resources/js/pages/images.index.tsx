@@ -12,11 +12,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 export default function Images({ images }: { images: Image[] }) {
-    const handleImageClick = (imageId: number) => {
+    const handleImageClick = (image: Image) => {
 
-        console.log('Image ID:', imageId);
+        console.log('Image ID:', image.id);
 
-        router.visit(route('images.show', imageId), {
+        router.visit(route('records.show', image.record_id?.toString() ), {
             method: 'get',
         });
     };
@@ -26,7 +26,7 @@ export default function Images({ images }: { images: Image[] }) {
             <div className="p-4">
                 <div className="flex flex-row flex-start flex-wrap gap-4">
                     {images.map((image: Image) => (
-                        <div key={image.id} className="overflow-hidden cursor-pointer" onClick={() => handleImageClick(image.id)}>
+                        <div key={image.id} className="overflow-hidden cursor-pointer" onClick={() => handleImageClick(image)}>
                             <img
                                 src={route('api.images.show', image.id)}
                                 alt={`Imagen ${image.id}`}

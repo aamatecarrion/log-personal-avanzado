@@ -7,7 +7,7 @@ export interface Auth {
 
 export interface Record {
     id: number;
-    title: string;
+    title: string | null | undefined;
     description: string;
     latitude: number;
     longitude: number;
