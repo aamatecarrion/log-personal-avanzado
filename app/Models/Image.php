@@ -2,21 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Base\Image as BaseImage;
 
-class Image extends Model
+class Image extends BaseImage
 {
-    /** @use HasFactory<\Database\Factories\ImageFactory> */
-    use HasFactory;
-    protected $fillable = [
-        'record_id',
-        'user_id',
-        'generated_description',
-        'file_latitude',
-        'file_longitude',
-        'file_date',
-        'original_filename',
-        'image_path',
-    ];
+	protected $fillable = [
+		'user_id',
+		'record_id',
+		'generated_description',
+		'file_latitude',
+		'file_longitude',
+		'file_date',
+		'original_filename',
+		'image_path'
+	];
 }

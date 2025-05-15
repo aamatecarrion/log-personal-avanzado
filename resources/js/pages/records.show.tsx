@@ -2,7 +2,7 @@ import { MapShow } from '@/components/map-show';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { useRecordsStore } from '@/store/recordsStore';
-import { type BreadcrumbItem } from '@/types';
+import { Record, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
@@ -10,65 +10,73 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Records', href: '/records' },
   { title: 'Record', href: '' },
 ];
-
-function formatDate(dateString: string) {
-  const dateUTC = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    day: '2-digit',
-    month: '2-digit',
+const spanishTimestampConvert = (fechaUTC: string): string => {
+  const fecha = new Date(fechaUTC);
+  
+  // Opciones para formatear cada parte de la fecha/hora
+  const opciones: Intl.DateTimeFormatOptions = {
     year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
+    hour12: false,      // Formato 24h
+    timeZone: 'Europe/Madrid'
   };
-  let formattedDate = new Intl.DateTimeFormat('es-ES', options).format(dateUTC);
-  return formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-}
+
+  // Formateamos las partes de la fecha
+  const formateador = new Intl.DateTimeFormat('es-ES', opciones);
+  const partes = formateador.formatToParts(fecha);
+
+  // Extraemos cada componente (TypeScript sabe que existen por las opciones)
+  const año = partes.find(p => p.type === 'year')!.value;
+  const mes = partes.find(p => p.type === 'month')!.value;
+  const dia = partes.find(p => p.type === 'day')!.value;
+  const hora = partes.find(p => p.type === 'hour')!.value.padStart(2, '0'); // Aseguramos 2 dígitos
+  const minuto = partes.find(p => p.type === 'minute')!.value.padStart(2, '0');
+  const segundo = partes.find(p => p.type === 'second')!.value.padStart(2, '0');
+
+  // Formato final: "YYYY-MM-DD HH:mm:ss"
+  return `${año}-${mes}-${dia} ${hora}:${minuto}:${segundo}`;
+};
 
 export default function RecordsShow() {
-  const [recordId, setRecordId] = useState(usePage().props.id as string);
-  console.log('Record ID:', recordId);
-  const selectedRecord = useRecordsStore((state) => state.selectedRecord);
-  const setSelectedRecord = useRecordsStore((state) => state.setSelectedRecord);
-
-  useEffect(() => {
-    setSelectedRecord(recordId);
-  }, [setSelectedRecord, recordId]);
+  const { props: { record } } = usePage<{ record: Record }>();
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Records" />
       <div className="flex flex-1 flex-col gap-4 p-4">
-        <Card className={selectedRecord?.latitude && selectedRecord?.longitude ? 'h-full' : ''}>
+        <Card className={record.latitude && record.longitude ? 'h-full' : ''}>
           <CardHeader>
-            <CardTitle>{selectedRecord?.title}</CardTitle>
+            <CardTitle>{record.title}</CardTitle>
           </CardHeader>
 
           <CardContent className="flex flex-col gap-4">
-            {selectedRecord && (
+            {record && (
               <>
                 <CardDescription className="text-muted-foreground text-sm">
                   <div className="flex justify-between">
-                    <p>{formatDate(selectedRecord.created_at)}</p>
-                    <span>{selectedRecord.date_diff}</span>
+                    <p>{spanishTimestampConvert(record.image?.file_date ?? record.created_at)}</p>
+                    <span>{record.image?.file_date_diff ?? record.date_diff}</span>
                   </div>
                 </CardDescription>
 
-                {selectedRecord.latitude && selectedRecord.longitude && (
+                {record.latitude && record.longitude && (
                   <p className="text-sm">
-                    <strong>Ubicación:</strong> {selectedRecord.latitude}, {selectedRecord.longitude}
+                    <strong>Ubicación:</strong> {record.latitude}, {record.longitude}
                   </p>
                 )}
 
-                <p className="text-base">{selectedRecord.description}</p>
+                <p className="text-base">{record.description}</p>
 
-                {selectedRecord.image && (
+                {record.image && (
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="overflow-hidden max-h-[50vh]">
                       <img
-                        src={route('api.images.show', selectedRecord.image.id)}
-                        alt={`Imagen ${selectedRecord.image.id}`}
+                        src={route('api.images.show', record.image.id)}
+                        alt={`Imagen ${record.image.id}`}
                         className="rounded-lg shadow max-h-full object-contain"
                       />
                     </div>
@@ -76,20 +84,20 @@ export default function RecordsShow() {
                     <div className="flex flex-col gap-2">
                       <h2 className="text-lg font-semibold">Metadata</h2>
                       <div className="text-sm space-y-1">
-                        <p><strong>Nombre original:</strong> {selectedRecord.image.original_filename}</p>
-                        <p><strong>Creado:</strong> {selectedRecord.image.created_at}</p>
-                        <p><strong>Actualizado:</strong> {selectedRecord.image.updated_at}</p>
-                        <p><strong>Latitud:</strong> {selectedRecord.image.file_latitude || 'N/A'}</p>
-                        <p><strong>Longitud:</strong> {selectedRecord.image.file_longitude || 'N/A'}</p>
-                        <p><strong>Fecha del archivo:</strong> {selectedRecord.image.file_date || 'N/A'}</p>
+                        <p><strong>Nombre original:</strong> {record.image.original_filename}</p>
+                        <p><strong>Creado:</strong> {spanishTimestampConvert(record.image.created_at)}</p>
+                        <p><strong>Actualizado:</strong> {spanishTimestampConvert(record.image.updated_at)}</p>
+                        {record.image.file_date && (
+                          <p><strong>Fecha del archivo:</strong> {spanishTimestampConvert(record.image.file_date)}</p>
+                        )}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {selectedRecord.latitude && selectedRecord.longitude && (
+                {record.latitude && record.longitude && (
                   <div className="h-[400px] mt-4 rounded overflow-hidden">
-                    <MapShow />
+                    <MapShow record={record} />
                   </div>
                 )}
               </>

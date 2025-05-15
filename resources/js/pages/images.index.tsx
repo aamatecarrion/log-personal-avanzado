@@ -15,6 +15,7 @@ export default function Images({ images }: { images: Image[] }) {
     const handleImageClick = (image: Image) => {
 
         console.log('Image ID:', image.id);
+        console.log('Record ID:', image.record_id);
 
         router.visit(route('records.show', image.record_id?.toString() ), {
             method: 'get',

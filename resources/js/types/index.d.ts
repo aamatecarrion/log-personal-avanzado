@@ -7,25 +7,28 @@ export interface Auth {
 
 export interface Record {
     id: number;
-    title: string | null | undefined;
-    description: string;
+    user_id: number;
+    image: Image | null;
+    title: string | null;
+    description: string | null;
     latitude: number;
     longitude: number;
     created_at: string;
     updated_at: string;
-    local_time: string;
+    time: string | null;
+    day: string | null;
     date_diff: string;
-    image: Image | null;
 }
 
 export interface Image {
     id: number;
-    record_id: number | null;
     user_id: number;
+    record_id: number | null;
     generated_description: string | null;
     file_latitude: number | null;
     file_longitude: number | null;
     file_date: date | null;
+    file_date_diff: string | null;
     original_filename: string;
     image_path: string;
     created_at: date | null;

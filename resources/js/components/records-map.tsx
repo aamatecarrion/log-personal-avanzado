@@ -6,18 +6,11 @@ import { Record } from "@/types";
 import { router } from "@inertiajs/react";
 
 
-export function RecordsMap() {
+export function RecordsMap({records}: { records: Record[] }) {
 
   const [filteredRecords, setFilteredRecords] = useState<Record[]>([]);
   
-  const fetchRecords = useRecordsStore((state) => state.fetchRecords);
-  const records = useRecordsStore((state) => state.records);
-
-  // Cargar los registros cuando el componente se monta
-  useEffect(() => {
-    fetchRecords();
-  }, [fetchRecords]);
-
+  
   // Filtramos solo los registros que tienen latitud y longitud
   useEffect(() => {
     if (records) {

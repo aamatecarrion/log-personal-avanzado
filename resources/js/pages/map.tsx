@@ -1,10 +1,10 @@
 import { RecordsMap } from '@/components/records-map';
-import { RecordsTable } from '@/components/records-table';
+
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { Record, type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -13,10 +13,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 export default function Map() {
+    const { props: { records } } = usePage<{ records: Record[] }>();
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Map" />
-            <RecordsMap></RecordsMap>
+            <RecordsMap records={records}></RecordsMap>
         </AppLayout>
     );
 }

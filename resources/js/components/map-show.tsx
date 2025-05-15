@@ -6,14 +6,13 @@ import { Record } from "@/types";
 import { router } from "@inertiajs/react";
 
 
-export function MapShow() {
+export function MapShow({record}: { record: Record }) {
   
-  const selectedRecord = useRecordsStore((state) => state.selectedRecord);
 
   return (
     <div className="h-[50vh]" >
       <MapContainer
-        center={[selectedRecord?.latitude ?? 37.62, selectedRecord?.longitude ?? -0.99]}
+        center={[record.latitude ?? 37.62, record.longitude ?? -0.99]}
         zoom={13}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
@@ -23,13 +22,13 @@ export function MapShow() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {selectedRecord && (
-          <Marker position={[selectedRecord.latitude, selectedRecord.longitude]}>
+        {record && (
+          <Marker position={[record.latitude, record.longitude]}>
             <Popup>
               <div>
-                <h3>{selectedRecord.title}</h3>
-                <p>{selectedRecord.description}</p>
-                <small>{selectedRecord.date_diff}</small>
+                <h3>{record.title}</h3>
+                <p>{record.description}</p>
+                <small>{record.date_diff}</small>
               </div>
             </Popup>
           </Marker>

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Image;
 use App\Models\Record;
+use DateTime;
+use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,9 +31,12 @@ class ImageController extends Controller
             $dateTaken = null;
             $latitude = null;
             $longitude = null;
-
+            
             if ($exif && isset($exif['DateTimeOriginal'])) {
-                $dateTaken = date('Y:m:d H:i:s', strtotime($exif['DateTimeOriginal']));
+                $fechaCaptura = $exif['DateTimeOriginal'];
+                $fecha = new DateTime($fechaCaptura, new DateTimeZone('Europe/Madrid'));
+                $fecha->setTimezone(new DateTimeZone('UTC'));
+                $dateTaken = $fecha->format('Y-m-d H:i:s');
             }
 
             if (

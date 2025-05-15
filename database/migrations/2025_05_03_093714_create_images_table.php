@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('generated_description')->nullable();
             $table->decimal('file_latitude', 10, 8)->nullable();
             $table->decimal('file_longitude', 11, 8)->nullable();
-            $table->date('file_date')->nullable();
+            $table->timestamp('file_date')->nullable();
             $table->string('original_filename');
             $table->string('image_path');
             $table->timestamps();
