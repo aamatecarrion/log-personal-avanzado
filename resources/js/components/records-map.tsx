@@ -5,19 +5,15 @@ import { useRecordsStore } from "@/store/recordsStore";
 import { Record } from "@/types";
 import { router } from "@inertiajs/react";
 
-
-export function RecordsMap({records}: { records: Record[] }) {
-
+export function RecordsMap({ records }: { records: Record[] }) {
   const [filteredRecords, setFilteredRecords] = useState<Record[]>([]);
-  
-  
-  // Filtramos solo los registros que tienen latitud y longitud
+
   useEffect(() => {
     if (records) {
-      const filteredRecords = records.filter(
+      const filtered = records.filter(
         (record) => record.latitude && record.longitude
       );
-      setFilteredRecords(filteredRecords);
+      setFilteredRecords(filtered);
     }
   }, [records]);
 
@@ -33,16 +29,48 @@ export function RecordsMap({records}: { records: Record[] }) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
+
         {filteredRecords.map((record) => {
           const position: LatLngExpression = [record.latitude, record.longitude];
+          
           return (
-            <Marker key={record.id} position={position}>
-              <Popup>
-                <div className="cursor-pointer" onClick={() => router.visit(`/records/${record.id}`)}>
-                  <h3>{record.title}</h3>
-                  <p>{record.description}</p>
-                  <small>{record.date_diff}</small>
+            <Marker
+              key={record.id}
+              position={position}
+              eventHandlers={{
+                click: (e) => {
+                  e.target.openPopup();
+                },
+                mouseover: (e) => {
+                  e.target.openPopup();
+                },
+                mouseout: (e) => {
+                  e.target.closePopup();
+                }
+              }}
+            >
+              <Popup
+                closeButton={false}
+                className="custom-popup"
+                autoClose={false}
+                closeOnClick={false}
+              >
+                <div 
+                  className="cursor-pointer" 
+                  onClick={() => router.visit(`/records/${record.id}`)}
+                >
+                  <h3 className="font-semibold mb-1">{record.title}</h3>
+                  <p className="text-sm line-clamp-2">{record.description}</p>
+                  {record.image && (
+                    
+                      <img
+                        src={route('api.images.show', record.image.id)}
+                        alt={`Imagen ${record.image.id}`}
+                        className="rounded-lg shadow max-h-full object-contain"
+                      />
+                  
+                )}
+                  <small className="text-gray-500">{record.date_diff}</small>
                 </div>
               </Popup>
             </Marker>
