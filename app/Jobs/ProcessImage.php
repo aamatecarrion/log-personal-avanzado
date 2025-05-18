@@ -27,34 +27,28 @@ class ProcessImage implements ShouldQueue
     public function handle()
     {
         try {
-            if (!is_string($this->image->image_path) || empty($this->image->image_path)) {
-                throw new \Exception("El path de la imagen no es válido");
-            }
+            if (!is_string($this->image->image_path) || empty($this->image->image_path)) throw new \Exception("El path de la imagen no es válido");
 
-            if (!Storage::disk('private')->exists($this->image->image_path)) {
-                throw new \Exception("Archivo de imagen no encontrado");
-            }
-
+            if (!Storage::disk('private')->exists($this->image->image_path)) throw new \Exception("Archivo de imagen no encontrado");
 
             // Convertir a base64
             $imageData = base64_encode(Storage::disk('private')->get($this->image->image_path));
 
             $response = Http::timeout(240)->post('http://localhost:11434/api/generate', [
-                'model' => 'moondream:latest',
-                'prompt' => '¿Qué hay en esta imagen?.',
+                'model' => 'gemma3',
+                'prompt' => 'genera una descripción para esta imagen, (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
                 'stream' => false,
                 'options' => [
-                    'temperature' => 0.4,  // Valor más balanceado
-                    'num_predict' => 512,  // Longitud máxima de respuesta
-                    'num_ctx' => 4096
-                ]
+                    'temperature' => 0.4,
+                    'num_predict' => 512,
+                    'num_ctx' => 4096,
+                    'num_thread' => 12
+                ],
             ]);
 
             // Verificar errores HTTP primero
-            if ($response->failed()) {
-                throw new \Exception("Error en la API: " . $response->body());
-            }
+            if ($response->failed()) throw new \Exception("Error en la API: " . $response->body());
 
             // Validar respuesta JSON
             $responseData = $response->json();
@@ -70,11 +64,34 @@ class ProcessImage implements ShouldQueue
                 'generated_description' => $generated_description
             ]);
 
+            $response = Http::timeout(240)->post('http://localhost:11434/api/generate', [
+                'model' => 'gemma3',
+                'prompt' => 'describe esta imagen en menos de 10 palabras (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
+                'images' => [$imageData],
+                'stream' => false,
+                'options' => [
+                    'temperature' => 0.4,
+                    'num_predict' => 512,
+                    'num_ctx' => 4096,
+                    'num_thread' => 12
+                ],
+            ]);
+
+            // Verificar errores HTTP primero
+            if ($response->failed()) throw new \Exception("Error en la API: " . $response->body());
+            // Validar respuesta JSON
+            $responseData = $response->json();
+            if (empty($responseData['response'])) {
+                Log::error("Respuesta vacía", ['response' => $responseData]);
+                throw new \Exception("La IA no generó una descripción válida");
+            }
+
+            // Sanitizar y truncar respuesta
+            $generated_title = substr(strip_tags($responseData['response']), 0, 2000);
+
             // Actualizar el título del registro asociado
             $this->image->record->update([
-                'title' => (mb_strlen($generated_description, 'UTF-8') > 20) 
-                    ? mb_substr($generated_description, 0, 17, 'UTF-8') . '...' 
-                    : $generated_description,
+                'title' => $generated_title,
             ]);
 
         } catch (\Exception $e) {
@@ -83,7 +100,6 @@ class ProcessImage implements ShouldQueue
                 'path' => $this->image->image_path
             ]);
             
-            $this->image->update(['status' => 'failed']);
             throw $e;
         }
     }

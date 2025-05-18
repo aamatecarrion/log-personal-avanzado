@@ -15,7 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function RecordsShow() {
   const { props: { record } } = usePage<{ record: Record }>();
-
+  console.log('Record:', record);
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Records" />
@@ -45,7 +45,7 @@ export default function RecordsShow() {
 
                 {record.image && (
                   <div className="flex flex-col md:flex-row gap-6">
-                    <div className="overflow-hidden max-h-[50vh]">
+                    <div className="overflow-hidden max-h-[60vh]">
                       <img
                         src={route('api.images.show', record.image.id)}
                         alt={`Imagen ${record.image.id}`}
@@ -55,7 +55,7 @@ export default function RecordsShow() {
 
                     <div className="flex flex-col gap-2">
                       <h2 className="text-lg font-semibold">Metadata</h2>
-                      <div className="text-sm space-y-1">
+                      <div className="text-sm space-y-1 max-w-[50vh] ">
                         <p><strong>Nombre original:</strong> {record.image.original_filename}</p>
                         <p><strong>Creado:</strong> {spanishTimestampConvert(record.image.created_at)}</p>
                         <p><strong>Actualizado:</strong> {spanishTimestampConvert(record.image.updated_at)}</p>
@@ -63,7 +63,10 @@ export default function RecordsShow() {
                           <p><strong>Fecha del archivo:</strong> {spanishTimestampConvert(record.image.file_date)}</p>
                         )}
                         {record.image.generated_description && (
-                          <p><strong>Descripción generada:</strong> {record.image.generated_description}</p>
+                          <div className="text-sm">
+                            <p><strong>Descripción generada:</strong></p>
+                            <p className="text-sm">{record.image.generated_description}</p>
+                          </div>
                         )}
                       </div>
                     </div>
