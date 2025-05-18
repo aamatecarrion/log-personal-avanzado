@@ -62,6 +62,9 @@ export default function RecordsShow() {
                         {record.image.file_date && (
                           <p><strong>Fecha del archivo:</strong> {spanishTimestampConvert(record.image.file_date)}</p>
                         )}
+                        {record.image.generated_description && (
+                          <p><strong>Descripción generada:</strong> {record.image.generated_description}</p>
+                        )}
                       </div>
                     </div>
                   </div>
