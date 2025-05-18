@@ -8,12 +8,14 @@ use DateTime;
 use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\ProcessImage;
+
 
 class ImageController extends Controller
 {
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
+        $request->validate([
             'images.*' => 'required|image',
         ], [
             'images.*.required' => 'No se han seleccionado imágenes',
@@ -63,6 +65,10 @@ class ImageController extends Controller
                 'file_latitude' => $latitude,
                 'file_longitude' => $longitude,
             ]);
+        }
+
+        foreach ($savedImages as $image) {
+            ProcessImage::dispatch($image);
         }
 
         return redirect()->route('images.upload')->with([
