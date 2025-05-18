@@ -3,38 +3,28 @@
 # Ruta del proyecto
 PROYECTO="/var/www/log-personal-avanzado"
 
+# Mensaje inicial
 echo "→ Haciendo pull del repositorio..."
-cd "$PROYECTO" || exit
+cd $PROYECTO || exit
 git pull origin main
 
+# Instalando dependencias PHP
 echo "→ Instalando dependencias PHP..."
 composer install --no-interaction --optimize-autoloader
 
+# Ejecutando migraciones (sin tocar datos existentes)
 echo "→ Ejecutando migraciones (sin tocar datos existentes)..."
 php artisan migrate --force
 
+# Construyendo assets frontend
 echo "→ Construyendo assets frontend..."
 npm install
 npm run build
 
+# Estableciendo permisos correctamente con sudo
 echo "→ Estableciendo permisos..."
+sudo chown -R antonio:www-data $PROYECTO
+sudo chmod -R 775 $PROYECTO/storage $PROYECTO/bootstrap/cache
 
-# Comprobar y cambiar propietario solo si hay archivos con dueño distinto
-if sudo find "$PROYECTO" \! -user antonio -o \! -group www-data | grep -q .; then
-  echo "→ Cambiando propietario a antonio:www-data en todo el proyecto..."
-  sudo chown -R antonio:www-data "$PROYECTO"
-else
-  echo "→ Todos los archivos ya tienen el propietario correcto."
-fi
-
-# Comprobar y cambiar permisos en storage y bootstrap/cache solo si hay permisos diferentes a 775
-for dir in "$PROYECTO/storage" "$PROYECTO/bootstrap/cache"; do
-  if sudo find "$dir" \! -perm 775 | grep -q .; then
-    echo "→ Cambiando permisos a 775 en $dir..."
-    sudo chmod -R 775 "$dir"
-  else
-    echo "→ Permisos correctos en $dir."
-  fi
-done
-
+# Mensaje de éxito
 echo "✅ Proyecto actualizado correctamente."
