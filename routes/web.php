@@ -34,7 +34,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('api')->name('api.')->group(function () {
         
         Route::post('/images', [ImageController::class, 'store'])->name('images.store');
-        Route::get('/images/{image}', [ImageController::class, 'show'])->name('images.show');
+        Route::get('/images/{id}', [ImageController::class, 'show'])->name('images.show');
         
         Route::get('/config', [ConfigController::class, 'index'])->name('preferences.index');
         Route::put('/config', [ConfigController::class, 'update'])->name('preferences.update');

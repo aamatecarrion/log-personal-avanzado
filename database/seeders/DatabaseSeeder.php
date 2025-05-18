@@ -27,6 +27,6 @@ class DatabaseSeeder extends Seeder
             'ask_location_permission' => true
         ]);
         
-        Record::factory(200)->create();
+        Record::factory(10)->create();
     }
 }

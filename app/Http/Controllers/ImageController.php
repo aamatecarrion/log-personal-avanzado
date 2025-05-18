@@ -71,8 +71,9 @@ class ImageController extends Controller
         ]);
     }
 
-    public function show(Image $image)
-    {
+    public function show($id)
+    {   
+        $image = Image::findOrFail($id);
         if ($image->user_id !== Auth::id()) {
             abort(403);
         }

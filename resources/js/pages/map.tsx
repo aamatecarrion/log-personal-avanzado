@@ -13,11 +13,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 export default function Map() {
-    const { props: { records } } = usePage<{ records: Record[] }>();
+    const { props: { records, record} } = usePage<{ records: Record[], record: Record }>();
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Map" />
-            <RecordsMap records={records}></RecordsMap>
+            <RecordsMap records={records} selectedRecord={record ?? null}></RecordsMap>
         </AppLayout>
     );
 }
