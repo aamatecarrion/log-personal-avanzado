@@ -23,8 +23,8 @@ npm run build
 
 # Estableciendo permisos correctamente con sudo
 echo "→ Estableciendo permisos..."
-sudo chown -R antonio:www-data /var/www/internetwebsite
-sudo chmod -R 775 /var/www/internetwebsite/storage /var/www/internetwebsite/bootstrap/cache
+sudo chown -R antonio:www-data $PROYECTO
+sudo chmod -R 775 $PROYECTO/storage $PROYECTO/bootstrap/cache
 
 # Mensaje de éxito
 echo "✅ Proyecto actualizado correctamente."
