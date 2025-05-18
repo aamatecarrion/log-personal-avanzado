@@ -15,5 +15,5 @@ test('new users can register', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('records.view', absolute: false));
+    $response->assertRedirect(route('records.index', absolute: false));
 });

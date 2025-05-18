@@ -24,10 +24,11 @@ export function RecordsMap({ records }: { records: Record[] }) {
         zoom={13}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%" }}
-      >
+        >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          
         />
 
         {filteredRecords.map((record) => {
@@ -36,41 +37,32 @@ export function RecordsMap({ records }: { records: Record[] }) {
           return (
             <Marker
               key={record.id}
-              position={position}
-              eventHandlers={{
-                click: (e) => {
-                  e.target.openPopup();
-                },
-                mouseover: (e) => {
-                  e.target.openPopup();
-                },
-                mouseout: (e) => {
-                  e.target.closePopup();
-                }
-              }}
-            >
+              position={position}            >
               <Popup
                 closeButton={false}
                 className="custom-popup"
-                autoClose={false}
-                closeOnClick={false}
+                autoClose={true}
+                closeOnClick={true}
               >
                 <div 
-                  className="cursor-pointer" 
+                  className="cursor-pointer"
                   onClick={() => router.visit(`/records/${record.id}`)}
                 >
-                  <h3 className="font-semibold mb-1">{record.title}</h3>
-                  <p className="text-sm line-clamp-2">{record.description}</p>
+                  <h3 className="font-semibold mb-2 text-lg">{record.title}</h3>
+                  
+                  {/* Contenedor de la imagen */}
                   {record.image && (
-                    
+                    <div className="mb-2 w-[200px] h-[150px] overflow-hidden rounded-lg">
                       <img
                         src={route('api.images.show', record.image.id)}
-                        alt={`Imagen ${record.image.id}`}
-                        className="rounded-lg shadow max-h-full object-contain"
+                        alt={`Imagen de ${record.title}`}
+                        className="w-full h-full object-cover"
                       />
+                    </div>
+                  )}
                   
-                )}
-                  <small className="text-gray-500">{record.date_diff}</small>
+                  <p className="text-sm line-clamp-2 mb-2">{record.description}</p>
+                  <small className="text-gray-500 block">{record.date_diff}</small>
                 </div>
               </Popup>
             </Marker>

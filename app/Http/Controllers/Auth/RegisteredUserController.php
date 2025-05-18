@@ -46,6 +46,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return to_route('records.view');
+        return to_route('records.index');
     }
 }
