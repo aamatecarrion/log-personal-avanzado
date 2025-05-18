@@ -27,16 +27,20 @@ class ProcessImage implements ShouldQueue
     public function handle()
     {
         try {
-            // Verificar existencia del archivo
-            if (!Storage::disk('private')->exists($this->image->path)) {
+            if (!is_string($this->image->image_path) || empty($this->image->image_path)) {
+                throw new \Exception("El path de la imagen no es válido");
+            }
+
+            if (!Storage::disk('private')->exists($this->image->image_path)) {
                 throw new \Exception("Archivo de imagen no encontrado");
             }
 
+
             // Convertir a base64
-            $imageData = base64_encode(Storage::disk('private')->get($this->image->path));
+            $imageData = base64_encode(Storage::disk('private')->get($this->image->image_path));
 
             $response = Http::timeout(240)->post('http://localhost:11434/api/generate', [
-                'model' => 'qwen2.5vl:latest',
+                'model' => 'moondream:latest',
                 'prompt' => '¿Qué hay en esta imagen?.',
                 'images' => [$imageData],
                 'stream' => false,
@@ -66,10 +70,17 @@ class ProcessImage implements ShouldQueue
                 'generated_description' => $generated_description
             ]);
 
+            // Actualizar el título del registro asociado
+            $this->image->record->update([
+                'title' => (mb_strlen($generated_description, 'UTF-8') > 20) 
+                    ? mb_substr($generated_description, 0, 17, 'UTF-8') . '...' 
+                    : $generated_description,
+            ]);
+
         } catch (\Exception $e) {
             Log::error("Error procesando imagen {$this->image->id}", [
                 'error' => $e->getMessage(),
-                'path' => $this->image->path
+                'path' => $this->image->image_path
             ]);
             
             $this->image->update(['status' => 'failed']);
