@@ -11,6 +11,7 @@ import { router } from "@inertiajs/react";
 import { spanishTimestampConvert } from "@/lib/utils";
 import { LocateIcon, LocateOffIcon } from "lucide-react";
 
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Map',
