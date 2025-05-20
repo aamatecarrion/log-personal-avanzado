@@ -90,7 +90,7 @@ export default function Map() {
                         >
                         <Popup
                             closeButton={false}
-                            className="custom-popup"
+                            className="custom-popup w-[300px] h-[400px]"
                             autoClose={true}
                             closeOnClick={true}
                             
@@ -111,25 +111,30 @@ export default function Map() {
                                     className="max-h-60 object-cover rounded-lg shadow"
                                     />
                                 </div>
-                                <div className="flex flex-col gap-2">
-                                <div className="text-sm space-y-1">
-                                    <p><strong>Nombre original:</strong> {record.image.original_filename}</p>
-                                    {record.image.file_date && (
-                                    <p><strong>Fecha del archivo:</strong> {spanishTimestampConvert(record.image.file_date)}</p>
-                                    )}
-                                </div>
+                                <div className="flex flex-col mb-2">
+                                    <div className="text-sm"><strong>Nombre original:</strong> {record.image.original_filename}</div>
                                 </div>
                                 </>
                             )}
                             {
                                 record.image?.file_date ? (
-                                <p className="text-sm mb-2">{spanishTimestampConvert(record.image.file_date)}</p>
+                                <div className="flex flex-col mb-2">
+                                    <div className="text-sm"><strong>Fecha del archivo: </strong>{spanishTimestampConvert(record.image.file_date)}</div>
+                                </div>
                                 ) : (
-                                <p className="text-sm mb-2">{spanishTimestampConvert(record.created_at)}</p>
+                                <div className="flex flex-col mb-2">
+                                    <div className="text-sm">{spanishTimestampConvert(record.created_at)}</div>
+                                </div>
                                 )
                             }
-                            <p className="text-sm line-clamp-2 mb-2">{record.description}</p>
-                            <span>{record.image?.file_date_diff ?? record.date_diff}</span>
+                            
+                            {record.description && (
+                                <div className="flex flex-col mb-2">
+                                    <strong>Descripción:</strong>
+                                    <div className="text-sm">{record.description}</div>
+                                </div>
+                            )}
+                            <span>{(record.image?.file_date_diff ?? record.date_diff).charAt(0).toUpperCase() + (record.image?.file_date_diff ?? record.date_diff).slice(1)}</span>
                             
                             </div>
                         </Popup>
