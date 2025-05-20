@@ -35,7 +35,7 @@ export function MapShow({record}: { record: Record }) {
                 },
               }
               );
-            }
+            },
           }}>
           </Marker>
         )}
