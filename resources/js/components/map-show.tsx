@@ -17,7 +17,6 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow,
 });
 
-<<<<<<< HEAD
 export function MapShow({record}: { record: Record }) {
   
 
