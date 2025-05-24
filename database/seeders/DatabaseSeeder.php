@@ -17,9 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
+        User::create([
             'name' => 'Antonio',
             'email' => 'antonio@localhost',
+            'email_verified_at' => now(),
             'password' => bcrypt('123456')
         ]);
         Config::create([
@@ -27,6 +28,6 @@ class DatabaseSeeder extends Seeder
             'ask_location_permission' => true
         ]);
         
-        Record::factory(10)->create();
+        /* Record::factory(10)->create(); */
     }
 }

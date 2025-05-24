@@ -67,7 +67,7 @@ const obtenerHoraEspanola = (fechaUTC: string): string => {
 
 export default function Records() {
     
-    const records = usePage<{ records: Record[] }>().props.records
+    const { records } = useRecordsStore((state) => (state))
     
     const groupedRecords = groupByDay(records)
 

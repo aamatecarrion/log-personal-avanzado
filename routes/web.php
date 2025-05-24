@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\ConfigApiController;
+use App\Http\Controllers\Api\ImageApiController;
+use App\Http\Controllers\Api\RecordApiController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ImagePageController;
+use App\Http\Controllers\MapController;
 use App\Http\Controllers\MapPageController;
 use App\Http\Controllers\RecordController;
 use App\Models\User;
@@ -17,27 +21,53 @@ Route::get('/', function () {
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/records', [RecordController::class, 'index'])->name('records.index');
-    Route::get('/records/create', [RecordController::class, 'create'])->name('records.create');
-    Route::post('/records', [RecordController::class, 'store'])->name('records.store');
-    Route::get('/records/{record}/edit', [RecordController::class, 'edit'])->name('records.edit');
-    Route::put('/records/{record}', [RecordController::class, 'update'])->name('records.update');
-    Route::delete('/records/{record}', [RecordController::class, 'destroy'])->name('records.destroy');
-    Route::get('/records/{record}', [RecordController::class, 'show'])->name('records.show');
-        
-    Route::get('/images/upload', [ImagePageController::class, 'upload'])->name('images.upload');
-    Route::get('/images', [ImagePageController::class, 'index'])->name('images.index');
-    Route::get('/images/{image}', [ImagePageController::class, 'show'])->name('images.show');
-
-    Route::get('/map', [MapPageController::class, 'index'])->name('map.view');
     
-    Route::prefix('api')->name('api.')->group(function () {
+    Route::prefix('/images')->name('images.')->group(function () {
         
-        Route::post('/images', [ImageController::class, 'store'])->name('images.store');
-        Route::get('/images/{id}', [ImageController::class, 'show'])->name('images.show');
+        Route::get('/', [ImageController::class, 'index'])->name('index');
+        Route::get('/{image}', [ImageController::class, 'show'])->name('show');
+        Route::get('/upload', [ImageController::class, 'upload'])->name('upload');
+    });
+    
+    Route::prefix('/records')->name('records.')->group(function () {
         
-        Route::get('/config', [ConfigController::class, 'index'])->name('preferences.index');
-        Route::put('/config', [ConfigController::class, 'update'])->name('preferences.update');
+        Route::get('/', [RecordController::class, 'index'])->name('index');
+        Route::get('/{record}', [RecordController::class, 'show'])->name('show');
+        Route::get('/create', [RecordController::class, 'create'])->name('create');
+        Route::get('/{record}/edit', [RecordController::class, 'edit'])->name('edit');                
+    });
+
+    Route::prefix('/config')->name('config.')->group(function () {
+        Route::get('/', [ConfigApiController::class, 'index'])->name('index');
+    });
+    
+    Route::get('/map', [MapController::class, 'index'])->name('map.view');
+    
+    Route::prefix('/api')->name('api.')->group(function () {
+        
+        Route::prefix('/records')->name('records.')->group(function () {
+            
+            Route::get('/', [RecordApiController::class, 'index'])->name('index');
+            Route::post('/', [RecordApiController::class, 'store'])->name('store');
+            Route::put('/{record}', [RecordApiController::class, 'update'])->name('update');
+            Route::get('/{record}', [RecordApiController::class, 'show'])->name('show');
+            Route::delete('/{record}', [RecordApiController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('/images')->name('images.')->group(function () {
+            Route::get('/', [ImageApiController::class, 'index'])->name('index');
+            Route::post('/', [ImageApiController::class, 'store'])->name('store');
+            Route::put('/{image}', [ImageApiController::class, 'update'])->name('update');
+            Route::get('/{image}', [ImageApiController::class, 'show'])->name('show');
+            Route::delete('/{image}', [ImageApiController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('/config')->name('config.')->group(function () {
+            Route::get('/', [ConfigApiController::class, 'index'])->name('index');
+            Route::post('/', [ConfigApiController::class, 'store'])->name('store');
+            Route::put('/', [ConfigApiController::class, 'update'])->name('update');
+        });
+
     });
 });
 

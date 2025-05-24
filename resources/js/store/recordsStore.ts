@@ -4,12 +4,12 @@ import { create } from 'zustand';
 import axios from 'axios';
 
 interface RecordsState {
-    records: Record[];
+    records: Record[] | [];
     setRecords: (newRecords: Record[]) => void;
     selectedRecord: Record | null;
+    setSelectedRecord: (id: string) => void;
     fetchRecords: () => void;
     fetchRecordById: (id: string) => void;
-    setSelectedRecord: (id: string) => void;
     config: Config | null;
     setConfig: (config: Config) => void;
     fetchConfig: () => void;
@@ -26,7 +26,7 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
     },
 
     fetchConfig: () => {
-        axios.get<Config>('/api/config')
+        axios.get('/api/config')
             .then(response => {
                 get().setConfig(response.data);
             })
@@ -53,17 +53,16 @@ export const useRecordsStore = create<RecordsState>((set, get) => ({
     },
 
     fetchRecords: async () => {
-        try {
-            const response = await fetch('/api/records');
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data: Record[] = await response.json();
-            set({ records: data });
-        } catch (error) {
-            console.error('Failed to fetch records:', error);
-        }
+        axios.get('/api/records')
+            .then(response => {
+                get().setRecords(response.data);
+            })
+            .catch(error => {
+                console.error('Failed to fetch records:', error);
+            });
     },
     fetchRecordById: (id) => {
-        axios.get<Record>(`/api/records/${id}`)
+        axios.get(`/api/records/${id}`)
             .then(response => {
                 set({ selectedRecord: response.data });
             })

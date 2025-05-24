@@ -1,9 +1,7 @@
-import { RecordsTable } from '@/components/records-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { useRecordsStore } from '@/store/recordsStore';
@@ -50,9 +48,8 @@ export default function RecordsCreate() {
             router.visit('/records');
         }
     }
-    const fetchConfig = useRecordsStore((state) => state.fetchConfig);
-    const updateConfig = useRecordsStore((state) => state.updateConfig);
-    const config = useRecordsStore((state) => state.config);
+    
+    const {fetchConfig, config, updateConfig} = useRecordsStore((state) => state);
 
     useEffect(() => {
         if ("geolocation" in navigator && config?.ask_location_permission) {
