@@ -29,7 +29,7 @@ export default function Images({ images }: { images: Image[] }) {
                     {images.map((image: Image) => (
                         <div key={image.id} className="overflow-hidden cursor-pointer" onClick={() => handleImageClick(image)}>
                             <img
-                                src={route('api.images.show', image.id)}
+                                src={route('images.show', image.id)}
                                 alt={`Imagen ${image.id}`}
                                 className="w-full h-60 object-cover"
                             />

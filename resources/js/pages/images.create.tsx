@@ -53,7 +53,7 @@ export default function ImagesUpload() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    post(route('api.images.store'), {
+    post(route('images.store'), {
       forceFormData: true,
       showProgress: false,
       onSuccess: () => {

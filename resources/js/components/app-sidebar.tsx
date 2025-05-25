@@ -15,7 +15,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Upload images',
-        href: '/images/upload',
+        href: '/images/create',
         icon: ImagePlus
     },
     {

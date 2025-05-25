@@ -13,19 +13,17 @@ use App\Jobs\ProcessImage;
 
 class ImageController extends Controller {
     public function index() {
+
+        $images = Image::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->with('record')
+            ->get();
+        return inertia('images.index', ['images' => $images]);
         return inertia('images.index');
     }
 
-    public function upload() {
-        return inertia('images.upload');
-    }
     public function store(Request $request) {
-        $request->validate([
-            'images.*' => 'required|image',
-        ], [
-            'images.*.required' => 'No se han seleccionado imágenes',
-            'images.*.image' => 'El archivo seleccionado no es una imagen',
-        ]);
+        $request->validate(['images.*' => 'required|image']);
 
         $savedImages = [];
 
@@ -46,9 +44,7 @@ class ImageController extends Controller {
                 $dateTaken = $fecha->format('Y-m-d H:i:s');
             }
 
-            if (
-                isset($exif['GPSLatitude'], $exif['GPSLatitudeRef'], $exif['GPSLongitude'], $exif['GPSLongitudeRef'])
-            ) {
+            if (isset($exif['GPSLatitude'], $exif['GPSLatitudeRef'], $exif['GPSLongitude'], $exif['GPSLongitudeRef'])) {
                 $latitude = $this->convertGpsToDecimal($exif['GPSLatitude'], $exif['GPSLatitudeRef']);
                 $longitude = $this->convertGpsToDecimal($exif['GPSLongitude'], $exif['GPSLongitudeRef']);
             }
@@ -76,21 +72,47 @@ class ImageController extends Controller {
             ProcessImage::dispatch($image);
         }
 
-        return response()->json([
-            'message' => 'Imágenes subidas y procesadas correctamente',
-            'images' => $savedImages,
-        ]);
+        return redirect()->route('images.index')->with('success', 'Imágenes subidas y procesadas');
+    }
+    public function create() {
+        return inertia('images.create');
     }
 
     public function show($id) {
         $image = Image::findOrFail($id);
-        if ($image->user_id !== Auth::id()) {
-            abort(403);
+        $this->checkUser($image);
+
+        $filePath = storage_path('app/private/' . $image->image_path);
+
+        if (!file_exists($filePath)) {
+            dd('Archivo no existe:', $filePath);
         }
 
-        return response()->file(storage_path('app/private/' . $image->image_path));
+        return response()->file($filePath);
     }
 
+
+    public function update(Request $request, Image $image) {
+        $this->checkUser($image);
+
+        $request->validate([
+            'generated_description' => 'nullable|string|max:10000',
+        ]);
+
+        $image->update($request->only(['generated_description']));
+        return redirect()->route('images.index')->with('success', 'Imagen actualizada');
+    }
+    public function destroy(Image $image) {
+        $this->checkUser($image);
+
+        $image->delete();
+        return redirect()->route('images.index')->with('success', 'Imagen eliminada');
+    }
+    public function edit(Image $image) {
+        $this->checkUser($image);
+
+        return inertia('images.edit', ['image' => $image]);
+    }
     private function convertGpsToDecimal($coord, $ref) {
         $degrees = count($coord) > 0 ? $this->gps2Num($coord[0]) : 0;
         $minutes = count($coord) > 1 ? $this->gps2Num($coord[1]) : 0;
@@ -103,6 +125,11 @@ class ImageController extends Controller {
         }
 
         return $decimal;
+    }
+    private function checkUser($image) {
+        if ($image->user_id !== Auth::id()) {
+            return redirect()->route('home')->with('error', 'Forbidden');
+        }
     }
 
     private function gps2Num($coordPart) {
