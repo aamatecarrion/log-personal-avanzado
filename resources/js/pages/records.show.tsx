@@ -1,9 +1,11 @@
 import { MapShow } from '@/components/map-show';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { spanishTimestampConvert } from '@/lib/utils';
 import { Record, type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { Trash, X } from 'lucide-react';
 import { use, useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -14,7 +16,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function RecordsShow({ record }: { record: Record }) {
 
-
+  const handleDelete = (id: number) => {
+    if (confirm('¿Estás seguro de que quieres eliminar este registro?')) {
+      router.delete(route('records.destroy', id), {
+        preserveScroll: true,
+      });
+    }
+  };
   
   console.log('Record:', record);
   return (
@@ -22,10 +30,13 @@ export default function RecordsShow({ record }: { record: Record }) {
       <Head title="Records" />
       <div className="flex flex-1 flex-col gap-4 p-4">
         <Card className={record?.latitude && record?.longitude ? 'h-full' : ''}>
-          <CardHeader>
+          <CardHeader className="flex flex-row justify-between">
             <CardTitle>{record?.title}</CardTitle>
+            <Button variant="destructive"  onClick={() => handleDelete(record.id)} className="h-8 w-8 p-0">
+              <span className="sr-only">Volver</span>
+              <Trash className="h-4 w-4" />
+            </Button>
           </CardHeader>
-
           <CardContent className="flex flex-col gap-4">
             {record && (
               <>
@@ -41,6 +52,7 @@ export default function RecordsShow({ record }: { record: Record }) {
                     <strong>Ubicación:</strong> {record.latitude}, {record.longitude}
                   </p>
                 )}
+                
 
                 <p className="text-base">{record.description}</p>
 
@@ -48,7 +60,7 @@ export default function RecordsShow({ record }: { record: Record }) {
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="overflow-hidden max-h-[60vh]">
                       <img
-                        src={route('api.images.show', record.image.id)}
+                        src={route('images.show', record.image.id)}
                         alt={`Imagen ${record.image.id}`}
                         className="rounded-lg shadow max-h-full object-contain"
                       />

@@ -25,7 +25,7 @@ Route::middleware('throttle:60,1')->group(function () {
         
         Route::resource('images', ImageController::class);
         
-        Route::get('/map', [MapController::class, 'index'])->name('map.view');
+        Route::get('/map', [MapController::class, 'index'])->name('map.index');
         
     });
     

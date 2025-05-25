@@ -15,6 +15,7 @@ class ImageController extends Controller {
     public function index() {
 
         $images = Image::where('user_id', Auth::id())
+            ->where('record_id', '!=', null)
             ->orderBy('created_at', 'desc')
             ->with('record')
             ->get();
@@ -85,7 +86,7 @@ class ImageController extends Controller {
         $filePath = storage_path('app/private/' . $image->image_path);
 
         if (!file_exists($filePath)) {
-            dd('Archivo no existe:', $filePath);
+            return redirect()->route('home')->with('error', 'Archivo no encontrado');
         }
 
         return response()->file($filePath);
