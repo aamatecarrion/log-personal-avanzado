@@ -26,6 +26,8 @@ export default function RecordsCreate() {
     const { data, setData, post, processing, errors, clearErrors } = useForm({
         title: '',
         description: '',
+        latitude: null,
+        longitude: null
     })
 
     const validate = () => {
@@ -41,11 +43,31 @@ export default function RecordsCreate() {
     }
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (validate()) {
-            post('/records');
-        }
+    e.preventDefault();
+    if (!validate()) return;
+
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setData('latitude', position.coords.latitude);
+                setData('longitude', position.coords.longitude);
+
+                // Espera un tick para asegurarte de que se actualiza el estado antes del post
+                setTimeout(() => {
+                    post('/records');
+                }, 0);
+            },
+            (error) => {
+                console.error("Error obteniendo ubicación:", error);
+                // Si quieres enviar sin ubicación en caso de error:
+                post('/records');
+            }
+        );
+    } else {
+        console.warn("Geolocalización no está disponible.");
+        post('/records');
     }
+};
     
     
     useEffect(() => {
