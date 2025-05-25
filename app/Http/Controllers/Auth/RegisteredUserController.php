@@ -41,10 +41,6 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-        // Create a default config for the user
-        $user->config()->create([
-            'ask_location_permission' => true,
-        ]);
 
         event(new Registered($user));
 
