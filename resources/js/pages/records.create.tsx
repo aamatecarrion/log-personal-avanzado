@@ -52,10 +52,10 @@ export default function RecordsCreate() {
                 setData('latitude', position.coords.latitude);
                 setData('longitude', position.coords.longitude);
 
-                // Espera un tick para asegurarte de que se actualiza el estado antes del post
+                // Espera para asegurarte de que se actualiza el estado antes del post
                 setTimeout(() => {
                     post('/records');
-                }, 0);
+                }, 1000);
             },
             (error) => {
                 console.error("Error obteniendo ubicación:", error);
@@ -76,6 +76,8 @@ export default function RecordsCreate() {
             (position) => {
               console.log("Lat:", position.coords.latitude);
               console.log("Lng:", position.coords.longitude);
+              setData('latitude', position.coords.latitude);
+              setData('longitude', position.coords.longitude);
             },
             (error) => {
               console.error("Error obteniendo ubicación:", error);
