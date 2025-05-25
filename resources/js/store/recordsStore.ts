@@ -6,65 +6,37 @@ import axios from 'axios';
 interface RecordsState {
     records: Record[] | [];
     setRecords: (newRecords: Record[]) => void;
+    
     selectedRecord: Record | null;
-    setSelectedRecord: (id: string) => void;
+    setSelectedRecord: (record: Record) => void;
+    
     fetchRecords: () => void;
-    fetchRecordById: (id: string) => void;
-    config: Config | null;
-    setConfig: (config: Config) => void;
-    fetchConfig: () => void;
-    updateConfig: (config: Config) => void;
+    fetchRecord: (id: string) => void;
 }
 
 export const useRecordsStore = create<RecordsState>((set, get) => ({
     records: [],
     selectedRecord: null,
-    config: null,
-
-    setConfig: (config) => {
-        set({ config: config })
-    },
-
-    fetchConfig: () => {
-        axios.get('/api/config')
-            .then(response => {
-                get().setConfig(response.data);
-            })
-            .catch(error => {
-                console.error('Failed to fetch config:', error);
-            });
-    },
-    updateConfig: (config: Config) => {
-        axios.put('/api/config', config)
-            .then(response => {
-                console.log('Config updated successfully:', response.data);
-                get().setConfig(response.data);
-            })
-            .catch(error => {
-                console.error('Failed to update config:', error);
-            });
-    },
 
     setRecords: (newRecords) => set({ records: newRecords }),
 
+    setSelectedRecord: (record: Record) => set({ selectedRecord: record }),
 
-    setSelectedRecord: (id) => {
-        get().fetchRecordById(id);
-    },
-
-    fetchRecords: async () => {
+    fetchRecords: () => {
         axios.get('/api/records')
             .then(response => {
+                console.log('Records fetched successfully:', response.data);
                 get().setRecords(response.data);
             })
             .catch(error => {
                 console.error('Failed to fetch records:', error);
             });
     },
-    fetchRecordById: (id) => {
+
+    fetchRecord: (id) => {
         axios.get(`/api/records/${id}`)
             .then(response => {
-                set({ selectedRecord: response.data });
+                get().setSelectedRecord(response.data);
             })
             .catch(error => {
                 console.error('Failed to fetch record:', error);

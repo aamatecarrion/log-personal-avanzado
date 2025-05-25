@@ -23,8 +23,5 @@ class ImageController extends Controller
         return inertia('images.upload');
     }
     
-    public function show()
-    {   
-        return inertia('images.show');
-    }
+    
 }

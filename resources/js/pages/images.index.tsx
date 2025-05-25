@@ -1,4 +1,4 @@
-import { RecordsTable } from '@/components/records-table';
+/* import { RecordsTable } from '@/components/records-table'; */
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';

@@ -49,10 +49,9 @@ export default function RecordsCreate() {
         }
     }
     
-    const {fetchConfig, config, updateConfig} = useRecordsStore((state) => state);
-
+    
     useEffect(() => {
-        if ("geolocation" in navigator && config?.ask_location_permission) {
+        if ("geolocation" in navigator) {
           navigator.geolocation.getCurrentPosition(
             (position) => {
               console.log("Lat:", position.coords.latitude);
@@ -65,7 +64,7 @@ export default function RecordsCreate() {
         } else {
           console.warn("Geolocalización no está disponible en este navegador.");
         }
-      }, [config?.ask_location_permission]);
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

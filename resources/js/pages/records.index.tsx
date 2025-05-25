@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useRecordsStore } from "@/store/recordsStore"
-import { useEffect } from "react"
+import { use, useEffect } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Car, MoreVertical, Search, SearchCheck, Trash } from "lucide-react"
 
@@ -67,9 +67,18 @@ const obtenerHoraEspanola = (fechaUTC: string): string => {
 
 export default function Records() {
     
-    const { records } = useRecordsStore((state) => (state))
+    const { records,fetchRecords } = useRecordsStore((state) => (state))
+    
+    useEffect(() => {
+        fetchRecords()
+    }, [])
+       
+    console.log("Records:", records)
+    
     
     const groupedRecords = groupByDay(records)
+
+
 
     function groupByDay(records: Record[]) {
 

@@ -21,13 +21,9 @@ class DatabaseSeeder extends Seeder
             'name' => 'Antonio',
             'email' => 'antonio@localhost',
             'email_verified_at' => now(),
-            'password' => bcrypt('123456')
+            'password' => bcrypt('123456789')
         ]);
-        Config::create([
-            'user_id' => User::where('email', 'antonio@localhost')->first()->id,
-            'ask_location_permission' => true
-        ]);
-        
-        /* Record::factory(10)->create(); */
+                
+        Record::factory(10)->create();
     }
 }

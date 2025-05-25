@@ -14,11 +14,16 @@ class RecordController extends Controller
 {
     public function index()
     {
-        return inertia('records.index');
+        $records = Record::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')->with('image')
+            ->get();
+
+        return inertia('records.index')->with('records', $records);
     }
-    public function show()
-    {   
-        return inertia('records.show');
+
+    public function show(Record $record)
+    {
+        return inertia('records.show')->with('record', $record);
     }
     
     public function create()
