@@ -1,6 +1,7 @@
 import { MapShow } from '@/components/map-show';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import { spanishTimestampConvert } from '@/lib/utils';
 import { Record, type BreadcrumbItem } from '@/types';
@@ -16,14 +17,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function RecordsShow({ record }: { record: Record }) {
 
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
+  const [clickCountDown, setClickCountDown] = useState(10);
+
   const handleDelete = (id: number) => {
-    if (confirm('¿Estás seguro de que quieres eliminar este registro?')) {
-      router.delete(route('records.destroy', id), {
-        preserveScroll: true,
-      });
+    setClickCountDown(prev => prev - 1);
+    if (clickCountDown <= 0) {
+      router.delete(route('records.destroy', id));
     }
   };
-  
+
   console.log('Record:', record);
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -32,10 +36,58 @@ export default function RecordsShow({ record }: { record: Record }) {
         <Card className={record?.latitude && record?.longitude ? 'h-full' : ''}>
           <CardHeader className="flex flex-row justify-between">
             <CardTitle>{record?.title}</CardTitle>
-            <Button variant="destructive"  onClick={() => handleDelete(record.id)} className="h-8 w-8 p-0">
-              <span className="sr-only">Volver</span>
-              <Trash className="h-4 w-4" />
-            </Button>
+
+            {/* Primer diálogo: Confirmación inicial */}
+            <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+              <DialogTrigger asChild>
+                <Trash className="h-4 w-4 cursor-pointer" />
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete record</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to delete this record?
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="flex justify-between">
+                  <DialogClose asChild>
+                    <Button variant="secondary" className='cursor-pointer'>Cancel</Button>
+                  </DialogClose>
+                  <Button variant="destructive" className='cursor-pointer' onClick={() => {
+                    setConfirmOpen(false);
+                    setFinalConfirmOpen(true);
+                  }}>
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Segundo diálogo: Confirmación definitiva */}
+            <Dialog open={finalConfirmOpen} onOpenChange={setFinalConfirmOpen}>
+              <DialogContent
+                className="max-h-[50vh] overflow-y-auto bg-zinc-950 text-white shadow-xl border border-red-700"
+              >
+                {/* Overlay negro */}
+                <div className="absolute inset-0 z-[-2] bg-black/80" />
+
+                <DialogHeader>
+                  <DialogTitle className="text-2xl text-red-600">⚠️ ARE YOU REALLY SURE???</DialogTitle>
+                  <DialogDescription className="text-white/80">
+                    THIS RECORD WILL BE HARD DESTROYED FOREVER AND CANNOT BE RECOVERED EVER AGAIN IN ALL ETERNITY OF THE UNIVERSE OR EVEN THE MULTIUNIVERSE DO YOU REALLY WANT TO GO THAT FURTHER? PLEASE RECONSIDER YOUR DECISION
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="flex flex-row f-end justify-between pt-4">
+                  <DialogClose asChild>
+                    <Button variant="secondary" className='cursor-pointer' onClick={() => setClickCountDown(10)}>Cancelar</Button>
+                  </DialogClose>
+                  <Button variant="destructive" className="cursor-pointer" onClick={() => handleDelete(record.id)}>
+                    DELETE FOREVER {clickCountDown > 0 && `(${clickCountDown})`}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             {record && (
@@ -52,7 +104,7 @@ export default function RecordsShow({ record }: { record: Record }) {
                     <strong>Ubicación:</strong> {record.latitude}, {record.longitude}
                   </p>
                 )}
-                
+
 
                 <p className="text-base">{record.description}</p>
 

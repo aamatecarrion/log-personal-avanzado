@@ -24,7 +24,7 @@ export function MapShow({record}: { record: Record }) {
       <MapContainer
         center={[record.latitude ?? 37.62, record.longitude ?? -0.99]}
         scrollWheelZoom={true}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", width: "100%", zIndex: 0 }}
         zoom={19}
         >
         <TileLayer
