@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Base\Record as BaseRecord;
+use Carbon\Carbon;
 
 class Record extends BaseRecord
 {
@@ -13,4 +14,10 @@ class Record extends BaseRecord
 		'latitude',
 		'longitude'
 	];
+	protected $appends = ['date_diff'];
+    
+    public function getDateDiffAttribute()
+    {
+        return Carbon::parse($this->created_at)->locale('es')->diffForHumans(['parts' => 8]);
+    }
 }
