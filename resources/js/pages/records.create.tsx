@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { useRecordsStore } from '@/store/recordsStore';
 import { Record, Config, type BreadcrumbItem } from '@/types';
 import { Textarea } from '@headlessui/react';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -44,8 +43,7 @@ export default function RecordsCreate() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (validate()) {
-            post('/api/records');
-            router.visit('/records');
+            post('/records');
         }
     }
     

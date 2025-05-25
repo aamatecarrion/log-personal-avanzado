@@ -6,7 +6,6 @@ import { Head, usePage } from '@inertiajs/react';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression, Marker as LeafletMarker } from "leaflet";
-import { useRecordsStore } from "@/store/recordsStore";
 import { router } from "@inertiajs/react";
 import { spanishTimestampConvert } from "@/lib/utils";
 import { LocateIcon, LocateOffIcon } from "lucide-react";
@@ -18,22 +17,13 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/map',
     },
 ];
-export default function Map() {
-    const { props: { records, record} } = usePage<{ records: Record[], record: Record }>();
+export default function Map({records, record}: { records: Record[], record: Record }) {
 
     const [selectedMarker, setSelectectMarker] = useState<Record | null>(record);
-    const [filteredRecords, setFilteredRecords] = useState<Record[]>([]);
+    
     const mapRef = useRef<any>(null);
     const markerRefs = useRef<{ [key: string]: LeafletMarker }>({});
 
-    useEffect(() => {
-        if (records) {
-        const filtered = records.filter(
-            (record) => record.latitude && record.longitude
-        );
-        setFilteredRecords(filtered);
-        }
-    }, [records]);
     const centerMap = useCallback((marker: LeafletMarker) => {
         let { lat, lng } = marker.getLatLng();
         lat = lat + 0.0012;
@@ -51,7 +41,7 @@ export default function Map() {
         centerMap(marker);
         marker.openPopup();
         }
-    }, [selectedMarker,filteredRecords, centerMap]);
+    }, [selectedMarker, centerMap]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -69,7 +59,7 @@ export default function Map() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
 
-                    {filteredRecords.map((record) => {
+                    {records.map((record) => {
                     const position: LatLngExpression = [record.latitude, record.longitude];
                     
                     return (

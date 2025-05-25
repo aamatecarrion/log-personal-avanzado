@@ -13,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useRecordsStore } from "@/store/recordsStore"
 import { use, useEffect } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Car, MoreVertical, Search, SearchCheck, Trash } from "lucide-react"
@@ -65,14 +64,8 @@ const obtenerHoraEspanola = (fechaUTC: string): string => {
   return fecha.toLocaleTimeString('es-ES', opciones);
 };
 
-export default function Records() {
+export default function Records({records}: { records: Record[] }) {
     
-    const { records,fetchRecords } = useRecordsStore((state) => (state))
-    
-    useEffect(() => {
-        fetchRecords()
-    }, [])
-       
     console.log("Records:", records)
     
     

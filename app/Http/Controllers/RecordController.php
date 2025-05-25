@@ -7,8 +7,6 @@ use App\Models\Record;
 
 class RecordController extends Controller {
     public function index() {
-        if (!Auth::check()) return response()->json(['message' => 'Unauthorized'], 401);
-        
         $records = Record::where('user_id', Auth::id())->orderBy('created_at', 'desc')->with('image')->get();
         return inertia('records.index', ['records' => $records]);
     }
@@ -19,33 +17,36 @@ class RecordController extends Controller {
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
         ]);
-        Record::create($request->all());
+        Record::create($request->merge(['user_id' => Auth::id()])->all());
         return redirect()->route('records.index')->with('success', 'Record created successfully');
     }
     public function create() {
         return inertia('records.create');
     }
     public function show(Record $record) {
-        if ($record->user_id !== Auth::id()) return redirect()->route('home')->with('error', 'Forbidden');
+        $this->checkUser($record);
 
         $record->load('image');
         return inertia('records.show', ['record' => $record]);
     }
     public function update(Request $request, Record $record) {
-        if ($record->user_id !== Auth::id()) return redirect()->route('home')->with('error', 'Forbidden');
+        $this->checkUser($record);
 
         $record->update($request->only(['title', 'description', 'latitude', 'longitude']));
         return redirect()->route('records.index')->with('success', 'Record updated successfully');
     }
     public function destroy(Record $record) {
-        if ($record->user_id !== Auth::id()) return redirect()->route('home')->with('error', 'Forbidden');
+        $this->checkUser($record);
 
         $record->delete();
         return redirect()->route('records.index')->with('success', 'Record deleted successfully');
     }
     public function edit(Record $record) {
-        if ($record->user_id !== Auth::id()) return redirect()->route('home')->with('error', 'Forbidden');
+        $this->checkUser($record);
 
         return inertia('records.edit', ['record' => $record]);
+    }
+    private function checkUser($record) {
+        if ($record->user_id !== Auth::id()) return redirect()->route('home')->with('error', 'Forbidden');
     }
 }

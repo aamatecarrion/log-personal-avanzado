@@ -18,6 +18,6 @@ class Record extends BaseRecord
     
     public function getDateDiffAttribute()
     {
-        return Carbon::parse($this->created_at)->locale('es')->diffForHumans(['parts' => 8]);
+        return Carbon::parse($this->created_at)->locale('es')->diffForHumans(['parts' => 3]);
     }
 }

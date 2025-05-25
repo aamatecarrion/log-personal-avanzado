@@ -5,7 +5,6 @@ import "leaflet/dist/leaflet.css";
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { useRecordsStore } from "@/store/recordsStore";
 import { Record } from "@/types";
 import { router } from "@inertiajs/react";
 
@@ -29,11 +28,12 @@ export function MapShow({record}: { record: Record }) {
         zoom={19}
         >
         <TileLayer
+          url="/tile/{z}/{x}/{y}.png"
           maxNativeZoom={19}
           maxZoom={20}
           minZoom={1}
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          //url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
         {record && (
