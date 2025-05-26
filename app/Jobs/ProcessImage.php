@@ -34,7 +34,7 @@ class ProcessImage implements ShouldQueue
             // Convertir a base64
             $imageData = base64_encode(Storage::disk('private')->get($this->image->image_path));
 
-            $response = Http::timeout(240)->post('http://localhost:11434/api/generate', [
+            $response = Http::timeout(240)->post('http://192.168.1.20:11434/api/generate', [
                 'model' => env('OLLAMA_MODEL'),
                 'prompt' => 'genera una descripción para esta imagen, (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
@@ -58,7 +58,7 @@ class ProcessImage implements ShouldQueue
                 'generated_description' => $generated_description
             ]);
 
-            $response = Http::timeout(240)->post('http://localhost:11434/api/generate', [
+            $response = Http::timeout(240)->post('http://192.168.1.20:11434/api/generate', [
                 'model' => env('OLLAMA_MODEL'),
                 'prompt' => 'describe esta imagen en menos de 10 palabras (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
