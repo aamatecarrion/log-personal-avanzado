@@ -27,17 +27,17 @@ class ProcessImage implements ShouldQueue
     public function handle()
     {
         try {
-            if (!is_string($this->image->image_path) || empty($this->image->image_path)) throw new \Exception("El path de la imagen no es válido");
+            /* if (!is_string($this->image->image_path) || empty($this->image->image_path)) throw new \Exception("El path de la imagen no es válido");
 
-            if (!Storage::disk('private')->exists($this->image->image_path)) throw new \Exception("Archivo de imagen no encontrado");
+            if (!Storage::disk('private')->exists($this->image->image_path)) throw new \Exception("Archivo de imagen no encontrado"); */
 
             $rawImage = Storage::disk('private')->get($this->image->image_path);
 
-            $info = getimagesizefromstring($rawImage);
+            /* $info = getimagesizefromstring($rawImage);
             if ($info === false) {
                 throw new \Exception("La imagen no es válida o está corrupta");
             }
-
+ */
             $imageData = base64_encode($rawImage);
 
             $response = Http::timeout(240)->post('http://192.168.1.20:11434/api/generate', [
