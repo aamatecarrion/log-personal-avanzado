@@ -35,7 +35,7 @@ class ProcessImage implements ShouldQueue
             $imageData = base64_encode(Storage::disk('private')->get($this->image->image_path));
 
             $response = Http::timeout(240)->post('http://localhost:11434/api/generate', [
-                'model' => 'gemma3',
+                'model' => 'gemma3:1b',
                 'prompt' => 'genera una descripción para esta imagen, (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
                 'stream' => false,
