@@ -31,8 +31,14 @@ class ProcessImage implements ShouldQueue
 
             if (!Storage::disk('private')->exists($this->image->image_path)) throw new \Exception("Archivo de imagen no encontrado");
 
-            // Convertir a base64
-            $imageData = base64_encode(Storage::disk('private')->get($this->image->image_path));
+            $rawImage = Storage::disk('private')->get($this->image->image_path);
+
+            $info = getimagesizefromstring($rawImage);
+            if ($info === false) {
+                throw new \Exception("La imagen no es válida o está corrupta");
+            }
+
+            $imageData = base64_encode($rawImage);
 
             $response = Http::timeout(240)->post('http://192.168.1.20:11434/api/generate', [
                 'model' => env('OLLAMA_MODEL'),

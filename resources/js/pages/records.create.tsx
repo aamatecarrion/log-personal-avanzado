@@ -26,9 +26,9 @@ export default function RecordsCreate() {
     const { data, setData, post, processing, errors, clearErrors } = useForm({
         title: '',
         description: '',
-        latitude: null,
-        longitude: null
-    })
+        latitude: null as number | null,
+        longitude: null as number | null,
+    });
 
     const validate = () => {
         let valid = true;
