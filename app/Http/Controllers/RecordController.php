@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Models\ImageProcessingJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Record;
@@ -26,8 +28,22 @@ class RecordController extends Controller {
     public function show(Record $record) {
         $this->checkUser($record);
 
-        $record->load('image');
-        return inertia('records.show', ['record' => $record]);
+        $record->load('image.image_processing_jobs');
+        $globalQueue = ImageProcessingJob::where('status', 'pending')
+            ->orderBy('id')
+            ->pluck('id');
+
+        $total_in_queue = $globalQueue->count();
+
+        foreach ($record->image->image_processing_jobs as $job) {
+            if ($job->status === 'pending') {
+                $job->position_in_queue = $globalQueue->search($job->id) + 1;
+            } else {
+                $job->position_in_queue = null;
+            }
+        }
+
+        return inertia('records.show', ['record' => $record, 'total_in_queue' => $total_in_queue]);
     }
     public function update(Request $request, Record $record) {
         $this->checkUser($record);

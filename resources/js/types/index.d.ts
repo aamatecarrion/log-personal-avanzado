@@ -4,60 +4,49 @@ import type { Config } from 'ziggy-js';
 export interface Auth {
     user: User;
 }
-
-export interface ProcessingJob {
-    id: number;
-    type: 'description' | 'title';
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    position_in_queue: number | null;
-    error: string | null;
-    queued_at: string | null;
-    started_at: string | null;
-    finished_at: string | null;
-    image: Image | null;
-    record: Record | null;
-}
-
 export interface Record {
-    id: number;
-    user_id: number;
-    image: Image | null;
-    title: string | null;
-    description: string | null;
-    latitude: number;
-    longitude: number;
-    created_at: string;
-    updated_at: string;
-    time: string | null;
-    day: string | null;
-    date_diff: string;
+  id: number
+  user_id: number
+  title: string
+  description: any
+  latitude: number
+  longitude: number
+  time: string | null
+  created_at: string
+  updated_at: string
+  date_diff: string
+  image: Image
 }
 
 export interface Image {
-    id: number;
-    original_filename: string;
-    image_path: string;
-    user_id: number;
-    record_id: number | null;
-    generated_description: string | null;
-    file_latitude: number | null;
-    file_longitude: number | null;
-    file_date: date | null;
-    file_date_diff: string | null;
-    created_at: date | null;
-    updated_at: date | null;
-    processing_jobs: ProcessingJob[];
+  id: number
+  record_id: number
+  record: Record
+  generated_description: string
+  file_latitude: number
+  file_longitude: number
+  file_date: string
+  original_filename: string
+  image_path: string
+  created_at: string
+  updated_at: string
+  file_date_diff: string
+  image_processing_jobs: ImageProcessingJob[]
 }
 
-export interface Image {
-  id: number;
-  original_filename: string;
-  image_path: string;
-  generated_description: string | null;
-  file_latitude: number | null;
-  file_longitude: number | null;
-  file_date: string | null;
-  record: Record | null;
+export interface ImageProcessingJob {
+  id: number
+  image_id: number
+  image: Image
+  type: string
+  status: string
+  queued_at: string
+  started_at: string
+  finished_at: string
+  error: string | null
+  created_at: string
+  updated_at: string
+  position_in_queue: number | null;
 }
 
 export interface Config {

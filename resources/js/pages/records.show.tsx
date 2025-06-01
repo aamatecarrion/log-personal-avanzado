@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { spanishTimestampConvert } from '@/lib/utils';
 import { Record, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Trash, X } from 'lucide-react';
+import { Clock, Loader2, RefreshCcw, Sparkle, Sparkles, Trash, X } from 'lucide-react';
 import { use, useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -16,7 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 
-export default function RecordsShow({ record }: { record: Record }) {
+export default function RecordsShow({ record, total_in_queue }: { record: Record, total_in_queue: number }) {
 
   useAutoReload(10000);
 
@@ -24,21 +24,65 @@ export default function RecordsShow({ record }: { record: Record }) {
   const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
   const [clickCountDown, setClickCountDown] = useState(10);
 
+  const [confirmGenerateDescriptionOpen, setConfirmGenerateDescriptionOpen] = useState(false);
+  const [confirmGenerateTitleOpen, setConfirmGenerateTitleOpen] = useState(false);
+
   const handleDelete = (id: number) => {
     setClickCountDown(prev => prev - 1);
     if (clickCountDown <= 0) {
       router.delete(route('records.destroy', id));
     }
   };
+  const handleRegenerateTitle = () => {
+    router.post(route('imageprocessing.generate-title',
+      { id: record.image.id }))
+  };
+  const handleRegenerateDescription = () => {
+    router.post(route('imageprocessing.generate-description',
+      { id: record.image.id }))
+  };
 
   console.log('Record:', record);
+
+  const jobs = record?.image?.image_processing_jobs;
+
+  // Obtener estados individuales
+  const descriptionJob = jobs.find(job => job.type === 'description');
+  const titleJob = jobs.find(job => job.type === 'title');
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Records" />
       <div className="flex flex-1 flex-col gap-4 p-4">
         <Card className={record?.latitude && record?.longitude ? 'h-full' : ''}>
           <CardHeader className="flex flex-row justify-between">
+            <div className="flex items-center">
+
             <CardTitle>{record?.title}</CardTitle>
+
+            <Dialog open={confirmGenerateTitleOpen} onOpenChange={setConfirmGenerateTitleOpen}>
+              <DialogTrigger asChild className='cursor-pointer ml-2'>
+                <Sparkles className="h-5 w-5 cursor-pointer text-yellow-500" />
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Regenerate title</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to regenerate the title for this record?
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="flex justify-between">
+                  <DialogClose asChild>
+                    <Button variant="secondary" className='cursor-pointer'>Cancel</Button>
+                  </DialogClose>
+                  <Button  className='cursor-pointer' onClick={handleRegenerateTitle}>
+                    <Sparkles className="h-4 w-4" />
+                    Regenerate
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            </div>
 
             {/* Primer diálogo: Confirmación inicial */}
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
@@ -130,11 +174,56 @@ export default function RecordsShow({ record }: { record: Record }) {
                         {record.image.file_date && (
                           <p><strong>Fecha del archivo:</strong> {spanishTimestampConvert(record.image.file_date)}</p>
                         )}
+                        
                         {record.image.generated_description && (
                           <div className="text-sm">
                             <p><strong>Descripción generada:</strong></p>
                             <p className="text-sm">{record.image.generated_description}</p>
                           </div>
+                        )}
+                        {descriptionJob?.status == 'pending' && (
+                          <span className="flex items-center gap-1 text-orange-200">
+                            <Clock className="h-4 w-4" /> Description generation queued ({descriptionJob.position_in_queue}/{total_in_queue})
+                          </span>
+                        )}
+                        {descriptionJob?.status == 'processing' && (
+                          <span className="flex items-center  gap-1 text-blue-500">
+                            <Loader2 className="h-4 w-4 animate-spin" /> Description generation in progress
+                          </span>
+                        )}
+                        {descriptionJob?.status == 'failed'  && (
+                          <span className="flex items-center gap-1 text-red-500">
+                            <span className="h-4 w-4">❌</span> Description generation failed
+                          </span>
+                        )}
+                        {(descriptionJob?.status == 'completed' || descriptionJob?.status == 'failed') && (
+                          <>
+                          <Dialog open={confirmGenerateDescriptionOpen} onOpenChange={setConfirmGenerateDescriptionOpen}>
+                            <DialogTrigger asChild>
+                              <Button variant="secondary" className="mt-2 cursor-pointer">
+                                <Sparkles className="h-4 w-4 cursor-pointer" />
+                                Regenerate description
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Regenerate description</DialogTitle>
+                                <DialogDescription>
+                                  Are you sure you want to regenerate the description for this record?
+                                </DialogDescription>
+                              </DialogHeader>
+                              <DialogFooter className="flex justify-between">
+                                <DialogClose asChild>
+                                  <Button variant="secondary" className='cursor-pointer'>Cancel</Button>
+                                </DialogClose>
+                                <Button  className='cursor-pointer' onClick={handleRegenerateDescription}>
+                                  <Sparkles className="h-4 w-4" />
+                                  Regenerate
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                          </>
                         )}
                       </div>
                     </div>

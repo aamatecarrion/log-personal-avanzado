@@ -1,6 +1,9 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateImageDescription;
+use App\Jobs\GenerateImageTitle;
+use App\Models\Image;
 use App\Models\ImageProcessingJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,16 +16,27 @@ class ImageProcessingJobController extends Controller
 
         $jobs = ImageProcessingJob::with(['image.record'])
             ->whereHas('image.record', fn($q) => $q->where('user_id', $user->id))
-            ->orderByDesc('created_at')
             ->get();
 
+        // Separar por estado
+        $processing = $jobs->filter(fn($job) => $job->status === 'processing')->sortBy('queued_at');
+        $pending = $jobs->filter(fn($job) => $job->status === 'pending')->sortBy('queued_at');
+        $completed = $jobs->filter(fn($job) => in_array($job->status, ['completed', 'failed']))->sortByDesc('finished_at');
+
+
+        // Combinar en el orden deseado
+        $jobs = $processing->concat($pending)->concat($completed)->values();
+
+        // Calcular posición en la cola
         $globalQueue = ImageProcessingJob::where('status', 'pending')
-            ->orderBy('id')
-            ->pluck('id');
+            ->orderBy('queued_at')
+            ->get();
+
+        $total_in_queue = $globalQueue->count();
 
         foreach ($jobs as $job) {
             if ($job->status === 'pending') {
-                $job->position_in_queue = $globalQueue->search($job->id) + 1;
+                $job->position_in_queue = $globalQueue->search(fn($item) => $item->id === $job->id) + 1;
             } else {
                 $job->position_in_queue = null;
             }
@@ -30,7 +44,57 @@ class ImageProcessingJobController extends Controller
 
         return inertia('image-processing-jobs.index', [
             'jobs' => $jobs,
+            'total_in_queue' => $total_in_queue,
         ]);
     }
+
+
+    public function show(ImageProcessingJob $job)
+    {
+        // Cola global ordenada (solo IDs necesarios para buscar posición)
+        $globalQueue = ImageProcessingJob::where('status', 'pending')
+            ->orderBy('queued_at')
+            ->get();
+
+        $total_in_queue = $globalQueue->count();
+
+        if ($job->status === 'pending') {
+            $job->position_in_queue = $globalQueue->search(fn($item) => $item->id === $job->id) + 1;
+        } else {
+            $job->position_in_queue = null;
+        }
+
+        return inertia('image-processing-jobs.show', [
+            'job' => $job,
+            'total_in_queue' => $total_in_queue,
+        ]);
+    }
+
+
+    public function generateDescription(Request $request, $id)
+    {   
+        $image = Image::findOrFail($id);
+
+        if ($image->record->user_id !== Auth::id()) {
+            return redirect()->route('imageprocessing.index')->with('error', 'No tienes permiso para procesar esta imagen.');
+        }
+
+        GenerateImageDescription::dispatch($image);
+
+        return redirect()->route('imageprocessing.index')->with('success', 'Trabajo en cola.');
+    }
+    public function generateTitle(Request $request, $id)
+    {   
+        $image = Image::findOrFail($id);
+
+        if ($image->record->user_id !== Auth::id()) {
+            return redirect()->route('imageprocessing.index')->with('error', 'No tienes permiso para procesar esta imagen.');
+        }
+
+        GenerateImageTitle::dispatch($image);
+
+        return redirect()->route('imageprocessing.index')->with('success', 'Trabajo en cola.');
+    }
+
 
 }

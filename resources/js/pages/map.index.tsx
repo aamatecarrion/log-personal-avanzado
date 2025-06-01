@@ -54,6 +54,7 @@ export default function Map({records, record}: { records: Record[], record: Reco
                     ref={mapRef}
                     center={[37.62, -0.99]}
                     zoom={record ? 19 : 13}
+                    
                     scrollWheelZoom={true}
                     style={{ height: "100%", width: "100%" }}
                 >
