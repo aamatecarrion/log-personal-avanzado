@@ -1,7 +1,7 @@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { Record, type BreadcrumbItem } from '@/types';
+import { Image, ProcessingJob, Record, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import {
   Table,
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table"
 import { use, useEffect } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Car, MoreVertical, Search, SearchCheck, Trash } from "lucide-react"
+import { Car, CheckCircle, Clock, Hourglass, Loader2, MoreVertical, Search, SearchCheck, Trash, XCircle } from "lucide-react"
 
 import { router } from "@inertiajs/react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,8 +24,8 @@ import { useAutoReload } from '@/hooks/useAutoReload';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Records',
-        href: '/records',
+        title: 'Image Processing',
+        href: '/image-processing',
     },
 ];
 const formatFechaEspanola = (fechaUTC: string): string => {
@@ -65,54 +65,64 @@ const obtenerHoraEspanola = (fechaUTC: string): string => {
   return fecha.toLocaleTimeString('es-ES', opciones);
 };
 
-export default function Records({records}: { records: Record[] }) {
+export default function ImageProcessingJobs({jobs}: { jobs: ProcessingJob[] }) {
 
     useAutoReload(10000)
     
-    console.log("Records:", records)
+    console.log("Jobs:", jobs)
     
-    
-    const groupedRecords = groupByDay(records)
-
-
-
-    function groupByDay(records: Record[]) {
-
-        // los grupos van a ser un objeto con la fecha como clave y un array de registros como valor
-        const groups: { [date: string]: Record[] } = {}
-
-        records.forEach((record) => {
-
-            const dateTime = record.image?.file_date ? record.image.file_date : record.created_at
-            console.log("DateTime:", dateTime)
-            const dayTitle = formatFechaEspanola(dateTime)
-            const recordWithLocalTime = { ...record, time: obtenerHoraEspanola(dateTime) }
-            if (!groups[dayTitle]) groups[dayTitle] = []
-            groups[dayTitle].push(recordWithLocalTime)
-        })
-
-        return groups
-    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Records" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div>
-      <div className="w-full">
-        {groupedRecords && Object.keys(groupedRecords).length > 0 ? (
-          Object.entries(groupedRecords).map(([date, records]) => (
-            <Card className="mb-3" key={date}>
+      <div className="w-full">          
+            <Card className="mb-3">
               <CardHeader>
-                <CardTitle>{date}</CardTitle>
+                <CardTitle>Processing Jobs</CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-left">ID</TableHead>
+                      <TableHead className="text-left">File name</TableHead>
+                      <TableHead className="text-left">Position</TableHead>
+                      <TableHead className='text-left'>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
                   <TableBody>
-                    {records.map((record) => (
-                      <TableRow key={record.id} onClick={() => router.visit(`/records/${record.id}`)} className="cursor-pointer">
-                        <TableCell className="text-left w-[60px]">{record.time}</TableCell>
-                        <TableCell className="font-medium text-left">{record.title}</TableCell>
+                    
+                    {jobs.map((job) => (
+                      <TableRow key={job.id} onClick={() => router.visit(`/records/${job.image?.record?.id}`)} className="cursor-pointer">
+                        <TableCell className="text-left w-[60px]">{job.id}</TableCell>
+                        <TableCell className="font-medium text-left">{job.image?.original_filename}</TableCell>
+                        <TableCell className="text-right">
+                          {job.position_in_queue}
+                        </TableCell>
+                        <TableCell className="text-left">
+                          {job.status === 'pending' && (
+                            <span className="flex items-center  gap-1 text-yellow-500">
+                              <Clock className="h-4 w-4" /> Pending
+                            </span>
+                          )}
+                          {job.status === 'processing' && (
+                            <span className="flex items-center  gap-1 text-blue-500">
+                              <Loader2 className="h-4 w-4 animate-spin" /> Processing
+                            </span>
+                          )}
+                          {job.status === 'completed' && (
+                            <span className="flex items-center  gap-1 text-green-500">
+                              <CheckCircle className="h-4 w-4" /> Completed
+                            </span>
+                          )}
+                          {job.status === 'failed' && (
+                            <span className="flex items-center  gap-1 text-red-500">
+                              <XCircle className="h-4 w-4" /> Failed
+                            </span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -136,12 +146,6 @@ export default function Records({records}: { records: Record[] }) {
                 </Table>
               </CardContent>
             </Card>
-          ))
-        ) : (
-          <Card>
-            <CardContent>No records found</CardContent>
-          </Card>
-        )}
       </div>
     </div>
             </div>

@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\Auth;
 class MapController extends Controller
 {
     public function index()
-    {
-        return inertia('map.index')->with([
-            'records' => Record::where('user_id', Auth::id())
-                ->whereNotNull('latitude')
-                ->whereNotNull('longitude')
-                ->get()
+    {   
+        $records = Record::where('user_id', Auth::id())
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')->with('image')
+            ->get();
+
+        return inertia('map.index', [
+            'records' => $records,
         ]);
     }
 }

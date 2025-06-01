@@ -2,6 +2,7 @@ import { MapShow } from '@/components/map-show';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useAutoReload } from '@/hooks/useAutoReload';
 import AppLayout from '@/layouts/app-layout';
 import { spanishTimestampConvert } from '@/lib/utils';
 import { Record, type BreadcrumbItem } from '@/types';
@@ -16,6 +17,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 export default function RecordsShow({ record }: { record: Record }) {
+
+  useAutoReload(10000);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);

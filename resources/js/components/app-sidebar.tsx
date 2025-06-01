@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, ImagePlus, Images, LayoutGrid, Logs, Map, SquarePen, Star } from 'lucide-react';
+import { BookOpen, Cpu, Folder, ImagePlus, Images, LayoutGrid, Logs, Map, SquarePen, Star, WorkflowIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -14,19 +14,14 @@ const mainNavItems: NavItem[] = [
         icon: SquarePen,
     },
     {
-        title: 'Upload images',
-        href: '/images/create',
-        icon: ImagePlus
-    },
-    {
         title: 'Records',
         href: '/records',
         icon: Logs,
     },
     {
-        title: 'Favorites',
-        href: '/favorites',
-        icon: Star,
+        title: 'Upload images',
+        href: '/images/upload',
+        icon: ImagePlus
     },
     {
         title: 'Images',
@@ -34,9 +29,19 @@ const mainNavItems: NavItem[] = [
         icon: Images,
     },
     {
+        title: 'Favorites',
+        href: '/favorites',
+        icon: Star,
+    },
+    {
         title: 'Map',
         href: '/map',
         icon: Map,
+    },
+    {
+        title: 'Image Processing',
+        href: '/image-processing',
+        icon: Cpu,
     },
 ];
 

@@ -9,6 +9,8 @@ import { LatLngExpression, Marker as LeafletMarker } from "leaflet";
 import { router } from "@inertiajs/react";
 import { spanishTimestampConvert } from "@/lib/utils";
 import { LocateIcon, LocateOffIcon } from "lucide-react";
+import { useAutoReload } from '@/hooks/useAutoReload';
+import MarkerClusterGroup from 'react-leaflet-cluster';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -21,6 +23,7 @@ export default function Map({records, record}: { records: Record[], record: Reco
 
     const [selectedMarker, setSelectectMarker] = useState<Record | null>(record);
     
+    useAutoReload(10000)
     const mapRef = useRef<any>(null);
     const markerRefs = useRef<{ [key: string]: LeafletMarker }>({});
 
@@ -58,79 +61,65 @@ export default function Map({records, record}: { records: Record[], record: Reco
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
+                    <MarkerClusterGroup>
 
                     {records.map((record) => {
-                    const position: LatLngExpression = [record.latitude, record.longitude];
+                        const position: LatLngExpression = [record.latitude, record.longitude];
                     
-                    return (
-                        <Marker
-                        key={record.id}
-                        riseOnHover={true}
-                        position={position}
-                        ref={(ref) => {
-                            if (ref) {
-                            markerRefs.current[record.id] = ref;
-                            }
-                        }}
-                        eventHandlers={{
-                            click: () => {
-                            setSelectectMarker(record);
-                            },
-                        }}
-                        >
-                        <Popup
-                            closeButton={false}
-                            className="custom-popup w-[300px] h-[400px]"
-                            autoClose={true}
-                            closeOnClick={true}
-                            
-                        >
-                            <div 
-                            className="cursor-pointer"
-                            onClick={() => router.visit(`/records/${record.id}`)}
+                        return (
+                            <Marker
+                                key={record.id}
+                                riseOnHover={true}
+                                position={position}
+                                ref={(ref) => {if (ref) {markerRefs.current[record.id] = ref;}}}
+                                eventHandlers={{click: () => {setSelectectMarker(record);}}}
                             >
-                            <h3 className="font-semibold mb-2 text-lg">{record.title}</h3>
-                            
-                            {/* Contenedor de la imagen */}
-                            {record.image?.id && (
-                                <>
-                                <div className="mb-2 rounded-lg">
-                                <img
-                                    src={route('api.images.show', record.image?.id)}
-                                    alt={`Imagen de ${record.title}`}
-                                    className="max-h-60 object-cover rounded-lg shadow"
-                                    />
+                            <Popup
+                                closeButton={false}
+                                className="custom-popup position-relative w-[300px] h-[400px]"
+                                autoClose={true}
+                            >
+                                <div className="cursor-pointer" onClick={() => router.visit(`/records/${record.id}`)}>
+                                    <h3 className="font-semibold mb-2 text-lg">{record.title}</h3>
+                                    
+                                    {/* Contenedor de la imagen */}
+                                    {record.image?.id && (
+                                        <>
+                                        <div className="mb-2 rounded-lg">
+                                            <img
+                                                src={route('images.show', record.image?.id)}
+                                                alt={`Imagen de ${record.title}`}
+                                                className="max-h-60 object-cover rounded-lg shadow"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col mb-2">
+                                            <div className="text-sm"><strong>Nombre original:</strong> {record.image.original_filename}</div>
+                                        </div>
+                                        </>
+                                    )}
+                                    {record.image?.file_date ? (
+                                        <div className="flex flex-col mb-2">
+                                            <div className="text-sm"><strong>Fecha del archivo: </strong>{spanishTimestampConvert(record.image.file_date)}</div>
+                                        </div>
+                                        ) : (
+                                        <div className="flex flex-col mb-2">
+                                            <div className="text-sm">{spanishTimestampConvert(record.created_at)}</div>
+                                        </div>
+                                        )
+                                    }
+                                    {record.description && (
+                                        <div className="flex flex-col mb-2">
+                                            <strong>Descripción:</strong>
+                                            <div className="text-sm">{record.description}</div>
+                                        </div>
+                                    )}
+                                    <span>{(record.image?.file_date_diff ?? record.date_diff).charAt(0).toUpperCase() + (record.image?.file_date_diff ?? record.date_diff).slice(1)}</span>
                                 </div>
-                                <div className="flex flex-col mb-2">
-                                    <div className="text-sm"><strong>Nombre original:</strong> {record.image.original_filename}</div>
-                                </div>
-                                </>
-                            )}
-                            {
-                                record.image?.file_date ? (
-                                <div className="flex flex-col mb-2">
-                                    <div className="text-sm"><strong>Fecha del archivo: </strong>{spanishTimestampConvert(record.image.file_date)}</div>
-                                </div>
-                                ) : (
-                                <div className="flex flex-col mb-2">
-                                    <div className="text-sm">{spanishTimestampConvert(record.created_at)}</div>
-                                </div>
-                                )
-                            }
-                            
-                            {record.description && (
-                                <div className="flex flex-col mb-2">
-                                    <strong>Descripción:</strong>
-                                    <div className="text-sm">{record.description}</div>
-                                </div>
-                            )}
-                            <span>{(record.image?.file_date_diff ?? record.date_diff).charAt(0).toUpperCase() + (record.image?.file_date_diff ?? record.date_diff).slice(1)}</span>
-                            
-                            </div>
-                        </Popup>
+                            </Popup>
                         </Marker>
                     );
-                    })}
+                })}
+                </MarkerClusterGroup>
                 </MapContainer>
             </div>
         </AppLayout>

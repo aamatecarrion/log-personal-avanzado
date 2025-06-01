@@ -40,7 +40,7 @@ class ProcessImage implements ShouldQueue
  */
             $imageData = base64_encode($rawImage);
 
-            $response = Http::timeout(240)->post('http://localhost:11434/api/generate', [
+            $response = Http::timeout(240)->post('http://' . env('OLLAMA_HOST') . ':' . env('OLLAMA_PORT') . '/api/generate', [
                 'model' => env('OLLAMA_MODEL'),
                 'prompt' => 'genera una descripción para esta imagen, (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],

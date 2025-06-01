@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateImageDescription;
+use App\Jobs\GenerateImageTitle;
 use App\Models\Image;
 use App\Models\Record;
 use DateTime;
@@ -14,13 +16,15 @@ use App\Jobs\ProcessImage;
 class ImageController extends Controller {
     public function index() {
 
-        $images = Image::where('user_id', Auth::id())
-            ->where('record_id', '!=', null)
+        $images = Image::whereHas('record', function($query) {
+            $query->where('user_id', Auth::id());
+        
+        })->whereNotNull('record_id')
             ->orderBy('created_at', 'desc')
             ->with('record')
             ->get();
+
         return inertia('images.index', ['images' => $images]);
-        return inertia('images.index');
     }
 
     public function store(Request $request) {
@@ -59,7 +63,6 @@ class ImageController extends Controller {
             ]);
 
             $savedImages[] = Image::create([
-                'user_id' => Auth::id(),
                 'record_id' => $record->id,
                 'original_filename' => $file->getClientOriginalName(),
                 'image_path' => $path,
@@ -69,8 +72,10 @@ class ImageController extends Controller {
             ]);
         }
 
+        
         foreach ($savedImages as $image) {
-            ProcessImage::dispatch($image);
+            GenerateImageDescription::dispatch($image);
+            GenerateImageTitle::dispatch($image);
         }
 
         return redirect()->route('images.index')->with('success', 'Imágenes subidas y procesadas');
@@ -128,7 +133,7 @@ class ImageController extends Controller {
         return $decimal;
     }
     private function checkUser($image) {
-        if ($image->user_id !== Auth::id()) {
+        if ($image->record->user_id !== Auth::id()) {
             return redirect()->route('home')->with('error', 'Forbidden');
         }
     }

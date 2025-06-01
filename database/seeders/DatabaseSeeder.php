@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Antonio',
             'email' => 'antonio@localhost',
             'email_verified_at' => now(),
-            'password' => bcrypt(env('AMATE_PASSWORD'))
+            'password' => bcrypt(env('AMATE_PASSWORD', "123456789"))
         ]);
                 
         Record::factory(10)->create();
