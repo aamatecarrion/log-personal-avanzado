@@ -16,7 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 
-export default function RecordsShow({ record, total_in_queue }: { record: Record, total_in_queue: number }) {
+export default function RecordsEdit({ record, total_in_queue }: { record: Record, total_in_queue: number }) {
 
   useAutoReload(10000);
 
@@ -55,69 +55,66 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
       <Head title="Records" />
       <div className="flex flex-1 flex-col gap-4 p-4">
         <Card className={record?.latitude && record?.longitude ? 'h-full' : ''}>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row justify-between">
             <div className="flex items-center">
-              <div className='flex flex-col gap-2'>
-              <CardTitle>{record?.title}</CardTitle>
-              {titleJob?.status == 'pending' && (
-                <span className="flex items-center gap-1 ml-2 text-orange-500">
-                  <Clock className="h-4 w-4" /> Title generation queued ({titleJob.position_in_queue}/{total_in_queue})
-                </span>
-              )}
-              {titleJob?.status == 'processing' && (
-                <span className="flex items-center  gap-1 text-blue-500">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Title generation in progress
-                </span>
-              )}
-              {titleJob?.status == 'failed'  && (
-                <span className="flex items-center gap-1 text-red-500">
-                  <span className="h-4 w-4">❌</span> Title generation failed
-                </span>
-              )}
-              </div>
-              <div>
 
-                {(titleJob?.status == 'completed' || titleJob?.status == 'failed') && (
-                  <>
-                  <Dialog open={confirmGenerateTitleOpen} onOpenChange={setConfirmGenerateTitleOpen}>
-                    <DialogTrigger asChild className='cursor-pointer ml-2'>
-                      <Button variant="secondary" className="cursor-pointer">
-                          <Sparkles className="h-5 w-5 cursor-pointer text-yellow-500" />
-                        Regenerate title
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Regenerate title</DialogTitle>
-                        <DialogDescription>
-                          Are you sure you want to regenerate the title for this record?
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter className="flex justify-between">
-                        <DialogClose asChild>
-                          <Button variant="secondary" className='cursor-pointer'>Cancel</Button>
-                        </DialogClose>
-                        <Button  className='cursor-pointer' onClick={handleRegenerateTitle}>
-                            <Sparkles className="h-5 w-5 cursor-pointer text-yellow-500" />
-                          Regenerate
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  </>
-                )}
+            <CardTitle>{record?.title}</CardTitle>
 
-                <Button variant="secondary" className="ml-2 cursor-pointer" onClick={() => router.visit(route('records.edit', record.id))}>
-                  <SquarePen className="h-4 w-4" />
-                  Edit
-                </Button>
-              </div>
+            {titleJob?.status == 'pending' && (
+              <span className="flex items-center gap-1 ml-2 text-orange-500">
+                <Clock className="h-4 w-4" /> Title generation queued ({titleJob.position_in_queue}/{total_in_queue})
+              </span>
+            )}
+            {titleJob?.status == 'processing' && (
+              <span className="flex items-center  gap-1 text-blue-500">
+                <Loader2 className="h-4 w-4 animate-spin" /> Title generation in progress
+              </span>
+            )}
+            {titleJob?.status == 'failed'  && (
+              <span className="flex items-center gap-1 text-red-500">
+                <span className="h-4 w-4">❌</span> Title generation failed
+              </span>
+            )}
+            {(titleJob?.status == 'completed' || titleJob?.status == 'failed') && (
+              <>
+              <Dialog open={confirmGenerateTitleOpen} onOpenChange={setConfirmGenerateTitleOpen}>
+                <DialogTrigger asChild className='cursor-pointer ml-2'>
+                  <Button variant="secondary" className="cursor-pointer">
+                      <Sparkles className="h-5 w-5 cursor-pointer text-yellow-500" />
+                    Regenerate title
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Regenerate title</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to regenerate the title for this record?
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter className="flex justify-between">
+                    <DialogClose asChild>
+                      <Button variant="secondary" className='cursor-pointer'>Cancel</Button>
+                    </DialogClose>
+                    <Button  className='cursor-pointer' onClick={handleRegenerateTitle}>
+                        <Sparkles className="h-5 w-5 cursor-pointer text-yellow-500" />
+                      Regenerate
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              </>
+            )}
+
+            <Button variant="secondary" className="ml-2 cursor-pointer" onClick={() => router.visit(route('records.edit', record.id))}>
+              <SquarePen className="h-4 w-4" />
+              Edit
+            </Button>
             </div>
             
 
             {/* Primer diálogo: Confirmación inicial */}
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-              <DialogTrigger asChild>
+              <DialogTrigger asChild >
                 <Trash className="h-4 w-4 cursor-pointer" />
               </DialogTrigger>
               <DialogContent>
