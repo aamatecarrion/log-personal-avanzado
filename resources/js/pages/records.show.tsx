@@ -8,7 +8,9 @@ import { spanishTimestampConvert } from '@/lib/utils';
 import { Record, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Clock, Loader2, RefreshCcw, Sparkle, Sparkles, SquarePen, Trash, X } from 'lucide-react';
+import { title } from 'process';
 import { use, useEffect, useState } from 'react';
+import axios from 'axios';
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Records', href: '/records' },
@@ -26,6 +28,10 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
 
   const [confirmGenerateDescriptionOpen, setConfirmGenerateDescriptionOpen] = useState(false);
   const [confirmGenerateTitleOpen, setConfirmGenerateTitleOpen] = useState(false);
+  const [titleEditOpen, setTitleEditOpen] = useState(false);
+  const [descriptionEditOpen, setDescriptionEditOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState(record.title);
+  const [editTitleButtonVisible, setEditTitleButtonVisible] = useState(false);
 
   const handleDelete = (id: number) => {
     setClickCountDown(prev => prev - 1);
@@ -42,13 +48,57 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
       { id: record.image.id }))
   };
 
+  
+  const handleTitleEdit = async () => {
+    if (titleEditOpen) {
+      setTitleEditOpen(false);
+      return;
+    }
+
+    const job = record.image?.image_processing_jobs?.find(job => job.type === 'title');
+
+    if (!job) {
+      setTitleEditOpen(true); // No hay job, puedes editar directamente
+      return;
+    }
+
+    try {
+      await axios.put(route('imageprocessing.cancel', job.id));
+      setTitleEditOpen(true); // Cancelado con éxito
+    } catch (error: any) {
+      const status = error.response?.status;
+      const message = error.response?.data?.message;
+
+      if (status === 410) {
+        // Job ya terminado: permitir edición
+        console.warn('Job terminado, puedes editar:', message);
+        setTitleEditOpen(true);
+      } else if (status === 409) {
+        // Job en proceso: NO permitir edición
+        console.warn('Job en proceso, no puedes editar:', message);
+        setTitleEditOpen(false);
+      } else {
+        console.error('Error inesperado:', message || error.message);
+        setTitleEditOpen(false);
+      }
+    }
+  };
+
+
+
+
   console.log('Record:', record);
 
   const jobs = record?.image?.image_processing_jobs;
 
   // Obtener estados individuales
-  const descriptionJob = jobs.find(job => job.type === 'description');
-  const titleJob = jobs.find(job => job.type === 'title');
+  const descriptionJob = jobs?.find(job => job.type === 'description');
+  const titleJob = jobs?.find(job => job.type === 'title');
+
+  useEffect(() => {
+    if (titleJob?.status !== 'processing') setEditTitleButtonVisible(true);
+  
+  }, [titleJob?.status]);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -58,7 +108,35 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center">
               <div className='flex flex-col gap-2'>
-              <CardTitle>{record?.title}</CardTitle>
+              {titleEditOpen ? (
+                <input
+                  type="text"
+                  defaultValue={record.title}
+                  className="border px-2 py-1 rounded"
+                  onChange={(e) => setNewTitle(e.target.value)}
+                />
+              ) : (
+                <CardTitle>{record?.title}</CardTitle>
+              )}
+              {titleEditOpen && (
+              <Button
+                onClick={() => {
+                  router.put(
+                    route('records.update', record.id),
+                    { title: newTitle },
+                    {
+                      onSuccess: () => {
+                        setTitleEditOpen(false);
+                        router.reload({ only: ['record'] }); // <-- Esto fuerza recarga del record
+                      },
+                    }
+                  );
+                }}
+              >
+                Guardar título
+              </Button>
+            )}
+
               {titleJob?.status == 'pending' && (
                 <span className="flex items-center gap-1 ml-2 text-orange-500">
                   <Clock className="h-4 w-4" /> Title generation queued ({titleJob.position_in_queue}/{total_in_queue})
@@ -107,9 +185,18 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
                   </>
                 )}
 
-                <Button variant="secondary" className="ml-2 cursor-pointer" onClick={() => router.visit(route('records.edit', record.id))}>
-                  <SquarePen className="h-4 w-4" />
-                  Edit
+                <Button variant="secondary" className="ml-2 cursor-pointer" onClick={handleTitleEdit}>
+                  { titleEditOpen ?
+                    <>
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </>
+                  :
+                    <>
+                      <SquarePen className="h-4 w-4" />
+                      Edit
+                    </>
+                  }
                 </Button>
               </div>
             </div>

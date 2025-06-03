@@ -31,7 +31,7 @@ export interface Image {
   created_at: string
   updated_at: string
   file_date_diff: string
-  image_processing_jobs: ImageProcessingJob[]
+  image_processing_jobs: ImageProcessingJob[] | null;
 }
 
 export interface ImageProcessingJob {

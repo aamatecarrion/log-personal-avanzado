@@ -43,22 +43,24 @@ class GenerateImageTitle implements ShouldQueue
             Log::error("No se encontró el registro de ImageProcessingJob para la imagen ID {$this->image->id}");
             return;
         }
-
-        $job->update([
-            'status' => 'processing',
-            'started_at' => now(),
-        ]);
-
+        if ($job->status === 'cancelled') return;
 
         try {
             $rawImage = Storage::disk('private')->get($this->image->image_path);
-
+            
             $info = getimagesizefromstring($rawImage);
             if ($info === false) {
                 throw new \Exception("La imagen no es válida o está corrupta");
             }
-
+            
             $imageData = base64_encode($rawImage);
+            
+            if ($job->fresh()->status === 'cancelled' ) return;
+            
+            $job->update([
+                'status' => 'processing',
+                'started_at' => now(),
+            ]);
 
             $response = Http::timeout(240)->post('http://' . env('OLLAMA_HOST') . ':' . env('OLLAMA_PORT') . '/api/generate', [
                 'model' => env('OLLAMA_MODEL'),

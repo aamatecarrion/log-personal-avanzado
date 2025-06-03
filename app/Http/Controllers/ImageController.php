@@ -134,7 +134,7 @@ class ImageController extends Controller {
     }
     private function checkUser($image) {
         if ($image->record->user_id !== Auth::id()) {
-            return redirect()->route('home')->with('error', 'Forbidden');
+            abort(403, 'Forbidden');
         }
     }
 

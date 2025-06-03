@@ -29,6 +29,7 @@ Route::middleware('throttle:240,1')->group(function () {
         Route::get('/image-processing', [ImageProcessingJobController::class, 'index'])->name('imageprocessing.index');
         Route::post('/image-processing/generate-title/{id}',[ImageProcessingJobController::class, 'generateTitle'])->name('imageprocessing.generate-title');
         Route::post('/image-processing/generate-description/{id}',[ImageProcessingJobController::class, 'generateDescription'])->name('imageprocessing.generate-description');
+        Route::put('/image-processing/{job}', [ImageProcessingJobController::class, 'cancel'])->name('imageprocessing.cancel');
         
     });
     

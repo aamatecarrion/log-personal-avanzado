@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('image_id')->constrained()->onDelete('cascade');
             $table->enum('type', ['description', 'title']);
-            $table->enum('status', ['pending', 'processing', 'completed', 'failed'])->default('pending');
+            $table->enum('status', ['pending', 'processing', 'completed', 'failed', 'cancelled'])->default('pending');
             $table->timestamp('queued_at')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();

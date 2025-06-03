@@ -29,17 +29,19 @@ class RecordController extends Controller {
         $this->checkUser($record);
 
         $record->load('image.image_processing_jobs');
-        $globalQueue = ImageProcessingJob::where('status', 'pending')
+        $total_in_queue = 0;
+        if ($record->image && $record->image->image_processing_jobs) {
+            $globalQueue = ImageProcessingJob::where('status', 'pending')
             ->orderBy('id')
             ->pluck('id');
+            $total_in_queue = $globalQueue->count();
 
-        $total_in_queue = $globalQueue->count();
-
-        foreach ($record->image->image_processing_jobs as $job) {
-            if ($job->status === 'pending') {
-                $job->position_in_queue = $globalQueue->search($job->id) + 1;
-            } else {
-                $job->position_in_queue = null;
+            foreach ($record->image->image_processing_jobs as $job) {
+                if ($job->status === 'pending') {
+                    $job->position_in_queue = $globalQueue->search($job->id) + 1;
+                } else {
+                    $job->position_in_queue = null;
+                }
             }
         }
 
@@ -49,7 +51,7 @@ class RecordController extends Controller {
         $this->checkUser($record);
 
         $record->update($request->only(['title', 'description', 'latitude', 'longitude']));
-        return redirect()->route('records.index')->with('success', 'Record updated successfully');
+        return redirect()->back()->with('success', 'Record updated successfully');
     }
     public function destroy(Record $record) {
         $this->checkUser($record);
@@ -57,12 +59,10 @@ class RecordController extends Controller {
         $record->delete();
         return redirect()->route('records.index')->with('success', 'Record deleted successfully');
     }
-    public function edit(Record $record) {
-        $this->checkUser($record);
 
-        return inertia('records.edit', ['record' => $record]);
-    }
     private function checkUser($record) {
-        if ($record->user_id !== Auth::id()) return redirect()->route('home')->with('error', 'Forbidden');
+        if ($record->user_id !== Auth::id()) {
+            abort(403, 'Forbidden');
+        }
     }
 }

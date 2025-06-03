@@ -76,25 +76,52 @@ class ImageProcessingJobController extends Controller
         $image = Image::findOrFail($id);
 
         if ($image->record->user_id !== Auth::id()) {
-            return redirect()->route('imageprocessing.index')->with('error', 'No tienes permiso para procesar esta imagen.');
+            return redirect()->back()->with('error', 'No tienes permiso para procesar esta imagen.');
         }
 
         GenerateImageDescription::dispatch($image);
 
-        return redirect()->route('imageprocessing.index')->with('success', 'Trabajo en cola.');
+        return redirect()->back()->with('success', 'Trabajo en cola.');
     }
     public function generateTitle(Request $request, $id)
     {   
         $image = Image::findOrFail($id);
 
         if ($image->record->user_id !== Auth::id()) {
-            return redirect()->route('imageprocessing.index')->with('error', 'No tienes permiso para procesar esta imagen.');
+            return redirect()->back()->with('error', 'No tienes permiso para procesar esta imagen.');
         }
 
         GenerateImageTitle::dispatch($image);
 
-        return redirect()->route('imageprocessing.index')->with('success', 'Trabajo en cola.');
+        return redirect()->back()->with('success', 'Trabajo en cola.');
+    }
+    public function cancel(Request $request, ImageProcessingJob $job)
+    {
+        $this->checkUser($job);
+
+        $updated = ImageProcessingJob::where('id', $job->id)
+            ->where('status', 'pending')
+            ->update(['status' => 'cancelled']);
+
+        if ($updated) {
+            return response()->json(['message' => 'Job cancelled.'], 200);
+        }
+
+        $job->refresh();
+
+        if ($job->status === 'processing') {
+            return response()->json(['message' => 'Job already processing, cannot cancel.'], 409);
+        }
+
+        return response()->json(['message' => 'Job is already finished.'], 410);
     }
 
 
+
+
+    private function checkUser(ImageProcessingJob $job) {
+        if ($job->image->record->user_id !== Auth::id()) {
+            abort(403, 'Forbidden');
+        }
+    }
 }

@@ -43,22 +43,32 @@ class GenerateImageDescription implements ShouldQueue
             Log::error("No se encontró el registro de ImageProcessingJob para la imagen ID {$this->image->id}");
             return;
         }
+        
+        if ($job->status === 'cancelled') return;
 
-        $job->update([
-            'status' => 'processing',
-            'started_at' => now(),
-        ]);
-
+        
         try {
             $rawImage = Storage::disk('private')->get($this->image->image_path);
-
+            
             $info = getimagesizefromstring($rawImage);
             if ($info === false) {
                 throw new \Exception("La imagen no es válida o está corrupta");
             }
-
+            
             $imageData = base64_encode($rawImage);
 
+            // Intentar pasar a 'processing' si sigue en 'pending'
+            $updated = ImageProcessingJob::where('id', $job->id)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'processing',
+                    'started_at' => now(),
+                ]);
+
+            if (!$updated) {
+                return; // Otro proceso lo cambió o fue cancelado
+            }
+            
             $response = Http::timeout(240)->post('http://' . env('OLLAMA_HOST') . ':' . env('OLLAMA_PORT') . '/api/generate', [
                 'model' => env('OLLAMA_MODEL'),
                 'prompt' => 'genera una descripción para esta imagen, (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
