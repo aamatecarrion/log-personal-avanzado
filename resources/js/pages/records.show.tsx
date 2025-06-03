@@ -185,6 +185,7 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
                   </>
                 )}
 
+              </div>
                 <Button variant="secondary" className="ml-2 cursor-pointer" onClick={handleTitleEdit}>
                   { titleEditOpen ?
                     <>
@@ -198,7 +199,6 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
                     </>
                   }
                 </Button>
-              </div>
             </div>
             
 
