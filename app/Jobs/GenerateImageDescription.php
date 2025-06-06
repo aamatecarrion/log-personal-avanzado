@@ -35,6 +35,8 @@ class GenerateImageDescription implements ShouldQueue
 
     public function handle()
     {
+        Log::info("Iniciando job para imagen ID {$this->image->id}");
+
         $job = ImageProcessingJob::where('image_id', $this->image->id)
                                  ->where('type', 'description')
                                  ->first();
@@ -44,20 +46,24 @@ class GenerateImageDescription implements ShouldQueue
             return;
         }
         
-        if ($job->status === 'cancelled') return;
+        if ($job->status === 'cancelled') {
+            Log::info("Job cancelado para imagen ID {$this->image->id}");
+            return;
+        }
 
-        
         try {
+            Log::info("Leyendo imagen desde Storage");
             $rawImage = Storage::disk('private')->get($this->image->image_path);
             
+            Log::info("Chequeando integridad de la imagen");
             $info = getimagesizefromstring($rawImage);
             if ($info === false) {
                 throw new \Exception("La imagen no es válida o está corrupta");
             }
-            
+
             $imageData = base64_encode($rawImage);
 
-            // Intentar pasar a 'processing' si sigue en 'pending'
+            Log::info("Actualizando estado a processing");
             $updated = ImageProcessingJob::where('id', $job->id)
                 ->where('status', 'pending')
                 ->update([
@@ -66,28 +72,31 @@ class GenerateImageDescription implements ShouldQueue
                 ]);
 
             if (!$updated) {
-                return; // Otro proceso lo cambió o fue cancelado
+                Log::info("El job ya no está pending, se cancela ejecución");
+                return;
             }
-            
-            $response = Http::timeout(240)->post('http://' . env('OLLAMA_HOST') . ':' . env('OLLAMA_PORT') . '/api/generate', [
+
+            Log::info("Enviando petición a la API de generación");
+            $response = Http::timeout(240)->post('http://127.0.0.1:11434/api/generate', [
                 'model' => env('OLLAMA_MODEL'),
                 'prompt' => 'genera una descripción para esta imagen, (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
                 'stream' => false
             ]);
 
-            // Verificar errores HTTP primero
-            if ($response->failed()) throw new \Exception("Error en la API: " . $response->body());
+            if ($response->failed()) {
+                Log::error("Error en la API: " . $response->body());
+                throw new \Exception("Error en la API: " . $response->body());
+            }
 
-            // Validar respuesta JSON
             $responseData = $response->json();
             if (empty($responseData['response'])) {
-                Log::error("Respuesta vacía", ['response' => $responseData]);
+                Log::error("Respuesta vacía de la API", ['response' => $responseData]);
                 throw new \Exception("La IA no generó una descripción válida");
             }
 
-            // Sanitizar y truncar respuesta
             $generated_description = substr(strip_tags($responseData['response']), 0, 2000);
+            Log::info("Descripción generada: " . $generated_description);
 
             $this->image->update(['generated_description' => $generated_description]);
 
@@ -96,8 +105,10 @@ class GenerateImageDescription implements ShouldQueue
                 'error' => null,
                 'finished_at' => now()
             ]);
+            Log::info("Job completado correctamente para imagen ID {$this->image->id}");
 
         } catch (\Throwable $e) {
+            Log::error("Error en job para imagen ID {$this->image->id}: " . $e->getMessage());
             $job->update([
                 'status' => 'failed',
                 'error' => $e->getMessage(),
@@ -105,4 +116,5 @@ class GenerateImageDescription implements ShouldQueue
             ]);
         }
     }
+
 }
