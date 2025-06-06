@@ -23,21 +23,20 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
   useAutoReload(10000);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [finalConfirmOpen, setFinalConfirmOpen] = useState(false);
-  const [clickCountDown, setClickCountDown] = useState(10);
-
-  const [confirmGenerateDescriptionOpen, setConfirmGenerateDescriptionOpen] = useState(false);
+  
   const [confirmGenerateTitleOpen, setConfirmGenerateTitleOpen] = useState(false);
+  const [confirmGenerateDescriptionOpen, setConfirmGenerateDescriptionOpen] = useState(false);
+  
   const [titleEditOpen, setTitleEditOpen] = useState(false);
   const [descriptionEditOpen, setDescriptionEditOpen] = useState(false);
+  
   const [newTitle, setNewTitle] = useState(record.title);
+  const [newDescription, setNewDescription] = useState(record.description);
+
   const [editTitleButtonVisible, setEditTitleButtonVisible] = useState(false);
 
-  const handleDelete = (id: number) => {
-    setClickCountDown(prev => prev - 1);
-    if (clickCountDown <= 0) {
+  const handleDelete = (id: number) => {    
       router.delete(route('records.destroy', id));
-    }
   };
   const handleRegenerateTitle = () => {
     router.post(route('imageprocessing.generate-title',
@@ -204,51 +203,23 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
 
             {/* Primer diálogo: Confirmación inicial */}
             <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-              <DialogTrigger asChild>
+              <DialogTrigger asChild className='hover:text-red-600 cursor-pointer'>
                 <Trash className="h-4 w-4 cursor-pointer" />
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Delete record</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to delete this record?
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter className="flex justify-between">
-                  <DialogClose asChild>
-                    <Button variant="secondary" className='cursor-pointer'>Cancel</Button>
-                  </DialogClose>
-                  <Button variant="destructive" className='cursor-pointer' onClick={() => {
-                    setConfirmOpen(false);
-                    setFinalConfirmOpen(true);
-                  }}>
-                    Delete
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {/* Segundo diálogo: Confirmación definitiva */}
-            <Dialog open={finalConfirmOpen} onOpenChange={setFinalConfirmOpen}>
-              <DialogContent
-                className="max-h-[50vh] overflow-y-auto bg-zinc-950 text-white shadow-xl border border-red-700"
-              >
-                {/* Overlay negro */}
+              <DialogContent className="max-h-[50vh] overflow-y-auto bg-zinc-950 text-white shadow-xl border border-red-700">
                 <div className="absolute inset-0 z-[-2] bg-black/80" />
 
                 <DialogHeader>
-                  <DialogTitle className="text-2xl text-red-600">⚠️ ARE YOU REALLY SURE???</DialogTitle>
+                  <DialogTitle className="text-2xl text-red-600">⚠️ Delete record</DialogTitle>
                   <DialogDescription className="text-white/80">
-                    THIS RECORD WILL BE HARD DESTROYED FOREVER AND CANNOT BE RECOVERED EVER AGAIN IN ALL ETERNITY OF THE UNIVERSE OR EVEN THE MULTIUNIVERSE DO YOU REALLY WANT TO GO THAT FURTHER? PLEASE RECONSIDER YOUR DECISION
+                    Are you sure you want to delete this record?
                   </DialogDescription>
                 </DialogHeader>
-                <DialogFooter className="flex flex-row f-end justify-between pt-4">
+               <DialogFooter className="flex flex-row f-end justify-between pt-4">
                   <DialogClose asChild>
-                    <Button variant="secondary" className='cursor-pointer' onClick={() => setClickCountDown(10)}>Cancelar</Button>
+                    <Button variant="secondary" className='cursor-pointer'>Cancel</Button>
                   </DialogClose>
-                  <Button variant="destructive" className="cursor-pointer" onClick={() => handleDelete(record.id)}>
-                    DELETE FOREVER {clickCountDown > 0 && `(${clickCountDown})`}
-                  </Button>
+                  <Button variant="destructive" className='cursor-pointer' onClick={() => handleDelete(record.id)}>⚠️ Delete</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

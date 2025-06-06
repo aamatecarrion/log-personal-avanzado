@@ -21,6 +21,7 @@ import { router } from "@inertiajs/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAutoReload } from '@/hooks/useAutoReload';
+import { formatFechaEspanola, obtenerHoraEspanola } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,43 +29,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/image-processing',
     },
 ];
-const formatFechaEspanola = (fechaUTC: string): string => {
-  const fecha = new Date(fechaUTC);
 
-  const formateador = new Intl.DateTimeFormat('es-ES', {
-    weekday: 'long',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: 'Europe/Madrid',
-  });
-
-  const partes = formateador.formatToParts(fecha);
-  
-  // Usamos "!" porque sabemos que existen
-  const diaSemana = partes.find(p => p.type === 'weekday')!.value;
-  const año = partes.find(p => p.type === 'year')!.value;
-  const mes = partes.find(p => p.type === 'month')!.value;
-  const dia = partes.find(p => p.type === 'day')!.value;
-
-  // Capitalizar primera letra
-  const diaCapitalizado = diaSemana[0].toUpperCase() + diaSemana.slice(1).toLowerCase();
-  return `${diaCapitalizado}, ${año}-${mes}-${dia}`;
-};
-const obtenerHoraEspanola = (fechaUTC: string): string => {
-  const fecha = new Date(fechaUTC);
-  
-  const opciones: Intl.DateTimeFormatOptions = {
-    hour: '2-digit',    // Hora en 2 dígitos (ej: "08" o "14")
-    minute: '2-digit',  // Minutos en 2 dígitos
-    second: '2-digit',  // Segundos en 2 dígitos
-    hour12: false,      // Formato 24 horas
-    timeZone: 'Europe/Madrid'
-  };
-
-  // Formatear usando toLocaleTimeString (es-ES para separadores correctos)
-  return fecha.toLocaleTimeString('es-ES', opciones);
-};
 
 export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: ImageProcessingJob[], total_in_queue: number }) {
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Base\UserLimit;
 use App\Models\Config;
 use App\Models\Record;
 use App\Models\User;
@@ -17,11 +18,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::create([
+        $admin = User::create([
             'name' => 'Antonio',
-            'email' => 'antonio@localhost',
+            'email' => 'admin@localhost',
             'email_verified_at' => now(),
-            'password' => bcrypt(env('AMATE_PASSWORD', "123456789"))
+            'password' => bcrypt(env('ADMIN_PASSWORD', 'admin')),
+            'is_admin' => true,
+        ]);
+        UserLimit::create([
+            'user_id' => $admin->id,
+            'can_upload_images' => true,
+            'can_process_images' => true,
+            'daily_upload_limit' => null,
+            'daily_process_limit' => null,
         ]);
                 
         Record::factory(10)->create();

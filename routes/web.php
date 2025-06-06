@@ -7,14 +7,14 @@ use App\Http\Controllers\RecordController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ImageProcessingJobController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\UserLimitController;
+use App\Http\Controllers\UserManagementController;
 
 Route::middleware('throttle:240,1')->group(function () {
     
     Route::get('/', function () {
         
-        return Auth::check() 
-        ? redirect()->route('records.index') 
-        : redirect()->route('login');
+        return Auth::check() ? redirect()->route('records.index') : redirect()->route('login');
         
     })->name('home');
     
@@ -33,6 +33,11 @@ Route::middleware('throttle:240,1')->group(function () {
         
     });
     
+});
+
+Route::prefix('/admin')->middleware(['auth', 'admin'])->group(function () {
+    Route::resource('user-limits', UserLimitController::class);
+    Route::resource('user-management', UserManagementController::class);
 });
 
 
