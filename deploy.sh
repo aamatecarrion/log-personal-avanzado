@@ -25,6 +25,9 @@ npm run build
 echo "→ Estableciendo permisos..."
 #sudo chown -R antonio:www-data $PROYECTO
 #sudo chmod -R 775 $PROYECTO/storage $PROYECTO/bootstrap/cache
+#sudo chown -R www-data:www-data storage/app/private
+
+
 
 # Mensaje de éxito
 echo "✅ Proyecto actualizado correctamente."
