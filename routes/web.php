@@ -35,7 +35,7 @@ Route::middleware('throttle:240,1')->group(function () {
     
 });
 
-Route::prefix('/admin')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('/admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::resource('user-limits', UserLimitController::class);
     Route::resource('user-management', UserManagementController::class);
 });

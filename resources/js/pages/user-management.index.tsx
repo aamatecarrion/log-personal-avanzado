@@ -29,7 +29,7 @@ export default function UserManagement({ users }: { users: User[] }) {
                 <div className="w-full"> 
                     <Card className="mb-3">
                         <CardHeader>
-                            <CardTitle>User processing jobs</CardTitle>
+                            <CardTitle>Usuarios</CardTitle>
                         </CardHeader>
                         <CardContent>
                         <Table>
@@ -37,7 +37,7 @@ export default function UserManagement({ users }: { users: User[] }) {
                             <TableRow>
                                 <TableHead className="text-left">ID</TableHead>
                                 <TableHead className="text-left">Nombre</TableHead>
-                                <TableHead className="text-left">email</TableHead>
+                                <TableHead className="text-left">Email</TableHead>
                                 <TableHead className="text-left">Creado</TableHead>
                             </TableRow>
                             </TableHeader>
@@ -71,7 +71,7 @@ export default function UserManagement({ users }: { users: User[] }) {
                                                 <DialogClose asChild>
                                                     <Button variant="secondary" className='cursor-pointer'>Cancel</Button>
                                                 </DialogClose>
-                                                <Button variant="destructive" className='cursor-pointer' onClick={() => router.delete(route('user-management.destroy', user.id))}>Eliminar</Button>
+                                                <Button variant="destructive" className='cursor-pointer' onClick={() => router.delete(route('admin.user-management.destroy', user.id))}>Eliminar</Button>
                                                 </DialogFooter>
                                             </DialogContent>
                                         </Dialog>

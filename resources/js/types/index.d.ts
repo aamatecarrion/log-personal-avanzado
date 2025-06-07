@@ -86,7 +86,19 @@ export interface User {
     avatar?: string;
     email_verified_at: string | null;
     is_admin: boolean;
+    user_limit: UserLimit | null;
     created_at: string;
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface UserLimit {
+    id: number;
+    user: User | null;
+    can_upload_images: boolean;
+    can_process_images: boolean;
+    daily_upload_limit: number | null;
+    daily_process_limit: number | null;
+    created_at: string;
+    updated_at: string;
 }

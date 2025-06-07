@@ -64,4 +64,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Image::class);
     }
+    public function user_limit()
+    {
+        return $this->hasOne(UserLimit::class);
+    }
 }

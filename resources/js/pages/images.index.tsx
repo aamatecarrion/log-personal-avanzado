@@ -4,10 +4,11 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { Image, Record, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
+import ImagesUpload from '@/components/images-upload';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Images',
+        title: 'Imágenes',
         href: '',
     },
 ];
@@ -24,6 +25,7 @@ export default function Images({ images }: { images: Image[] }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Images" />
+            <ImagesUpload />
             <div className="p-4">
                 <div className="flex flex-row flex-start flex-wrap gap-4">
                     {images.map((image: Image) => (
