@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FavoriteController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -9,6 +10,8 @@ use App\Http\Controllers\ImageProcessingJobController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\UserLimitController;
 use App\Http\Controllers\UserManagementController;
+use App\Models\UserLimit;
+use Illuminate\Support\Facades\RateLimiter;
 
 Route::middleware('throttle:240,1')->group(function () {
     
@@ -30,6 +33,7 @@ Route::middleware('throttle:240,1')->group(function () {
         Route::post('/image-processing/generate-title/{id}',[ImageProcessingJobController::class, 'generateTitle'])->name('imageprocessing.generate-title');
         Route::post('/image-processing/generate-description/{id}',[ImageProcessingJobController::class, 'generateDescription'])->name('imageprocessing.generate-description');
         Route::put('/image-processing/{job}', [ImageProcessingJobController::class, 'cancel'])->name('imageprocessing.cancel');
+        Route::resource('/favorites', FavoriteController::class);
         
     });
     
@@ -38,6 +42,24 @@ Route::middleware('throttle:240,1')->group(function () {
 Route::prefix('/admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::resource('user-limits', UserLimitController::class);
     Route::resource('user-management', UserManagementController::class);
+});
+
+Route::get('/test', function () {
+    
+    $user = Auth::user();
+    
+    $dailyLimit = $user->user_limit?->daily_process_limit;
+    
+
+    $key = "user:{$user->id}:daily_image_process";
+    
+    if ($dailyLimit !== null && RateLimiter::attempts($key) >= $dailyLimit) {
+        dd("limite");   
+    }
+    $traelo = RateLimiter::attempts($key);
+    dd($traelo);
+
+    //$traelo = UserLimit::where('can_process_images', false)->get();
 });
 
 

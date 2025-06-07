@@ -10,6 +10,8 @@ import { DialogContent, DialogDescription, DialogTitle } from '@/components/ui/d
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Search, Trash } from 'lucide-react';
 import { useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useHasMouse } from '@/hooks/useHasMouse';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,6 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function UserManagement({ users }: { users: User[] }) {
 
     const { auth } = usePage<{ auth: Auth }>().props;
+    const hasMouse = useHasMouse();
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -44,7 +47,7 @@ export default function UserManagement({ users }: { users: User[] }) {
                             <TableBody>
                             
                             {users.map((user) => (
-                                <TableRow key={user.id}>
+                                <TableRow key={user.id} className='group'>
                                     <TableCell className="text-left w-[60px]">{user.id}</TableCell>
                                     <TableCell className="font-medium text-left">{user.name}</TableCell>
                                     <TableCell className="text-left">{user.email}</TableCell>
@@ -53,12 +56,12 @@ export default function UserManagement({ users }: { users: User[] }) {
                                         {formatFechaEspanola(user.created_at)}, {obtenerHoraEspanola(user.created_at)}
                                         </span>
                                     </TableCell>
-                                    { user.id !== (auth?.user?.id) && (
                                         
                                     <TableCell>
+                                    { user.id !== (auth?.user?.id) && (
                                         <Dialog>
-                                            <DialogTrigger asChild className='hover:text-red-600 cursor-pointer'>
-                                                <Trash className="h-5 w-5 cursor-pointer" />
+                                            <DialogTrigger asChild className='hover:text-red-600 text-muted-foreground cursor-pointer'>
+                                                <Trash className={`h-4 w-4 ${hasMouse ? 'opacity-0' : ''} group-hover:opacity-100`} />
                                             </DialogTrigger>
                                             <DialogContent>
                                             <DialogHeader>
@@ -75,8 +78,8 @@ export default function UserManagement({ users }: { users: User[] }) {
                                                 </DialogFooter>
                                             </DialogContent>
                                         </Dialog>
-                                    </TableCell>
                                     )}
+                                    </TableCell>
                                 </TableRow>
                             ))}
                             </TableBody>

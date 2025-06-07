@@ -87,7 +87,7 @@ export function AppSidebar() {
             <SidebarContent>
 
                 <SidebarGroup className="px-2 py-0">
-                    {auth?.user?.is_admin &&     
+                    {(auth?.user?.is_admin || false) &&     
                     <SidebarGroupLabel>Enlaces de Usuario</SidebarGroupLabel>}
                     <SidebarMenu>
                         {mainNavItems.map((item) => (
@@ -106,7 +106,7 @@ export function AppSidebar() {
                     </SidebarMenu>
                 </SidebarGroup>
 
-                {auth?.user?.is_admin && (
+                {(auth?.user?.is_admin || false) && (
                     <SidebarGroup className="px-2 py-0">
                     <SidebarGroupLabel>Enlaces de Admin</SidebarGroupLabel>
                     <SidebarMenu>

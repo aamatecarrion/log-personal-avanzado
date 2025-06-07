@@ -34,6 +34,12 @@ export interface Image {
   image_processing_jobs: ImageProcessingJob[] | null;
 }
 
+export interface Favorite {
+  id: number
+  user_id: number
+  title: string
+}
+
 export interface ImageProcessingJob {
   id: number
   image_id: number
@@ -102,3 +108,10 @@ export interface UserLimit {
     created_at: string;
     updated_at: string;
 }
+export interface UploadLimit {
+  limit: number 
+  left: number
+  time: string | null
+  can_upload: boolean
+}
+

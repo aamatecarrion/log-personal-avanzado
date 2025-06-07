@@ -2,7 +2,7 @@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { Image, Record, type BreadcrumbItem } from '@/types';
+import { Auth, Image, Record, UploadLimit, User, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import ImagesUpload from '@/components/images-upload';
 
@@ -12,7 +12,13 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '',
     },
 ];
-export default function Images({ images }: { images: Image[] }) {
+
+
+export default function Images({ images, upload_limit }: { images: Image[], upload_limit: UploadLimit | null }) {
+    
+    const { auth } = usePage<{ auth: Auth}>().props;
+    console.log(upload_limit)
+    
     const handleImageClick = (image: Image) => {
 
         console.log('Image ID:', image.id);
@@ -25,7 +31,7 @@ export default function Images({ images }: { images: Image[] }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Images" />
-            <ImagesUpload />
+            <ImagesUpload upload_limit={upload_limit}/>
             <div className="p-4">
                 <div className="flex flex-row flex-start flex-wrap gap-4">
                     {images.map((image: Image) => (

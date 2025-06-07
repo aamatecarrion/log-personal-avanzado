@@ -26,8 +26,34 @@ class ImageController extends Controller {
             ->orderBy('created_at', 'desc')
             ->with('record')
             ->get();
+        
+        $uploadLimit = $this->getUploadLimit(Auth::user());
 
-        return inertia('images.index', ['images' => $images]);
+        return inertia('images.index', ['images' => $images, 'upload_limit' => $uploadLimit]);
+    }
+
+    private function getUploadLimit(User $user) {
+        
+        $key = "upload-images:$user->id";
+        $limit = $user->user_limit?->daily_upload_limit;
+        if ($limit === null) {
+            return null;
+        }
+        if (RateLimiter::tooManyAttempts($key, $limit)) {
+            $seconds = RateLimiter::availableIn($key);
+            $time = Carbon::now()->addSeconds($seconds);
+        }
+
+        $left = $limit - RateLimiter::attempts($key);
+
+        $can_upload = $user->user_limit?->can_upload_images;
+
+        return [
+            'limit' => $limit,
+            'left' => $left,
+            'time' => $time ?? null,
+            'can_upload' => $can_upload
+        ];
     }
 
     public function create() {
@@ -113,24 +139,34 @@ class ImageController extends Controller {
     }
     public function store(Request $request)
     {
-        $userId = Auth::id();
+        $user = Auth::user();
+        $this->checkUploadPermission($user);
         $imagenes = $request->file('images', []);
         $cantidad = count($imagenes);
 
         $this->validateUploadRequest($request);
-        $this->checkUploadLimits($userId, $cantidad);
+        $this->checkUploadLimits($user, $cantidad);
 
         $savedImages = collect();
 
         foreach ($imagenes as $file) {
-            $savedImages->push($this->saveImageAndRecord($file, $userId));
-            RateLimiter::hit("upload-images:$userId", 86400);
+            $savedImages->push($this->saveImageAndRecord($file, $user));
+            RateLimiter::hit("upload-images:$user->id", 86400);
         }
 
         $this->dispatchJobsForImages($savedImages);
 
         return redirect()->route('images.index')->with('success', 'Imágenes subidas y procesadas');
     }
+    private function checkUploadPermission(User $user) {
+
+        $hasLimitAndCantUpload = $user->user_limit?->can_upload_images === 0;
+
+        if ($hasLimitAndCantUpload) {
+            abort(403, 'Forbidden: No tienes permiso para subir imágenes.');
+        }
+    }
+
     private function validateUploadRequest(Request $request): void
     {
         $request->validate([
@@ -138,18 +174,17 @@ class ImageController extends Controller {
         ]);
     }
 
-    private function checkUploadLimits(int $userId, int $cantidad): void
+    private function checkUploadLimits(User $user, int $cantidad): void
     {
-        $key = "upload-images:$userId";
-        $limit = User::find($userId)->upload_limit ?? null;
+        $key = "upload-images:$user->id";
+        $limit = $user->user_limit?->daily_upload_limit;
         if ($limit === null) {
-            return; // No hay límite definido, no hacemos nada
+            return;
         }
         if (RateLimiter::tooManyAttempts($key, $limit)) {
-            $restantes = RateLimiter::availableIn($key);
-            $segundos = RateLimiter::availableIn($key);
-            $tiempo = Carbon::seconds($segundos);
-            abort(429, "Has alcanzado el límite de $limit imágenes. Inténtalo en " . $tiempo->cascade()->forHumans());
+            $seconds = RateLimiter::availableIn($key);
+            $tiempo = Carbon::now()->addSeconds($seconds);
+            abort(429, "Has alcanzado el límite de $limit imágenes. Inténtalo en " . $tiempo->diffForHumans());
         }
 
         $restantes = $limit - RateLimiter::attempts($key);
@@ -158,7 +193,7 @@ class ImageController extends Controller {
         }
     }
 
-    private function saveImageAndRecord($file, int $userId): Image
+    private function saveImageAndRecord($file, User $user): Image
     {
         $path = $file->store('images', 'private');
         $absolutePath = $file->getPathname();
@@ -180,7 +215,7 @@ class ImageController extends Controller {
         }
 
         $record = Record::create([
-            'user_id' => $userId,
+            'user_id' => $user->id,
             'title' => 'Imagen: ' . $file->getClientOriginalName(),
             'description' => null,
             'latitude' => $latitude,
@@ -199,9 +234,39 @@ class ImageController extends Controller {
 
     private function dispatchJobsForImages($images): void
     {
+        $user = Auth::user();
+
+        if ($user->user_limit && !$user->user_limit->can_process_images) {
+            return;
+        }
+
+        $daylyLimit = $user->user_limit?->daily_process_limit;
+
+        if ($daylyLimit === null) {
+            foreach ($images as $image) {
+                GenerateImageTitle::dispatch($image);
+                GenerateImageDescription::dispatch($image);
+            }
+            return;
+        }
+        $key = "user:{$user->id}:daily_image_process";
+
+        $attempts = RateLimiter::attempts($key);
+        $available = $daylyLimit - $attempts;
+
+        if ($available <= 0) return;
+
         foreach ($images as $image) {
-            GenerateImageDescription::dispatch($image);
+            if ($available <= 0) break;
+            
             GenerateImageTitle::dispatch($image);
+            $available--;
+            
+            if ($available <= 0) break;
+
+            GenerateImageDescription::dispatch($image);
+            $available--;
         }
     }
+
 }

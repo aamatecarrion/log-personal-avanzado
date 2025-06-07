@@ -138,7 +138,7 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
 
               {titleJob?.status == 'pending' && (
                 <span className="flex items-center gap-1 ml-2 text-orange-500">
-                  <Clock className="h-4 w-4" /> Title generation queued ({titleJob.position_in_queue}/{total_in_queue})
+                  <Clock className="h-4 w-4" />Generación en cola ({titleJob.position_in_queue}/{total_in_queue})
                 </span>
               )}
               {titleJob?.status == 'processing' && (
@@ -154,7 +154,7 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
               </div>
               <div>
 
-                {(titleJob?.status == 'completed' || titleJob?.status == 'failed') && (
+               
                   <>
                   <Dialog open={confirmGenerateTitleOpen} onOpenChange={setConfirmGenerateTitleOpen}>
                     <DialogTrigger asChild className='cursor-pointer ml-2'>
@@ -182,8 +182,7 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
                     </DialogContent>
                   </Dialog>
                   </>
-                )}
-
+               
               </div>
                 <Button variant="secondary" className="ml-2 cursor-pointer" onClick={handleTitleEdit}>
                   { titleEditOpen ?

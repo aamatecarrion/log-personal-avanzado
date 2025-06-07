@@ -99,51 +99,51 @@ export default function Records({records}: { records: Record[] }) {
             <Head title="Records" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <div>
-      <div className="w-full">
-        {groupedRecords && Object.keys(groupedRecords).length > 0 ? (
-          Object.entries(groupedRecords).map(([date, records]) => (
-            <Card className="mb-3" key={date}>
-              <CardHeader>
-                <CardTitle>{date}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableBody>
-                    {records.map((record) => (
-                      <TableRow key={record.id} onClick={() => router.visit(`/records/${record.id}`)} className="cursor-pointer">
-                        <TableCell className="text-left w-[60px]">{record.time}</TableCell>
-                        <TableCell className="font-medium text-left">{record.title}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
-                                <span className="sr-only">Open menu</span>
-                                <MoreVertical />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem className="cursor-pointer" onClick={() => console.log("Delete")}>
-                                <Trash className="h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>Action 2</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          ))
-        ) : (
-          <Card>
-            <CardContent>No records found</CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
+                <div className="w-full">
+                  {groupedRecords && Object.keys(groupedRecords).length > 0 ? (
+                    Object.entries(groupedRecords).map(([date, records]) => (
+                      <Card className="mb-3" key={date}>
+                        <CardHeader>
+                          <CardTitle>{date}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Table>
+                            <TableBody>
+                              {records.map((record) => (
+                                <TableRow key={record.id} onClick={() => router.visit(`/records/${record.id}`)} className="cursor-pointer">
+                                  <TableCell className="text-left w-[60px]">{record.time}</TableCell>
+                                  <TableCell className="font-medium text-left">{record.title}</TableCell>
+                                  {/* <TableCell className="text-right">
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
+                                          <span className="sr-only">Open menu</span>
+                                          <MoreVertical />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem className="cursor-pointer" onClick={() => console.log("Delete")}>
+                                          <Trash className="h-4 w-4" />
+                                          Delete
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>Action 2</DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </TableCell> */}
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <Card>
+                      <CardContent>No records found</CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
             </div>
         </AppLayout>
     );

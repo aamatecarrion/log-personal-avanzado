@@ -17,8 +17,8 @@ return new class extends Migration
             $table->boolean('can_upload_images')->default(false);
             $table->boolean('can_process_images')->default(false);
             
-            $table->integer('daily_upload_limit')->default(10)->nullable();
-            $table->integer('daily_process_limit')->default(40)->nullable();
+            $table->integer('daily_upload_limit')->default(5)->nullable();
+            $table->integer('daily_process_limit')->default(10)->nullable();
 
             $table->timestamps();
         });

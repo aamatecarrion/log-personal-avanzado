@@ -39,6 +39,16 @@ class DatabaseSeeder extends Seeder
             ]);
         }
         
+        $favorites = ['comer', 'ducha', 'dormir', 'cena'];
+        User::all()->each(function ($user) use ($favorites) {
+            foreach ($favorites as $title) {
+                $user->favorites()->create([
+                    'title' => $title,
+                ]);
+            }
+        });
+        
+
         Record::factory(10)->create();
     }
 }

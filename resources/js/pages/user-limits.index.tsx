@@ -21,11 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function UserLimits({ users }: { users: User[] }) {
     const { auth } = usePage<{ auth: Auth }>().props;
 
-    const handleToggle = (
-        userId: number,
-        field: 'can_upload_images' | 'can_process_images',
-        checked: boolean
-    ) => {
+    const handleToggle = (userId: number, field: 'can_upload_images' | 'can_process_images', checked: boolean) => {
         router.put(
             route('admin.user-limits.update', { user_limit: userId }),
             {
@@ -44,11 +40,7 @@ export default function UserLimits({ users }: { users: User[] }) {
         );
     };
 
-    const handleInputChange = (
-        userId: number,
-        field: 'daily_upload_limit' | 'daily_processing_limit',
-        value: number
-    ) => {
+    const handleInputChange = ( userId: number, field: 'daily_upload_limit' | 'daily_process_limit', value: number ) => {
         router.put(
             route('admin.user-limits.update', { user_limit: userId }),
             {
@@ -131,7 +123,7 @@ export default function UserLimits({ users }: { users: User[] }) {
                                                 onChange={(e) => {
                                                     const val = parseInt(e.target.value, 10);
                                                     if (!isNaN(val)) {
-                                                        handleInputChange(user.id, 'daily_processing_limit', val);
+                                                        handleInputChange(user.id, 'daily_process_limit', val);
                                                     }
                                                 }}
                                             />

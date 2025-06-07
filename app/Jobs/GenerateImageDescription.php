@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 
 class GenerateImageDescription implements ShouldQueue
@@ -21,9 +22,9 @@ class GenerateImageDescription implements ShouldQueue
 
     public function __construct(Image $image)
     {
+        
         $this->image = $image;
 
-        // Crear el registro con queued_at = ahora, si no existe ya
         ImageProcessingJob::updateOrCreate([
             'image_id' => $image->id,
             'type' => 'description',
@@ -52,6 +53,28 @@ class GenerateImageDescription implements ShouldQueue
         }
 
         try {
+            $user = $this->image->record->user;
+            if ($user->user_limit && !$user->user_limit?->can_process_images) {
+                $job->update([
+                    'status' => 'cancelled',
+                    'finished_at' => now(),
+                ]);
+                return; 
+            }
+            $dayliLimit = $user->user_limit?->daily_process_limit;
+            $key = "user:{$user->id}:daily_image_process";
+
+            $dayliLimit = $user->user_limit?->daily_process_limit;
+            $key = "user:{$user->id}:daily_image_process";
+
+            if ($dayliLimit !== null && RateLimiter::attempts($key) >= $dayliLimit) {
+                $job->update([
+                    'status' => 'pending',
+                    'queued_at' => now(),
+                ]);
+                return;
+            }
+
             Log::info("Leyendo imagen desde Storage");
             $rawImage = Storage::disk('private')->get($this->image->image_path);
             
@@ -79,7 +102,7 @@ class GenerateImageDescription implements ShouldQueue
             Log::info("Enviando petición a la API de generación");
             $response = Http::timeout(240)->post('http://127.0.0.1:11434/api/generate', [
                 'model' => env('OLLAMA_MODEL'),
-                'prompt' => 'genera una descripción para esta imagen, (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
+                'prompt' => 'genera una descripción para esta imagen, (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
                 'stream' => false
             ]);
@@ -105,6 +128,8 @@ class GenerateImageDescription implements ShouldQueue
                 'error' => null,
                 'finished_at' => now()
             ]);
+            RateLimiter::hit("user:{$this->image->record->user_id}:daily_image_process", 60 * 60 * 24);
+
             Log::info("Job completado correctamente para imagen ID {$this->image->id}");
 
         } catch (\Throwable $e) {

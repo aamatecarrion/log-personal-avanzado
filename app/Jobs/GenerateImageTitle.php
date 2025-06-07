@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 
 class GenerateImageTitle implements ShouldQueue
@@ -20,10 +21,10 @@ class GenerateImageTitle implements ShouldQueue
     public $image;
 
     public function __construct(Image $image)
-    {
-        $this->image = $image;
+    {   
 
-        // Crear el registro con queued_at = ahora, si no existe ya
+        $this->image = $image;
+        
         ImageProcessingJob::updateOrCreate([
             'image_id' => $image->id,
             'type' => 'title',
@@ -34,7 +35,7 @@ class GenerateImageTitle implements ShouldQueue
     }
 
     public function handle()
-    {
+    {   
         $job = ImageProcessingJob::where('image_id', $this->image->id)
                                  ->where('type', 'title')
                                  ->first();
@@ -46,6 +47,25 @@ class GenerateImageTitle implements ShouldQueue
         if ($job->status === 'cancelled') return;
 
         try {
+            $user = $this->image->record->user;
+            if ($user->user_limit && !$user->user_limit?->can_process_images) {
+                $job->update([
+                    'status' => 'cancelled',
+                    'finished_at' => now(),
+                ]);
+                return; 
+            }
+            $dayliLimit = $user->user_limit?->daily_process_limit;
+            $key = "user:{$user->id}:daily_image_process";
+
+            if ($dayliLimit !== null && RateLimiter::attempts($key) >= $dayliLimit) {
+                $job->update([
+                    'status' => 'pending',
+                    'queued_at' => now(),
+                ]);
+                return;
+            }
+
             $rawImage = Storage::disk('private')->get($this->image->image_path);
             
             $info = getimagesizefromstring($rawImage);
@@ -62,11 +82,10 @@ class GenerateImageTitle implements ShouldQueue
                 'started_at' => now(),
             ]);
 
-            $response = Http::withOptions([
-    'force_ip_resolve' => 'v4'
-])->timeout(240)->post('http://127.0.0.1:11434/api/generate', [
+
+            $response = Http::timeout(240)->post('http://127.0.0.1:11434/api/generate', [
                 'model' => env('OLLAMA_MODEL'),
-                'prompt' => 'describe esta imagen en menos de 10 palabras (no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
+                'prompt' => 'describe esta imagen en menos de 10 palabras (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
                 'stream' => false,
             ]);
@@ -92,6 +111,7 @@ class GenerateImageTitle implements ShouldQueue
                 'status' => 'completed',
                 'finished_at' => now()
             ]);
+            RateLimiter::hit("user:{$this->image->record->user_id}:daily_image_process", 60 * 60 * 24);
             
         } catch (\Throwable $e) {
             $job->update([

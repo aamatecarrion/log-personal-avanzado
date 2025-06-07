@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('favorites', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->timestamps();
+
+            $table->unique(['user_id', 'title']);
         });
     }
-
     /**
      * Reverse the migrations.
      */
