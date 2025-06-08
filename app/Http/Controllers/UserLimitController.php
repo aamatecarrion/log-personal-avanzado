@@ -14,7 +14,7 @@ class UserLimitController extends Controller
         
         return inertia('user-limits.index')->with('users', $users);
     }
-    public function update(Request $request, UserLimit $user_limit)
+    public function update(Request $request)
     {
         $validated = $request->validate([
             'can_upload_images' => 'nullable|boolean',

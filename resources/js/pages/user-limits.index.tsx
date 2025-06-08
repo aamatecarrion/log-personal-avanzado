@@ -32,6 +32,7 @@ export default function UserLimits({ users }: { users: User[] }) {
                 preserveScroll: true,
                 onSuccess: () => {
                     console.log(`User ${userId} ${field} updated to ${checked}`);
+                    router.reload() 
                 },
                 onError: (error) => {
                     console.error(`Error updating user ${userId} ${field}:`, error);
