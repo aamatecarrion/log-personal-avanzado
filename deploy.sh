@@ -18,7 +18,7 @@ php artisan migrate --force
 
 # Construyendo assets frontend
 echo "→ Construyendo assets frontend..."
-npm install --legacy-peer-deps
+npm install
 npm run build
 
 # Estableciendo permisos correctamente con sudo
