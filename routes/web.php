@@ -44,23 +44,6 @@ Route::prefix('/admin')->middleware(['auth', 'admin'])->name('admin.')->group(fu
     Route::resource('user-management', UserManagementController::class);
 });
 
-Route::get('/test', function () {
-    
-    $user = Auth::user();
-    
-    $dailyLimit = $user->user_limit?->daily_process_limit;
-    
-
-    $key = "user:{$user->id}:daily_image_process";
-    
-    if ($dailyLimit !== null && RateLimiter::attempts($key) >= $dailyLimit) {
-        dd("limite");   
-    }
-    $traelo = RateLimiter::attempts($key);
-    dd($traelo);
-
-    //$traelo = UserLimit::where('can_process_images', false)->get();
-});
 
 
 require __DIR__.'/settings.php';
