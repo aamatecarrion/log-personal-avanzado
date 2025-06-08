@@ -37,9 +37,9 @@ class FavoriteController extends Controller
         return redirect()->back()->with('success', 'Favorite added successfully.');
     }
 
-    public function destroy($id)
+    public function destroy($title)
     {
-        $favorite = Favorite::where('id', $id)
+        $favorite = Favorite::where('title', $title)
                             ->where('user_id', Auth::id())
                             ->firstOrFail();
 
