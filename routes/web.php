@@ -13,7 +13,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Models\UserLimit;
 use Illuminate\Support\Facades\RateLimiter;
 
-Route::middleware('throttle:240,1')->group(function () {
+Route::middleware('throttle:120,1')->group(function () {
     
     Route::get('/', function () {
         

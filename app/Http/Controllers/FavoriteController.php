@@ -22,7 +22,7 @@ class FavoriteController extends Controller
             'title' => [
                 'required',
                 'string',
-                'max:255',
+                'max:50',
                 Rule::unique('favorites')->where(function ($query) {
                     return $query->where('user_id', Auth::id());
                 }),

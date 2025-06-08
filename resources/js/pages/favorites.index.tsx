@@ -79,6 +79,7 @@ export default function Favorites({ favorites }: { favorites: Favorite[] }) {
               placeholder="Nuevo favorito..."
               className="border rounded px-2 py-1"
               value={newFavTitle}
+              maxLength={50}
               onChange={e => setNewFavTitle(e.target.value)}
             />
             <Button type="submit" className="cursor-pointer" >Añadir</Button>
