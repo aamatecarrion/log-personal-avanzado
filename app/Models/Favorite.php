@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Base\Favorite as BaseFavorite;
 
-class Favorite extends Model
+class Favorite extends BaseFavorite
 {
-    /** @use HasFactory<\Database\Factories\FavoriteFactory> */
-    use HasFactory;
+	protected $fillable = [
+		'user_id',
+		'title'
+	];
 }

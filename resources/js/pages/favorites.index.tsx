@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import { type BreadcrumbItem, Favorite } from '@/types';
-import { useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
+import { useHasMouse } from '@/hooks/useHasMouse';
+import { Badge } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -14,40 +16,94 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Favorites({ favorites }: { favorites: Favorite[] }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [newFavTitle, setNewFavTitle] = useState("");
+  const hasMouse = useHasMouse();
 
-  const handleFavClick = (e : any) => {
+  const handleFavClick = (fav: Favorite) => {
     if (isEditing) {
-      router.delete(route('favorites.destroy', e.target.innerText));
+      // En modo edición, borramos favorito
+      router.delete(route('favorites.destroy', fav.title));
+    } else {
+      router.post(route('records.store'), {
+        title: fav.title,
+      });
     }
-    router.post(route('records.store'), {
-      title: e.target.innerText,
-    });
+  };
+  useEffect(() => {
+
+  },[])
+  const isEditingStyle = () => {
+      return isEditing ? "bg-red-200  hover:bg-red-300 " : ""
   }
+  const handleAddFavorite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newFavTitle.trim()) return;
+    router.post(route('favorites.store'), { title: newFavTitle.trim() });
+    setNewFavTitle("");
+  };
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!isEditing) return;
+    setNewFavTitle("");
+    inputRef.current?.focus();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsEditing(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isEditing]);
+
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Favoritos" />
       
-      {favorites.length > 0 ? (
-        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {favorites.map((fav) => (
-            <Button
-              onClick={handleFavClick}
-              key={fav.id}
-              variant="outline"
-              className="cursor-pointer rounded-full h-[100px] w-[100px] flex items-center justify-center text-center text-sm p-2 overflow-hidden"
-            >
-              <span className="truncate">{fav.title}</span>
-            </Button>
-          ))}
-
-          {/* Botón para añadir favorito */}
-        </div>
-      ) : (
-        <Card className="m-4">
-          <CardContent>No tienes favoritos aún.</CardContent>
-        </Card>
-      )}
-      
+      <div className="m-4 flex items-center gap-4">
+        <Button className="bg-secondary text-secondary-foreground cursor-pointer hover:bg-secondary/80" onClick={()=>setIsEditing(!isEditing)}>
+          {isEditing ? "Salir del modo edición" : "Editar favoritos"}
+        </Button>
+        
+        {isEditing && (
+          <form onSubmit={handleAddFavorite} className="flex gap-2">
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Nuevo favorito..."
+              className="border rounded px-2 py-1"
+              value={newFavTitle}
+              onChange={e => setNewFavTitle(e.target.value)}
+            />
+            <Button type="submit" className="cursor-pointer" >Añadir</Button>
+          </form>
+        )}
+      </div>
+      <div className="m-4 flex items-center gap-4">
+        {favorites.length > 0 ? (
+          <div className="flex flex-wrap flex-row gap-4">
+            {favorites.sort((a, b) => a.title.localeCompare(b.title)).map((fav) => (
+              <Button
+                key={fav.id}
+                variant="outline"
+                onClick={() => handleFavClick(fav)}
+                className={`${isEditingStyle()} cursor-pointer h-[50px] px-4 text-center`}
+              >{fav.title}
+              </Button>
+            ))}
+          </div>
+        ) : (
+          <Card className="m-4">
+            <CardContent>No tienes favoritos aún.</CardContent>
+          </Card>
+        )}
+      </div>
     </AppLayout>
   );
 }
