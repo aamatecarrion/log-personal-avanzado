@@ -158,3 +158,36 @@
         @apply bg-background text-foreground;
     }
 }
+.bb{
+    border: 1px solid black
+}
+.bb-black{
+    border: 1px solid black
+}
+.bb-red{
+    border: 1px solid red
+}
+.bb-green{
+    border: 1px solid green
+}
+.bb-blue{
+    border: 1px solid blue
+}
+.bb-yellow{
+    border: 1px solid yellow
+}
+.bb-orange{
+    border: 1px solid orange
+}
+.bb-purple{
+    border: 1px solid purple
+}
+.bb-pink{
+    border: 1px solid pink
+}
+.bb-gray{
+    border: 1px solid gray
+}
+.bb-cyan{
+    border: 1px solid cyan
+}
