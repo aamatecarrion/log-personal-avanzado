@@ -24,7 +24,7 @@ import { useAutoReload } from '@/hooks/useAutoReload';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Records',
+        title: 'Registros',
         href: '/records',
     },
 ];
@@ -139,7 +139,7 @@ export default function Records({records}: { records: Record[] }) {
                     ))
                   ) : (
                     <Card>
-                      <CardContent>No records found</CardContent>
+                      <CardContent>No hay registros</CardContent>
                     </Card>
                   )}
                 </div>

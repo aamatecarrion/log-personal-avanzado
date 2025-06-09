@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'User Limits',
+        title: 'Límites de usuario',
         href: '/admin/user-limits',
     },
 ];
@@ -62,7 +62,7 @@ export default function UserLimits({ users }: { users: User[] }) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="User Limits" />
+            <Head title="Límites de usuario" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card className="mb-3">
                     <CardHeader>

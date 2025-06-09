@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Auth, Image, Record, UploadLimit, User, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import ImagesUpload from '@/components/images-upload';
+import { useAutoReload } from '@/hooks/useAutoReload';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -16,6 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Images({ images, upload_limit }: { images: Image[], upload_limit: UploadLimit | null }) {
     
+    useAutoReload(1000);
     const { auth } = usePage<{ auth: Auth}>().props;
     console.log(upload_limit)
     

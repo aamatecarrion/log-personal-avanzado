@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { Record, Config, type BreadcrumbItem } from '@/types';
-import { Textarea } from '@headlessui/react';
+import { Textarea } from '@/components/ui/textarea';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { config } from 'process';
 import { useEffect } from 'react';
@@ -13,11 +13,11 @@ import { useStore } from 'zustand';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Records',
+        title: 'Registros',
         href: '/records',
     },
     {
-        title: 'Create',
+        title: 'Crear',
         href: "",
     },
 ];
@@ -90,16 +90,16 @@ export default function RecordsCreate() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Records" />
+            <Head title="Registros" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>New Record</CardTitle>
+                        <CardTitle>Nuevo registro</CardTitle>
                     </CardHeader>
                     <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <Label htmlFor="title">Title</Label>
+                            <Label htmlFor="title">Título</Label>
                             <Input
                                 id="title"
                                 value={data.title}
@@ -108,7 +108,7 @@ export default function RecordsCreate() {
                             {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
                         </div>
                         <div>
-                            <Label htmlFor="description">Description</Label>
+                            <Label htmlFor="description">Descripción</Label>
                             <Textarea className={"w-full border border-gray-300 rounded-md p-2 focus:outline-none"}
                                 id="description"
                                 value={data.description}

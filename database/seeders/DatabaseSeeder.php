@@ -34,8 +34,8 @@ class DatabaseSeeder extends Seeder
             ]);
             UserLimit::create([
                 'user_id' => $user->id,
-                'can_upload_images' => false,
-                'can_process_images' => false,
+                'can_upload_images' => true,
+                'can_process_images' => true,
             ]);
         }
         

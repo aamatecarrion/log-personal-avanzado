@@ -60,10 +60,10 @@ class GenerateImageTitle implements ShouldQueue
 
             if ($dayliLimit !== null && RateLimiter::attempts($key) >= $dayliLimit) {
                 $job->update([
-                    'status' => 'pending',
-                    'queued_at' => now(),
+                    'status' => 'cancelled',
+                    'finished_at' => now(),
                 ]);
-                return;
+                return; 
             }
 
             $rawImage = Storage::disk('private')->get($this->image->image_path);

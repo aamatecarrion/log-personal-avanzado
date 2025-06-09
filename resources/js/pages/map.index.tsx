@@ -13,7 +13,7 @@ import { useAutoReload } from '@/hooks/useAutoReload';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Map',
+        title: 'Mapa',
         href: '/map',
     },
 ];
@@ -50,7 +50,7 @@ export default function Map({records, record}: { records: Record[], record: Reco
   
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Map" />
+            <Head title="Mapa" />
             <div style={{ height: "100%", width: "100%", zIndex: 0 }}>
                 <MapContainer
                     ref={mapRef}

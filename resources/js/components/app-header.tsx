@@ -17,7 +17,7 @@ import AppLogoIcon from './app-logo-icon';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Records',
+        title: 'Registros',
         href: '/records',
         icon: LayoutGrid,
     },

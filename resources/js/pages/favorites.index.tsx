@@ -24,14 +24,46 @@ export default function Favorites({ favorites }: { favorites: Favorite[] }) {
       // En modo edición, borramos favorito
       router.delete(route('favorites.destroy', fav.title));
     } else {
-      router.post(route('records.store'), {
-        title: fav.title,
-      });
+      if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(
+              (position) => {  
+                router.post(route('records.store'), {
+                  title: fav.title,
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude
+                });
+              },
+              (error) => {
+                  router.post(route('records.store'), {
+                    title: fav.title,
+                  });
+              }
+          );
+      } else {
+          console.warn("Geolocalización no está disponible.");
+          router.post(route('records.store'), {
+            title: fav.title,
+          });
+      }
+
     }
   };
-  useEffect(() => {
 
-  },[])
+  useEffect(() => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log("Lat:", position.coords.latitude);
+            console.log("Lng:", position.coords.longitude);
+          },
+          (error) => {
+            console.error("Error obteniendo ubicación:", error);
+          }
+        );
+      } else {
+        console.warn("Geolocalización no está disponible en este navegador.");
+      }
+  }, []);
   const isEditingStyle = () => {
       return isEditing ? "bg-red-200  hover:bg-red-300 " : ""
   }

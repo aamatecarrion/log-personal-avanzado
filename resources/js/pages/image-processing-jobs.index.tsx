@@ -25,7 +25,7 @@ import { formatFechaEspanola, obtenerHoraEspanola } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Image Processing',
+        title: 'Procesamientos',
         href: '/image-processing',
     },
 ];
@@ -49,41 +49,41 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
               <div className="w-full"> 
                     <Card className="mb-3">
                       <CardHeader>
-                        <CardTitle>Processing jobs stats</CardTitle>
+                        <CardTitle>Estadisticas de procesamiento</CardTitle>
                         <CardDescription>
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="flex flex-row justify-between flex-wrap gap-2">
                         <span>
-                          Global in queue (all users): {total_in_queue}
+                          Procesamientos en cola (todos los usuarios): {total_in_queue}
 
                         </span>
                         <span>
-                          User jobs in queue: {userJobsInQueue}
+                          Procesamientos en cola del usuario: {userJobsInQueue}
                         </span>
                         <span>
-                          User jobs completed: {userJobsCompleted}
+                          Procesamientos completados del usuario: {userJobsCompleted}
                         </span>
                         <span>
-                          User jobs failed: {userJobsFailed}
+                          Procesamientos fallidos del usuario: {userJobsFailed}
                         </span>
                       </CardContent>
                     </Card>
                     <Card className="mb-3">
                       <CardHeader>
-                        <CardTitle>User processing jobs</CardTitle>
+                        <CardTitle>Procesamientos del usuario</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <Table>
                           <TableHeader>
                             <TableRow>
                               <TableHead className="text-left">ID</TableHead>
-                              <TableHead className="text-left">File name</TableHead>
-                              {userJobsInQueue > 0 && <TableHead className="text-left">Position</TableHead>}
-                              <TableHead className="text-left">Status</TableHead>
-                              <TableHead className="text-left" >Queued at</TableHead>
-                              <TableHead className="text-left">Finished at</TableHead>
-                              <TableHead className="text-left">Type</TableHead>
+                              <TableHead className="text-left">Nombre del archivo</TableHead>
+                              {userJobsInQueue > 0 && <TableHead className="text-left">Posición</TableHead>}
+                              <TableHead className="text-left">Estado</TableHead>
+                              <TableHead className="text-left" >Añadido a la cola</TableHead>
+                              <TableHead className="text-left">Finalizado</TableHead>
+                              <TableHead className="text-left">Tipo</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -133,13 +133,13 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                                 </TableCell>
                                 <TableCell className="text-left">
                                   {job.type === 'title' ? (
-                                    <span className="text-xs text-muted-foreground">Title</span>
+                                    <span className="text-xs text-muted-foreground">Título</span>
                                   ) : job.type === 'description' ? (
-                                    <span className="text-xs text-muted-foreground">Description</span>
+                                    <span className="text-xs text-muted-foreground">Descripción</span>
                                   ) : job.type === 'image' ? (
-                                    <span className="text-xs text-muted-foreground">Image</span>
+                                    <span className="text-xs text-muted-foreground">Imagen</span>
                                   ) : (
-                                    <span className="text-xs text-muted-foreground">Unknown</span>
+                                    <span className="text-xs text-muted-foreground">Desconocido</span>
                                   )}
                                 </TableCell>
                                 
@@ -154,3 +154,4 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
         </AppLayout>
     );
 }
+

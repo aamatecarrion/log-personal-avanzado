@@ -69,10 +69,10 @@ class GenerateImageDescription implements ShouldQueue
 
             if ($dayliLimit !== null && RateLimiter::attempts($key) >= $dayliLimit) {
                 $job->update([
-                    'status' => 'pending',
-                    'queued_at' => now(),
+                    'status' => 'cancelled',
+                    'finished_at' => now(),
                 ]);
-                return;
+                return; 
             }
 
             Log::info("Leyendo imagen desde Storage");
