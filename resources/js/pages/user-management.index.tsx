@@ -15,7 +15,7 @@ import { useHasMouse } from '@/hooks/useHasMouse';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'User Management',
+        title: 'Gestión de usuarios',
         href: '/admin/user-management',
     },
 ];
