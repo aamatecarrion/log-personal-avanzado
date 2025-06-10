@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
 
         $admin = User::create([
-            'name' => 'Antonio',
+            'name' => 'Admin',
             'email' => 'admin@localhost',
             'email_verified_at' => now(),
             'password' => bcrypt(env('ADMIN_PASSWORD', 'admin')),
