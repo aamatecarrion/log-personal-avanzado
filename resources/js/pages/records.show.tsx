@@ -22,7 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function RecordsShow({ record, total_in_queue }: { record: Record, total_in_queue: number }) {
 
-  useAutoReload(10000);
+  useAutoReload(30000);
 
   const [titleEditOpen, setTitleEditOpen] = useState(false);
   const [descriptionEditOpen, setDescriptionEditOpen] = useState(false);

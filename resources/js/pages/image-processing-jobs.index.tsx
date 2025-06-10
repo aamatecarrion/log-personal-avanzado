@@ -33,7 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: ImageProcessingJob[], total_in_queue: number }) {
 
-    useAutoReload(10000)
+    useAutoReload(30000)
     
     console.log("Jobs:", jobs)
 

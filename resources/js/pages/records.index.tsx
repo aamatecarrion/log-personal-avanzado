@@ -67,7 +67,7 @@ const obtenerHoraEspanola = (fechaUTC: string): string => {
 
 export default function Records({records}: { records: Record[] }) {
 
-    useAutoReload(10000)
+    useAutoReload(30000)
     
     console.log("Records:", records)
     

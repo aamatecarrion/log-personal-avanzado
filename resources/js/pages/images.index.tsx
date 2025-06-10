@@ -17,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Images({ images, upload_limit }: { images: Image[], upload_limit: UploadLimit | null }) {
     
-    useAutoReload(1000);
+    useAutoReload(30000);
     const { auth } = usePage<{ auth: Auth}>().props;
     console.log(upload_limit)
     
