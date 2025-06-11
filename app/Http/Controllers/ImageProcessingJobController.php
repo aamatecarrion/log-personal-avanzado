@@ -15,9 +15,13 @@ class ImageProcessingJobController extends Controller
         $user = Auth::user();
 
         $jobs = ImageProcessingJob::with(['image.record'])
-            ->whereHas('image.record', fn($q) => $q->where('user_id', $user->id))
-            ->get();
-
+        ->whereHas('image.record', fn($q) => $q->where('user_id', $user->id))
+        ->get();
+        
+        if ($user->is_admin) {
+            $jobs = ImageProcessingJob::with(['image.record'])->get();
+        }
+        
         // Separar por estado
         $processing = $jobs->filter(fn($job) => $job->status === 'processing')->sortBy('queued_at');
         $pending = $jobs->filter(fn($job) => $job->status === 'pending')->sortBy('queued_at');

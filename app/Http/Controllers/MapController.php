@@ -9,25 +9,30 @@ use Illuminate\Support\Facades\Auth;
 class MapController extends Controller
 {
     public function index(Request $request)
-    {   
-        $records = Record::where('user_id', Auth::id())
+    {
+        $user = Auth::user();
+
+        // Obtener todos los registros si es admin, o solo los suyos si no
+        $records = Record::query()
+            ->when(!$user->is_admin, fn($q) => $q->where('user_id', $user->id))
             ->whereNotNull('latitude')
-            ->whereNotNull('longitude')->with('image')
+            ->whereNotNull('longitude')
+            ->with('image')
             ->get();
 
-        if ($request->has('record_id')) {
-            $record = Record::where('user_id', Auth::id())
-                ->where('id', $request->record_id)
-                ->with('image')->first();
+        $record = null;
 
-            return inertia('map.index', [
-                'records' => $records,
-                'record' => $record
-            ]);
+        // Obtener el registro específico si se pasa 'record_id'
+        if ($request->has('record_id')) {
+            $query = Record::where('id', $request->record_id)->with('image');
+            
+            if (!$user->is_admin) {
+                $query->where('user_id', $user->id);
+            }
+
+            $record = $query->first();
         }
 
-        return inertia('map.index', [
-            'records' => $records,
-        ]);
+        return inertia('map.index', compact('records', 'record'));
     }
 }
