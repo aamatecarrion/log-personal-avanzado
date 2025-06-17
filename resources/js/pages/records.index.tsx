@@ -74,7 +74,19 @@ export default function Records({records}: { records: Record[] }) {
     
     const groupedRecords = groupByDay(records)
 
+    function orderGroups(obj : any) {
 
+      const entries = Object.entries(obj);
+      
+      entries.sort((a, b) => {
+        const dateA = a[0].split(', ')[1];
+        const dateB = b[0].split(', ')[1];
+        
+        return dateB.localeCompare(dateA);
+      });
+      
+      return Object.fromEntries(entries);
+    }
 
     function groupByDay(records: Record[]) {
 
@@ -90,8 +102,11 @@ export default function Records({records}: { records: Record[] }) {
             if (!groups[dayTitle]) groups[dayTitle] = []
             groups[dayTitle].push(recordWithLocalTime)
         })
+        console.log("Groups:", groups)
 
-        return groups
+        const orderedGroups = orderGroups(groups)
+
+        return orderedGroups
     }
 
     return (
@@ -109,27 +124,10 @@ export default function Records({records}: { records: Record[] }) {
                         <CardContent>
                           <Table>
                             <TableBody>
-                              {records.map((record) => (
+                              {(records as Record[]).map((record) => (
                                 <TableRow key={record.id} onClick={() => router.visit(`/records/${record.id}`)} className="cursor-pointer">
                                   <TableCell className="text-left w-[60px]">{record.time}</TableCell>
                                   <TableCell className="font-medium text-left">{record.title}</TableCell>
-                                  {/* <TableCell className="text-right">
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
-                                          <span className="sr-only">Open menu</span>
-                                          <MoreVertical />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                        <DropdownMenuItem className="cursor-pointer" onClick={() => console.log("Delete")}>
-                                          <Trash className="h-4 w-4" />
-                                          Delete
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem>Action 2</DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  </TableCell> */}
                                 </TableRow>
                               ))}
                             </TableBody>
