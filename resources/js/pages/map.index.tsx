@@ -29,42 +29,52 @@ export default function Map({records, record}: { records: Record[], record: Reco
         if (record) setSelectectMarker(record)
     }, [record]);
 
-    function locationFixedToggle() {
-        if (!locationFixed) {
-            flyToLocation()
-        }
-        setLocationFixed(!locationFixed);
-    }
-    function flyToLocation() {
-        if (location === null) return
+    useEffect(() => {
+        console.log("Location:", location)
+        console.log("Location fixed:", locationFixed)
+        if (location && locationFixed === true) flyToLocation(location);
+    }, [location, locationFixed]);
+
+
+    function flyToLocation(pos: NullableLocation) {
+        if (!pos) return;
         const map = mapRef.current;
         const targetZoom = map.getZoom() < 17 ? 17 : map.getZoom();
-        map.flyTo([location.latitude, location.longitude], targetZoom, { animate: true, duration: 2 });
+        map.flyTo([pos.latitude, pos.longitude], targetZoom, { animate: true, duration: 2 });
     }
     useEffect(() => {
+
         if ("geolocation" in navigator) {
-        const watchId = navigator.geolocation.watchPosition(
-            (position) => {
-            setLocation({ 
-                latitude: position.coords.latitude, 
-                longitude: position.coords.longitude
-            });
-            setError(false);
-            if (locationFixed) {
-                flyToLocation()
-            }
-            },
-            (error) => {
-            console.error("Error obteniendo ubicación:", error);
-            setError(true);
-            setLocation({ latitude: 51.505, longitude: -0.09 });
-            }
-        );
-        
-        return () => navigator.geolocation.clearWatch(watchId);
+            const watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const newLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    console.log("New location:", newLocation)
+                    setLocation(newLocation);
+                    setError(false);
+                    if (locationFixed) {
+                        flyToLocation(newLocation);
+                    }
+                },
+                (error) => {
+                    console.error("Error obteniendo ubicación:", error);
+                    setError(true);
+                    window.alert("You are going to Brazil!")
+                    setLocation({latitude: -22.931285, longitude: -43.171638})
+                },
+                {
+                    //enableHighAccuracy: true,
+                    maximumAge: 0,
+                    timeout: 5000
+                }
+            );
+
+            return () => navigator.geolocation.clearWatch(watchId);
         } else {
-        console.warn("Geolocalización no está disponible en este navegador.");
-        setLocation({ latitude: 51.505, longitude: -0.09 });
+            window.alert("You are going to Brazil!")
+            setLocation({latitude: -22.931285, longitude: -43.171638})
         }
     }, []);
 
@@ -114,8 +124,14 @@ export default function Map({records, record}: { records: Record[], record: Reco
                         maxZoom={22}  
                     />  
                     <div className="absolute bottom-10 right-5 z-1000">
-                        <button onClick={locationFixedToggle} className="bg-white text-gray-500 p-2  rounded-[50%] shadow-md cursor-pointer">
-                            {locationFixed ? <LocateFixed className='w-10 h-10 text-blue-500'/> :  <LocateIcon className='w-10 h-10'/>}
+                        <button onClick={() => setLocationFixed(!locationFixed)} className="bg-white text-gray-500 p-2  rounded-[50%] shadow-md cursor-pointer">
+                            {   
+                                location === null 
+                                ? <LocateOffIcon className='w-10 h-10 text-red-500'/> 
+                                : locationFixed 
+                                ? <LocateFixed className='w-10 h-10 text-blue-500'/> 
+                                :  <LocateIcon className='w-10 h-10'/>
+                            }
                         </button>
                     </div>
                     {location && (
