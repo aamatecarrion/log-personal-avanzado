@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
 
         $admin = User::create([
             'name' => 'Admin',
@@ -26,29 +25,13 @@ class DatabaseSeeder extends Seeder
             'is_admin' => true,
         ]);
         
-        for ($i=1; $i<=10; $i++) {
-            $user = User::create([
-                'name' => "Usuario $i",
-                'email' => "usuario$i@localhost",
-                'password' => bcrypt("usuario$i"),
-            ]);
-            UserLimit::create([
-                'user_id' => $user->id,
-                'can_upload_images' => true,
-                'can_process_images' => true,
+        $favorites = ['Comer', 'Ducha', 'Dormir', 'Cenar', 'Café'];
+        
+        foreach ($favorites as $title) {
+            $admin->favorites()->create([
+                'title' => $title,
             ]);
         }
-        
-        $favorites = ['comer', 'ducha', 'dormir', 'cena'];
-        User::all()->each(function ($user) use ($favorites) {
-            foreach ($favorites as $title) {
-                $user->favorites()->create([
-                    'title' => $title,
-                ]);
-            }
-        });
-        
 
-        Record::factory(10)->create();
     }
 }
