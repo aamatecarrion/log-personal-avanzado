@@ -1,14 +1,15 @@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
-import { Record, type BreadcrumbItem } from '@/types';
+import { NullableLocation, Record, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { LatLngExpression, Marker as LeafletMarker } from "leaflet";
 import { router } from "@inertiajs/react";
 import { spanishTimestampConvert } from "@/lib/utils";
-import { LocateIcon, LocateOffIcon } from "lucide-react";
+import { LocateFixed, LocateIcon, LocateOffIcon } from "lucide-react";
+import L from "leaflet";
 import { useAutoReload } from '@/hooks/useAutoReload';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,11 +21,53 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Map({records, record}: { records: Record[], record: Record | null }) {
 
     const [selectedMarker, setSelectectMarker] = useState<Record | null>();
+    const [error, setError] = useState<boolean>(false);
+    const [location, setLocation] = useState<NullableLocation>(null);
+    const [locationFixed, setLocationFixed] = useState<boolean>(false);
     
     useEffect(() => {
         if (record) setSelectectMarker(record)
     }, [record]);
-    
+
+    function locationFixedToggle() {
+        if (!locationFixed) {
+            flyToLocation()
+        }
+        setLocationFixed(!locationFixed);
+    }
+    function flyToLocation() {
+        if (location === null) return
+        const map = mapRef.current;
+        const targetZoom = map.getZoom() < 17 ? 17 : map.getZoom();
+        map.flyTo([location.latitude, location.longitude], targetZoom, { animate: true, duration: 2 });
+    }
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+        const watchId = navigator.geolocation.watchPosition(
+            (position) => {
+            setLocation({ 
+                latitude: position.coords.latitude, 
+                longitude: position.coords.longitude
+            });
+            setError(false);
+            if (locationFixed) {
+                flyToLocation()
+            }
+            },
+            (error) => {
+            console.error("Error obteniendo ubicación:", error);
+            setError(true);
+            setLocation({ latitude: 51.505, longitude: -0.09 });
+            }
+        );
+        
+        return () => navigator.geolocation.clearWatch(watchId);
+        } else {
+        console.warn("Geolocalización no está disponible en este navegador.");
+        setLocation({ latitude: 51.505, longitude: -0.09 });
+        }
+    }, []);
+
     useEffect(() => {
         console.log(selectedMarker)
         if (selectedMarker && markerRefs.current[selectedMarker.id]) {
@@ -62,13 +105,24 @@ export default function Map({records, record}: { records: Record[], record: Reco
                     maxZoom={22}
                     scrollWheelZoom={true}
                     style={{ height: "100%", width: "100%" }}
+                    
                 >
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         maxNativeZoom={19}
                         maxZoom={22}  
-                    />
+                    />  
+                    <div className="absolute bottom-10 right-5 z-1000">
+                        <button onClick={locationFixedToggle} className="bg-white text-gray-500 p-2  rounded-[50%] shadow-md cursor-pointer">
+                            {locationFixed ? <LocateFixed className='w-10 h-10 text-blue-500'/> :  <LocateIcon className='w-10 h-10'/>}
+                        </button>
+                    </div>
+                    {location && (
+                        <Marker position={[location!.latitude, location!.longitude]} icon={L.icon({iconUrl: 'gps-location.svg', iconSize: [25, 41], iconAnchor: [12, 41]})}>
+                        </Marker>
+                        
+                    )}
                         {records.map((record) => {
                             const position: LatLngExpression = [record.latitude, record.longitude];
                         
@@ -124,7 +178,6 @@ export default function Map({records, record}: { records: Record[], record: Reco
                             </Marker>
                         );
                     })}
-    
                 </MapContainer>
             </div>
         </AppLayout>

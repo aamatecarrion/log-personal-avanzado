@@ -18,6 +18,13 @@ export interface Record {
   image: Image
 }
 
+interface Location {
+  latitude: number;
+  longitude: number;
+}
+
+type NullableLocation = Location | null;
+
 export interface Image {
   id: number
   record_id: number
