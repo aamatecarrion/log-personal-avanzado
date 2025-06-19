@@ -72,8 +72,6 @@ export default function Map({records, record}: { records: Record[], record: Reco
                 (error) => {
                     console.error("Error obteniendo ubicación:", error);
                     setError(true);
-                    window.alert("You are going to Brazil!")
-                    setLocation({latitude: -22.931285, longitude: -43.171638})
                 },
                 {
                     enableHighAccuracy: true,
