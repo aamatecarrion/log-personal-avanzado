@@ -21,6 +21,7 @@ export interface Record {
 interface Location {
   latitude: number;
   longitude: number;
+  accuracy: number;
 }
 
 type NullableLocation = Location | null;

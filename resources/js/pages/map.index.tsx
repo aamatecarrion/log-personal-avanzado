@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { NullableLocation, Record, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import { LatLngExpression, Marker as LeafletMarker } from "leaflet";
 import { router } from "@inertiajs/react";
 import { spanishTimestampConvert } from "@/lib/utils";
@@ -58,9 +58,11 @@ export default function Map({records, record}: { records: Record[], record: Reco
         if ("geolocation" in navigator) {
             const watchId = navigator.geolocation.watchPosition(
                 (position) => {
+                    console.log(position)
                     const newLocation = {
                         latitude: position.coords.latitude,
-                        longitude: position.coords.longitude
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
                     };
                     console.log("New location:", newLocation)
                     setLocation(newLocation);
@@ -83,7 +85,7 @@ export default function Map({records, record}: { records: Record[], record: Reco
             return () => navigator.geolocation.clearWatch(watchId);
         } else {
             window.alert("You are going to Brazil!")
-            setLocation({latitude: -22.931285, longitude: -43.171638})
+            setLocation({latitude: -22.931285, longitude: -43.171638, accuracy: 10});
         }
     }, []);
 
@@ -144,11 +146,25 @@ export default function Map({records, record}: { records: Record[], record: Reco
                         </button>
                     </div>
                     {location && (
-                        <>
-                        <Marker position={[location!.latitude, location!.longitude]} icon={L.icon({iconUrl: 'gps-location.svg', iconSize: [25, 41], iconAnchor: [12, 22]})}>
-                        </Marker>
-                        </>
+                    <>
+                        {/* <Marker
+                        position={[location.latitude, location.longitude]}
+                        icon={L.icon({ iconUrl: 'gps-location.svg', iconSize: [25, 41], iconAnchor: [12, 22] })}
+                        /> */}
+                        <Marker
+                        position={[location.latitude, location.longitude]}
+                        icon={L.icon({ iconUrl: 'location_dot.png', iconSize: [20, 20], iconAnchor: [9.5, 11.5] })}
+                        />
+                        {/* <Marker
+                        position={[location.latitude, location.longitude]}
                         
+                        /> */}
+                        <Circle
+                        center={[location.latitude, location.longitude]}
+                        radius={location.accuracy} // ← ¡En metros!
+                        pathOptions={{ color: '#2c76ff', fillOpacity: 0.2 }}
+                        />
+                    </>
                     )}
                         {records.map((record) => {
                             const position: LatLngExpression = [record.latitude, record.longitude];
