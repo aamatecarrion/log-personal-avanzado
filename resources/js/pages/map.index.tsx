@@ -162,7 +162,7 @@ export default function Map({records, record}: { records: Record[], record: Reco
                         <Circle
                         center={[location.latitude, location.longitude]}
                         radius={location.accuracy} // ← ¡En metros!
-                        pathOptions={{ color: '#2c76ff', fillOpacity: 0.2 }}
+                        pathOptions={{ fillColor: '#0084ff2f', color: "#0084ff6c" }}
                         />
                     </>
                     )}
