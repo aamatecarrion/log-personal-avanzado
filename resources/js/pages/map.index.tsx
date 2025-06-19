@@ -76,9 +76,9 @@ export default function Map({records, record}: { records: Record[], record: Reco
                     setLocation({latitude: -22.931285, longitude: -43.171638})
                 },
                 {
-                    //enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 5000
+                    enableHighAccuracy: true,
+                    maximumAge: 5000,
+                    timeout: 1000
                 }
             );
 
