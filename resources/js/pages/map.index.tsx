@@ -146,8 +146,10 @@ export default function Map({records, record}: { records: Record[], record: Reco
                         </button>
                     </div>
                     {location && (
-                        <Marker position={[location!.latitude, location!.longitude]} icon={L.icon({iconUrl: 'gps-location.svg', iconSize: [25, 41], iconAnchor: [12, 41]})}>
+                        <>
+                        <Marker position={[location!.latitude, location!.longitude]} icon={L.icon({iconUrl: 'gps-location.svg', iconSize: [25, 41], iconAnchor: [12, 22]})}>
                         </Marker>
+                        </>
                         
                     )}
                         {records.map((record) => {
