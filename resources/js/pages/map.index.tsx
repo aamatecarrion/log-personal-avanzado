@@ -39,6 +39,17 @@ export default function Map({records, record}: { records: Record[], record: Reco
     function flyToLocation(pos: NullableLocation) {
         if (!pos) return;
         const map = mapRef.current;
+        const center= map.getCenter()
+        const trucatedDigits = 5
+        const truncatedCenter = {
+            lat: Number(center.lat.toFixed(trucatedDigits)),
+            lng: Number(center.lng.toFixed(trucatedDigits)),
+        };
+        const truncatedPos = {
+            latitude: Number(pos.latitude.toFixed(trucatedDigits)),
+            longitude: Number(pos.longitude.toFixed(trucatedDigits)),
+        };
+        if (truncatedCenter.lat === truncatedPos.latitude && truncatedCenter.lng === truncatedPos.longitude) return;
         const targetZoom = map.getZoom() < 17 ? 17 : map.getZoom();
         map.flyTo([pos.latitude, pos.longitude], targetZoom, { animate: true, duration: 2 });
     }
