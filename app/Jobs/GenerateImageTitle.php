@@ -114,6 +114,11 @@ class GenerateImageTitle implements ShouldQueue
             RateLimiter::hit("user:{$this->image->record->user_id}:daily_image_process", 60 * 60 * 24);
             
         } catch (\Throwable $e) {
+
+            Log::error("Error procesando título para imagen ID {$this->image->id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
             $job->update([
                 'status' => 'failed',
                 'error' => $e->getMessage(),
