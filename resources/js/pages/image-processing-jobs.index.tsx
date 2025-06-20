@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAutoReload } from '@/hooks/useAutoReload';
 import { formatFechaEspanola, obtenerHoraEspanola } from '@/lib/utils';
+import Marquee from "react-fast-marquee";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -74,7 +75,8 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                         <CardTitle>Procesamientos del usuario</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <Table>
+                        <Marquee pauseOnClick speed={100}>
+                        <Table className='w-full'>
                           <TableHeader>
                             <TableRow>
                               <TableHead className="text-left">ID</TableHead>
@@ -82,16 +84,19 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                               {userJobsInQueue > 0 && <TableHead className="text-left">Posición</TableHead>}
                               <TableHead className="text-left">Estado</TableHead>
                               <TableHead className="text-left" >Añadido a la cola</TableHead>
+                              <TableHead className="text-left">Iniciado</TableHead>
                               <TableHead className="text-left">Finalizado</TableHead>
+                              <TableHead className="text-left">Error</TableHead>
                               <TableHead className="text-left">Tipo</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            
                             {jobs.map((job) => (
                               <TableRow key={job.id} onClick={() => router.visit(`/records/${job.image?.record?.id}`)} className="cursor-pointer">
                                 <TableCell className="text-left w-[60px]">{job.id}</TableCell>
-                                <TableCell className="font-medium text-left">{job.image?.original_filename}</TableCell>
+                                <TableCell className="font-medium text-left">
+                                    {job.image?.original_filename}                                  
+                                </TableCell>
                                 { userJobsInQueue > 0 && 
                                   <TableCell className="text-right">
                                   {job.position_in_queue}
@@ -125,12 +130,23 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                                   </span>
                                 </TableCell>
                                 <TableCell >
-                                {job.finished_at && (
-                                    <span className="text-xs text-muted-foreground">
-                                      {formatFechaEspanola(job.finished_at)}, {obtenerHoraEspanola(job.finished_at)}
-                                    </span>    
-                                )}
+                                    {job.started_at && 
+                                      <span className="text-xs text-muted-foreground">
+                                          {formatFechaEspanola(job.started_at)}, {obtenerHoraEspanola(job.started_at)}
+                                      </span>
+                                    }
                                 </TableCell>
+                                <TableCell >
+                                {job.finished_at && (
+                                      <span className="text-xs text-muted-foreground">
+                                        {formatFechaEspanola(job.finished_at)}, {obtenerHoraEspanola(job.finished_at)}
+                                      </span>                                    )}
+                                </TableCell>
+                                {job.error && (
+                                  <TableCell className="text-left">
+                                    <span className="text-xs text-muted-foreground">{job.error}</span>
+                                  </TableCell>
+                                )}
                                 <TableCell className="text-left">
                                   {job.type === 'title' ? (
                                     <span className="text-xs text-muted-foreground">Título</span>
@@ -147,6 +163,7 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                             ))}
                           </TableBody>
                         </Table>
+                        </Marquee>
                       </CardContent>
                     </Card>
               </div>
