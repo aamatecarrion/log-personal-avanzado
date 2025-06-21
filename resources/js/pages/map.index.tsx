@@ -50,9 +50,36 @@ export default function Map({records, record}: { records: Record[], record: Reco
             longitude: Number(pos.longitude.toFixed(trucatedDigits)),
         };
         if (truncatedCenter.lat === truncatedPos.latitude && truncatedCenter.lng === truncatedPos.longitude) return;
-        const targetZoom = map.getZoom() < 17 ? 17 : map.getZoom();
-        map.flyTo([pos.latitude, pos.longitude], targetZoom, { animate: true, duration: 2 });
+        
+        const currentZoom = map.getZoom();
+        const targetZoom = currentZoom < 17 ? 17 : currentZoom;
+        const zoomChanged = currentZoom !== targetZoom;
+
+        map.flyTo(
+            [pos.latitude, pos.longitude],
+            targetZoom,
+            {
+                animate: zoomChanged,
+                duration: zoomChanged ? 2 : 0
+            }
+        );
+
     }
+    useEffect(() => {
+        const map = mapRef.current;
+        if (!map) return;
+
+        const handleUserMove = () => {
+            setLocationFixed(false);
+        };
+
+        map.on("dragstart", handleUserMove);
+
+        return () => {
+            map.off("dragstart", handleUserMove);
+        };
+    }, []);
+
     useEffect(() => {
 
         if ("geolocation" in navigator) {
