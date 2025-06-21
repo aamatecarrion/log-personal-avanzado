@@ -75,16 +75,9 @@ class GenerateImageDescription implements ShouldQueue
                 return; 
             }
 
-            Log::info("Leyendo imagen desde Storage");
             $rawImage = Storage::disk('private')->get($this->image->image_path);
-            
-            Log::info("Chequeando integridad de la imagen");
-            /* $info = getimagesizefromstring($rawImage);
-            if ($info === false) {
-                throw new \Exception("La imagen no es válida o está corrupta");
-            } */
-
-            $imageData = base64_encode($rawImage);
+            $mime = Storage::disk('private')->mimeType($this->image->image_path);
+            $imageData = 'data:' . $mime . ';base64,' . base64_encode($rawImage);
 
             Log::info("Actualizando estado a processing");
             $updated = ImageProcessingJob::where('id', $job->id)
