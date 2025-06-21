@@ -77,8 +77,8 @@ export default function Map({records, record}: { records: Record[], record: Reco
                 },
                 {
                     enableHighAccuracy: true,
-                    maximumAge: 5000,
-                    timeout: 1000
+                    maximumAge: 0,
+                    timeout: 10000
                 }
             );
 
