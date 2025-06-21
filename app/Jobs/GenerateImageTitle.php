@@ -67,9 +67,8 @@ class GenerateImageTitle implements ShouldQueue
             }
 
             $rawImage = Storage::disk('private')->get($this->image->image_path);
-            $mime = Storage::disk('private')->mimeType($this->image->image_path);
-            $imageData = 'data:' . $mime . ';base64,' . base64_encode($rawImage);
-
+            
+            $imageData = base64_encode($rawImage);
             
             if ($job->fresh()->status === 'cancelled' ) return;
             
@@ -79,8 +78,8 @@ class GenerateImageTitle implements ShouldQueue
             ]);
 
 
-            $response = Http::timeout(240)->post('http://' . env('OLLAMA_HOST','127.0.0.1') . ':11434/api/generate', [
-                'model' => env('OLLAMA_MODEL','gemma3'),
+            $response = Http::timeout(240)->post('http://'.env('OLLAMA_HOST').':11434/api/generate', [
+                'model' => env('OLLAMA_MODEL'),
                 'prompt' => 'describe esta imagen en menos de 10 palabras (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
                 'stream' => false,
