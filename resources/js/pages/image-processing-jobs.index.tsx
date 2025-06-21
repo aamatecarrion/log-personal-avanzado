@@ -141,11 +141,11 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                                         {formatFechaEspanola(job.finished_at)}, {obtenerHoraEspanola(job.finished_at)}
                                       </span>                                    )}
                                 </TableCell>
-                                {job.error && (
                                   <TableCell className="text-left">
-                                    <span className="text-xs text-muted-foreground">{job.error}</span>
+                                    {job.error && (
+                                      <span className="text-xs text-muted-foreground">{job.error}</span>
+                                    )}
                                   </TableCell>
-                                )}
                                 <TableCell className="text-left">
                                   {job.type === 'title' ? (
                                     <span className="text-xs text-muted-foreground">Título</span>
