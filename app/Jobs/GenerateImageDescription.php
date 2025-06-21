@@ -100,7 +100,7 @@ class GenerateImageDescription implements ShouldQueue
             }
 
             Log::info("Enviando petición a la API de generación");
-            $response = Http::timeout(240)->post('http://127.0.0.1:11434/api/generate', [
+            $response = Http::timeout(240)->post('http://' . env('OLLAMA_HOST','127.0.0.1') . ':11434/api/generate', [
                 'model' => env('OLLAMA_MODEL','gemma3:1b'),
                 'prompt' => 'genera una descripción para esta imagen, (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
