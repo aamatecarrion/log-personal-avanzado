@@ -145,27 +145,23 @@ export default function Map({records, record}: { records: Record[], record: Reco
                             }
                         </button>
                     </div>
-                    {location && (
-                    <>
-                        {/* <Marker
-                        position={[location.latitude, location.longitude]}
-                        icon={L.icon({ iconUrl: 'gps-location.svg', iconSize: [25, 41], iconAnchor: [12, 22] })}
-                        /> */}
-                        <Marker
-                        position={[location.latitude, location.longitude]}
-                        icon={L.icon({ iconUrl: 'location_dot.png', iconSize: [20, 20], iconAnchor: [9.5, 11.5] })}
-                        />
-                        {/* <Marker
-                        position={[location.latitude, location.longitude]}
-                        
-                        /> */}
-                        <Circle
-                        center={[location.latitude, location.longitude]}
-                        radius={location.accuracy} // ← ¡En metros!
-                        pathOptions={{ fillColor: '#0084ff2f', color: "#0084ff6c" }}
-                        />
-                    </>
-                    )}
+                    {location && (() => {
+                        const center: LatLngExpression = [location.latitude, location.longitude];
+
+                        return (
+                            <>
+                                <Marker
+                                    position={center}
+                                    icon={L.icon({ iconUrl: 'location_dot.png', iconSize: [20, 20], iconAnchor: [9.5, 11.5] })}
+                                />
+                                <Circle
+                                    center={center}
+                                    radius={location.accuracy}
+                                    pathOptions={{ fillColor: '#0084ff2f', color: "#0084ff6c" }}
+                                />
+                            </>
+                        );
+                    })()}
                         {records.map((record) => {
                             const position: LatLngExpression = [record.latitude, record.longitude];
                         

@@ -84,7 +84,7 @@ class GenerateImageTitle implements ShouldQueue
 
 
             $response = Http::timeout(240)->post('http://' . env('OLLAMA_HOST','127.0.0.1') . ':11434/api/generate', [
-                'model' => env('OLLAMA_MODEL','gemma3:1b'),
+                'model' => env('OLLAMA_MODEL','gemma3'),
                 'prompt' => 'describe esta imagen en menos de 10 palabras (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                 'images' => [$imageData],
                 'stream' => false,
