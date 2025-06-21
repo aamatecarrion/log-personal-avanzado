@@ -75,7 +75,6 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                         <CardTitle>Procesamientos del usuario</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <Marquee pauseOnClick speed={100}>
                         <Table className='w-full'>
                           <TableHeader>
                             <TableRow>
@@ -163,7 +162,6 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                             ))}
                           </TableBody>
                         </Table>
-                        </Marquee>
                       </CardContent>
                     </Card>
               </div>
