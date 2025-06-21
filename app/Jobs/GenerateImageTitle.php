@@ -68,10 +68,10 @@ class GenerateImageTitle implements ShouldQueue
 
             $rawImage = Storage::disk('private')->get($this->image->image_path);
             
-            $info = getimagesizefromstring($rawImage);
+            /* $info = getimagesizefromstring($rawImage);
             if ($info === false) {
                 throw new \Exception("La imagen no es válida o está corrupta");
-            }
+            } */
             
             $imageData = base64_encode($rawImage);
             
