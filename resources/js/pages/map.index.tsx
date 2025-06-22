@@ -156,8 +156,8 @@ export default function Map({records, record}: { records: Record[], record: Reco
                     
                 >
                     <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, etc."
+                        url="/tiles/{z}/{x}/{y}"
                         maxNativeZoom={19}
                         maxZoom={22}  
                     />  
