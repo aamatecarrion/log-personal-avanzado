@@ -155,12 +155,20 @@ export default function Map({records, record}: { records: Record[], record: Reco
                     style={{ height: "100%", width: "100%" }}
                     
                 >
+                    
                     <TileLayer
-                        attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, etc."
-                        url="/tiles/{z}/{x}/{y}"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         maxNativeZoom={19}
                         maxZoom={22}  
                     />  
+                    <TileLayer
+                        attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, etc."
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                        maxNativeZoom={19}
+                        maxZoom={22}
+                        errorTileUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                    />
                     <div className="absolute bottom-10 right-5 z-1000">
                         <button onClick={() => setLocationFixed(!locationFixed)} className="bg-white text-gray-500 p-2  rounded-[50%] shadow-md cursor-pointer">
                             {   
