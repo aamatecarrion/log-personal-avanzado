@@ -4,13 +4,14 @@ import AppLayout from '@/layouts/app-layout';
 import { NullableLocation, Record, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents, useMap } from "react-leaflet";
 import { LatLngExpression, Marker as LeafletMarker } from "leaflet";
 import { router } from "@inertiajs/react";
 import { spanishTimestampConvert } from "@/lib/utils";
-import { LocateFixed, LocateIcon, LocateOffIcon } from "lucide-react";
+import { LocateIcon, LocateOffIcon } from "lucide-react";
 import L from "leaflet";
 import { useAutoReload } from '@/hooks/useAutoReload';
+import { Slider } from "@/components/ui/slider"
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -24,7 +25,9 @@ export default function Map({records, record}: { records: Record[], record: Reco
     const [error, setError] = useState<boolean>(false);
     const [location, setLocation] = useState<NullableLocation>(null);
     const [locationFixed, setLocationFixed] = useState<boolean>(false);
-    
+    const [satelliteOpacity, setSatelliteOpacity] = useState(1); // entre 0 y 1
+
+        
     useEffect(() => {
         if (record) setSelectectMarker(record)
     }, [record]);
@@ -35,6 +38,27 @@ export default function Map({records, record}: { records: Record[], record: Reco
         if (location && locationFixed === true) flyToLocation(location);
     }, [location, locationFixed]);
 
+    const LocateFixedCustomIcon = ({ className = '' }) => (
+        <svg
+            className={className}
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <line x1="2" y1="12" x2="5" y2="12" />
+            <line x1="19" y1="12" x2="22" y2="12" />
+            <line x1="12" y1="2" x2="12" y2="5" />
+            <line x1="12" y1="19" x2="12" y2="22" />
+            <circle cx="12" cy="12" r="7" />
+            <circle cx="12" cy="12" r="3" fill="currentColor" />
+        </svg>
+    );
 
     function flyToLocation(pos: NullableLocation) {
         if (!pos) return;
@@ -65,20 +89,26 @@ export default function Map({records, record}: { records: Record[], record: Reco
         );
 
     }
-    useEffect(() => {
-        const map = mapRef.current;
-        if (!map) return;
 
-        const handleUserMove = () => {
-            setLocationFixed(false);
-        };
+    function CreateLabelPane() {
+        const map = useMap();
 
-        map.on("dragstart", handleUserMove);
+        useEffect(() => {
+            if (!map.getPane("labels")) {
+            const pane = map.createPane("labels");
+            }
+        }, [map]);
 
-        return () => {
-            map.off("dragstart", handleUserMove);
-        };
-    }, []);
+        return null;
+    }
+    function MapEvents({ onDragStart }: { onDragStart: () => void }) {
+        useMapEvents({
+            dragstart() {
+                onDragStart();
+            },
+        });
+        return null;
+    }
 
     useEffect(() => {
 
@@ -155,7 +185,7 @@ export default function Map({records, record}: { records: Record[], record: Reco
                     style={{ height: "100%", width: "100%" }}
                     
                 >
-                    
+                    <MapEvents onDragStart={() => setLocationFixed(false)} />
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -167,7 +197,22 @@ export default function Map({records, record}: { records: Record[], record: Reco
                         url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
                         maxNativeZoom={19}
                         maxZoom={22}
+                        opacity={satelliteOpacity}
                         errorTileUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                    />
+                        <CreateLabelPane />
+                    <TileLayer
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
+                        attribution="© Esri"
+                        opacity={satelliteOpacity}
+                        pane="labels"
+                    />
+
+                    <TileLayer
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                        attribution="© Esri"
+                        opacity={satelliteOpacity}
+                        pane="labels"
                     />
                     <div className="absolute bottom-10 right-5 z-1000">
                         <button onClick={() => setLocationFixed(!locationFixed)} className="bg-white text-gray-500 p-2  rounded-[50%] shadow-md cursor-pointer">
@@ -175,11 +220,23 @@ export default function Map({records, record}: { records: Record[], record: Reco
                                 location === null 
                                 ? <LocateOffIcon className='w-10 h-10 text-red-500'/> 
                                 : locationFixed 
-                                ? <LocateFixed className='w-10 h-10 text-blue-500'/> 
+                                ? <LocateFixedCustomIcon className="w-10 h-10 text-blue-500" />
                                 :  <LocateIcon className='w-10 h-10'/>
                             }
                         </button>
                     </div>
+                     {/* Slider de opacidad */}
+                    <div className="absolute top-5 right-5 w-[200px] z-[1000] bg-white/70 rounded-xl shadow px-2">
+                        <Slider 
+                        className="cursor-pointer w-full h-5"
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        value={[satelliteOpacity]}
+                        onValueChange={(value) => setSatelliteOpacity(value[0])}
+                        />
+                    </div>
+                    
                     {location && (() => {
                         const center: LatLngExpression = [location.latitude, location.longitude];
 
