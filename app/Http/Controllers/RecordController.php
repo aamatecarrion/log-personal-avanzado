@@ -9,7 +9,12 @@ use App\Models\Record;
 
 class RecordController extends Controller {
     public function index() {
-        $records = Record::where('user_id', Auth::id())->orderBy('created_at', 'desc')->with('image')->get();
+        if (Auth::user()->is_admin) {
+            $records = Record::orderBy('created_at', 'desc')->with('image')->get();
+        } else {
+            $records = Record::where('user_id', Auth::id())->orderBy('created_at', 'desc')->with('image')->get();
+        }
+        
         return inertia('records.index', ['records' => $records]);
     }
     public function store(Request $request) {
@@ -26,7 +31,9 @@ class RecordController extends Controller {
         return inertia('records.create');
     }
     public function show(Record $record) {
-        $this->checkUser($record);
+        if (!Auth::user()->is_admin) {
+            $this->checkUser($record);
+        }
 
         $record->load('image.image_processing_jobs');
         $total_in_queue = 0;
@@ -54,13 +61,17 @@ class RecordController extends Controller {
         return redirect()->back()->with('success', 'Record updated successfully');
     }
     public function destroy(Record $record) {
-        $this->checkUser($record);
-
+        if (!Auth::user()->is_admin) {
+            $this->checkUser($record);
+        }
+        
         $record->delete();
         return redirect()->route('records.index')->with('success', 'Record deleted successfully');
     }
 
     private function checkUser($record) {
+        if (Auth::user()->is_admin) return;
+            
         if ($record->user_id !== Auth::id()) {
             abort(403, 'Forbidden');
         }

@@ -18,19 +18,23 @@ use Illuminate\Support\Facades\Storage;
 
 class ImageController extends Controller {
     public function index() {
+        $user = Auth::user();
 
-        $images = Image::whereHas('record', function($query) {
-            $query->where('user_id', Auth::id());
-        
-        })->whereNotNull('record_id')
-            ->orderBy('created_at', 'desc')
-            ->with('record')
-            ->get();
-        
-        $uploadLimit = $this->getUploadLimit(Auth::user());
+        $images = Image::whereHas('record', function ($query) use ($user) {
+            if (!$user->is_admin) {
+                $query->where('user_id', $user->id);
+            }
+        })
+        ->whereNotNull('record_id')
+        ->orderBy('created_at', 'desc')
+        ->with('record')
+        ->get();
+
+        $uploadLimit = $this->getUploadLimit($user);
 
         return inertia('images.index', ['images' => $images, 'upload_limit' => $uploadLimit]);
     }
+
 
     private function getUploadLimit(User $user) {
         
@@ -61,7 +65,7 @@ class ImageController extends Controller {
     }
 
     public function show($id) {
-        $image = Image::findOrFail($id);
+        $image = Image::with('record')->findOrFail($id);
         $this->checkUser($image);
 
         $filePath = storage_path('app/private/' . $image->image_path);
@@ -72,6 +76,7 @@ class ImageController extends Controller {
 
         return response()->file($filePath);
     }
+
 
 
     public function update(Request $request, Image $image) {
@@ -126,6 +131,8 @@ class ImageController extends Controller {
         return round($totalBytes / 1024 / 1024, 2); // tamaño en megas
     }
     private function checkUser($image) {
+        if (Auth::user()->is_admin) return;
+
         if ($image->record->user_id !== Auth::id()) {
             abort(403, 'Forbidden');
         }
