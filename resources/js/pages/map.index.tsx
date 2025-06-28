@@ -27,7 +27,21 @@ export default function Map({records, record}: { records: Record[], record: Reco
     const [locationFixed, setLocationFixed] = useState<boolean>(false);
     const [satelliteOpacity, setSatelliteOpacity] = useState(1); // entre 0 y 1
 
-        
+    
+    const user = usePage<any>().props.auth.user;
+
+    useEffect(() => {
+        window.Echo
+        .private(`user.${user.id}`)
+        .listen('.records.update', (e: any) => {
+            router.reload({ showProgress: false });
+        });
+
+        return () => {
+            window.Echo.leaveChannel(`private-user.${user.id}`);
+        };
+    }, []);
+    
     useEffect(() => {
         if (record) setSelectectMarker(record)
     }, [record]);

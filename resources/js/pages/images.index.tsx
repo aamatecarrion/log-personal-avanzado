@@ -6,6 +6,7 @@ import { Auth, Image, Record, UploadLimit, User, type BreadcrumbItem } from '@/t
 import { Head, router, usePage } from '@inertiajs/react';
 import ImagesUpload from '@/components/images-upload';
 import { useAutoReload } from '@/hooks/useAutoReload';
+import { useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -17,7 +18,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Images({ images, upload_limit }: { images: Image[], upload_limit: UploadLimit | null }) {
     
-    useAutoReload(30000);
     const { auth } = usePage<{ auth: Auth}>().props;
     console.log(upload_limit)
     
@@ -30,6 +30,18 @@ export default function Images({ images, upload_limit }: { images: Image[], uplo
             method: 'get',
         });
     };
+    const { user } = auth;
+    useEffect(() => {
+        window.Echo
+        .private(`user.${user.id}`)
+        .listen('.records.update', (e: any) => {
+            router.reload({ showProgress: false });
+        });
+
+        return () => {
+        window.Echo.leaveChannel(`private-user.${user.id}`);
+        };
+    }, []);
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Images" />

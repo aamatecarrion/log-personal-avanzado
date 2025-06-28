@@ -33,8 +33,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: ImageProcessingJob[], total_in_queue: number }) {
-
-    useAutoReload(30000)
     
     console.log("Jobs:", jobs)
 
@@ -42,6 +40,20 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
     const userJobsCompleted = jobs.filter((job) => job.status === 'completed').length;
     const userJobsFailed = jobs.filter((job) => job.status === 'failed').length;
     const userJobsProcessing = jobs.filter((job) => job.status === 'processing').length;
+
+    const user = usePage<any>().props.auth.user;
+
+    useEffect(() => {
+      window.Echo
+        .private(`user.${user.id}`)
+        .listen('.records.update', (e: any) => {
+          router.reload({ showProgress: false });
+        });
+
+      return () => {
+        window.Echo.leaveChannel(`private-user.${user.id}`);
+      };
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
