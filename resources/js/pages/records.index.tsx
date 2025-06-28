@@ -21,6 +21,7 @@ import { router } from "@inertiajs/react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAutoReload } from '@/hooks/useAutoReload';
+// import Echo from 'laravel-echo'; // Remove this import if not needed
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -67,7 +68,19 @@ const obtenerHoraEspanola = (fechaUTC: string): string => {
 
 export default function Records({records}: { records: Record[] }) {
 
-    useAutoReload(30000)
+  const { user } = usePage<any>().props.auth;
+
+    useEffect(() => {
+      window.Echo
+        .private(`user.${user.id}`)
+        .listen('.records.update', (e: any) => {
+          router.reload({ showProgress: false });
+        });
+
+      return () => {
+        window.Echo.leaveChannel(`private-user.${user.id}`);
+      };
+    }, []);
     
     console.log("Records:", records)
     

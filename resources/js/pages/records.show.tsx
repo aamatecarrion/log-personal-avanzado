@@ -22,7 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function RecordsShow({ record, total_in_queue }: { record: Record, total_in_queue: number }) {
 
-  useAutoReload(30000);
+  const { user } = usePage<any>().props.auth;
 
   const [titleEditOpen, setTitleEditOpen] = useState(false);
   const [descriptionEditOpen, setDescriptionEditOpen] = useState(false);
@@ -105,6 +105,18 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
     if (descriptionJob?.status !== 'processing') setEditDescriptionButtonVisible(true)
     else setEditDescriptionButtonVisible(false)
   })
+
+  useEffect(() => {
+      window.Echo
+        .private(`user.${user.id}`)
+        .listen('.records.update', (e: any) => {
+          router.reload({ showProgress: false });
+        });
+
+      return () => {
+        window.Echo.leaveChannel(`private-user.${user.id}`);
+      };
+    }, []);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
