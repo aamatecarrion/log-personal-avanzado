@@ -29,8 +29,8 @@ export default function Map({records, record}: { records: Record[], record: Reco
 
     
     const user = usePage<any>().props.auth.user;
-
-    useEffect(() => {
+    useAutoReload(1000);
+    /* useEffect(() => {
         window.Echo
         .private(`user.${user.id}`)
         .listen('.records.update', (e: any) => {
@@ -40,7 +40,7 @@ export default function Map({records, record}: { records: Record[], record: Reco
         return () => {
             window.Echo.leaveChannel(`private-user.${user.id}`);
         };
-    }, []);
+    }, []); */
     
     useEffect(() => {
         if (record) setSelectectMarker(record)
@@ -127,33 +127,37 @@ export default function Map({records, record}: { records: Record[], record: Reco
     useEffect(() => {
 
         if ("geolocation" in navigator) {
-            const watchId = navigator.geolocation.watchPosition(
-                (position) => {
-                    console.log(position)
-                    const newLocation = {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    };
-                    console.log("New location:", newLocation)
-                    setLocation(newLocation);
-                    setError(false);
-                    if (locationFixed) {
-                        flyToLocation(newLocation);
+            
+            const interval = setInterval(() => {
+                
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        const newLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy
+                        };
+                        setLocation(newLocation);
+                        setError(false);
+                        if (locationFixed) {
+                            flyToLocation(newLocation);
+                        }
+                    },
+                    (error) => {
+                        console.error("Error obteniendo ubicación:", error);
+                        setError(true);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        maximumAge: 0,
+                        timeout: 10000
                     }
-                },
-                (error) => {
-                    console.error("Error obteniendo ubicación:", error);
-                    setError(true);
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 10000
-                }
-            );
+                );
+            },200)
 
-            return () => navigator.geolocation.clearWatch(watchId);
+            return () => {
+                clearInterval(interval);
+            };
         } else {
             window.alert("You are going to Brazil!")
             setLocation({latitude: -22.931285, longitude: -43.171638, accuracy: 10});

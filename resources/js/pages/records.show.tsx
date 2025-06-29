@@ -105,8 +105,8 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
     if (descriptionJob?.status !== 'processing') setEditDescriptionButtonVisible(true)
     else setEditDescriptionButtonVisible(false)
   })
-
-  useEffect(() => {
+  useAutoReload(1000);
+  /* useEffect(() => {
       window.Echo
         .private(`user.${user.id}`)
         .listen('.records.update', (e: any) => {
@@ -116,7 +116,7 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
       return () => {
         window.Echo.leaveChannel(`private-user.${user.id}`);
       };
-    }, []);
+    }, []); */
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>

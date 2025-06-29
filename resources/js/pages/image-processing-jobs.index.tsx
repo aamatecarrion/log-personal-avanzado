@@ -43,7 +43,8 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
 
     const user = usePage<any>().props.auth.user;
 
-    useEffect(() => {
+    useAutoReload(1000);
+    /* useEffect(() => {
       window.Echo
         .private(`user.${user.id}`)
         .listen('.records.update', (e: any) => {
@@ -53,7 +54,7 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
       return () => {
         window.Echo.leaveChannel(`private-user.${user.id}`);
       };
-    }, []);
+    }, []); */
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

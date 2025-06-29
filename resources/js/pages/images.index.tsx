@@ -31,7 +31,8 @@ export default function Images({ images, upload_limit }: { images: Image[], uplo
         });
     };
     const { user } = auth;
-    useEffect(() => {
+    useAutoReload(1000);
+    /* useEffect(() => {
         window.Echo
         .private(`user.${user.id}`)
         .listen('.records.update', (e: any) => {
@@ -41,7 +42,7 @@ export default function Images({ images, upload_limit }: { images: Image[], uplo
         return () => {
         window.Echo.leaveChannel(`private-user.${user.id}`);
         };
-    }, []);
+    }, []); */
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Images" />

@@ -69,8 +69,8 @@ const obtenerHoraEspanola = (fechaUTC: string): string => {
 export default function Records({records}: { records: Record[] }) {
 
   const { user } = usePage<any>().props.auth;
-
-    useEffect(() => {
+  useAutoReload(1000);
+    /* useEffect(() => {
       window.Echo
         .private(`user.${user.id}`)
         .listen('.records.update', (e: any) => {
@@ -80,7 +80,7 @@ export default function Records({records}: { records: Record[] }) {
       return () => {
         window.Echo.leaveChannel(`private-user.${user.id}`);
       };
-    }, []);
+    }, []); */
     
     console.log("Records:", records)
     
