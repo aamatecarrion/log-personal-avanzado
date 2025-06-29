@@ -29,7 +29,7 @@ export default function Map({records, record}: { records: Record[], record: Reco
 
     
     const user = usePage<any>().props.auth.user;
-    useAutoReload(1000);
+    /* useAutoReload(1000); */
     /* useEffect(() => {
         window.Echo
         .private(`user.${user.id}`)
