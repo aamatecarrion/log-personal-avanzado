@@ -63,11 +63,13 @@ function getHighlightedText(text: string, highlight: string) {
   const regex = new RegExp(`(.{0,20})(${highlight})(.{0,20})`, 'i');
   const match = text.match(regex);
   if (!match) return truncateText(text);
-  const prefix = match[1] ? '...' : '';
-  const suffix = match[3] ? '...' : '';
+
+  const startTruncated = match.index! > 0;
+  const endTruncated = match.index! + match[0].length < text.length;
+
   return (
     <span>
-      {prefix}{match[1]}<mark>{match[2]}</mark>{match[3]}{suffix}
+      {startTruncated && '...'}{match[1]}<mark>{match[2]}</mark>{match[3]}{endTruncated && '...'}
     </span>
   );
 }
@@ -116,7 +118,7 @@ export default function Records({ records }: { records: Record[] }) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Records" />
-      <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+      <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-hidden">
         <Input
           type="search"
           placeholder="Buscar..."
@@ -130,8 +132,8 @@ export default function Records({ records }: { records: Record[] }) {
                 <CardHeader>
                   <CardTitle>{date}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <Table>
+                <CardContent className="overflow-x-auto">
+                  <Table className="table-fixed w-full">
                     <TableBody>
                       {(records as Record[]).map((record) => {
                         const title = renderField(record.title, search);
@@ -146,10 +148,10 @@ export default function Records({ records }: { records: Record[] }) {
                             onClick={() => router.visit(`/records/${record.id}`)}
                             className="cursor-pointer"
                           >
-                            <TableCell className="text-left w-[60px]">{record.time}</TableCell>
-                            <TableCell className="font-medium text-left">
+                            <TableCell className="text-left w-[60px] whitespace-nowrap">{record.time}</TableCell>
+                            <TableCell className="font-medium text-left whitespace-normal break-words">
                               {parts.map((part, i) => (
-                                <span key={i}>
+                                <span key={i} className="inline">
                                   {i > 0 && ' - '}{part}
                                 </span>
                               ))}
