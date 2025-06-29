@@ -1,6 +1,5 @@
 import '../css/app.css';
 import 'leaflet/dist/leaflet.css';
-import './echo';
 
 
 import { createInertiaApp } from '@inertiajs/react';
