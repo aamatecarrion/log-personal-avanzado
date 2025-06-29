@@ -30,9 +30,9 @@ return [
         'reverb' => [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
             'port' => env('REVERB_SERVER_PORT', 6001),
-            'path' => env('REVERB_SERVER_PATH', ''),
+            'path' => '',
             'hostname' => env('REVERB_HOST'),
-            'options' => [],
+            'options' => [], // sin tls
             'max_request_size' => env('REVERB_MAX_REQUEST_SIZE', 10_000),
             'scaling' => [
                 'enabled' => env('REVERB_SCALING_ENABLED', false),
@@ -75,9 +75,9 @@ return [
                 'app_id' => env('REVERB_APP_ID'),
                 'options' => [
                     'host' => env('REVERB_HOST'),
-                    'port' => env('REVERB_PORT', 443),
-                    'scheme' => env('REVERB_SCHEME', 'https'),
-                    'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                    'port' => env('REVERB_PORT', 30601),
+                    'scheme' => 'http', // importante
+                    'useTLS' => false,
                 ],
                 'allowed_origins' => ['*'],
                 'ping_interval' => env('REVERB_APP_PING_INTERVAL', 60),

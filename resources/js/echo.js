@@ -9,5 +9,6 @@ window.Echo = new Echo({
   wsHost: import.meta.env.VITE_REVERB_HOST,
   wsPort: import.meta.env.VITE_REVERB_PORT,
   forceTLS: false,
+  encrypted: false,
   enabledTransports: ['ws'],
 });
