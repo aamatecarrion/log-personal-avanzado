@@ -98,7 +98,7 @@ export default function Favorites({ favorites }: { favorites: Favorite[] }) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Favoritos" />
       
-      <div className="m-4 flex items-center gap-4">
+      <div className="m-4 flex items-center flex-wrap gap-4">
         <Button className="bg-secondary text-secondary-foreground cursor-pointer hover:bg-secondary/80" onClick={()=>setIsEditing(!isEditing)}>
           {isEditing ? "Salir del modo edición" : "Editar favoritos"}
         </Button>
