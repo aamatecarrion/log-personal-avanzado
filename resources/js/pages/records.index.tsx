@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { use, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Car, MoreVertical, Search, SearchCheck, Trash } from "lucide-react"
 
@@ -21,17 +21,17 @@ import { router } from "@inertiajs/react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAutoReload } from '@/hooks/useAutoReload';
-// import Echo from 'laravel-echo'; // Remove this import if not needed
+import { Input } from '@/components/ui/input';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Registros',
-        href: '/records',
-    },
+  {
+    title: 'Registros',
+    href: '/records',
+  },
 ];
+
 const formatFechaEspanola = (fechaUTC: string): string => {
   const fecha = new Date(fechaUTC);
-
   const formateador = new Intl.DateTimeFormat('es-ES', {
     weekday: 'long',
     year: 'numeric',
@@ -39,123 +39,136 @@ const formatFechaEspanola = (fechaUTC: string): string => {
     day: '2-digit',
     timeZone: 'Europe/Madrid',
   });
-
   const partes = formateador.formatToParts(fecha);
-  
-  // Usamos "!" porque sabemos que existen
   const diaSemana = partes.find(p => p.type === 'weekday')!.value;
   const año = partes.find(p => p.type === 'year')!.value;
   const mes = partes.find(p => p.type === 'month')!.value;
   const dia = partes.find(p => p.type === 'day')!.value;
-
-  // Capitalizar primera letra
   const diaCapitalizado = diaSemana[0].toUpperCase() + diaSemana.slice(1).toLowerCase();
   return `${diaCapitalizado}, ${año}-${mes}-${dia}`;
 };
+
 const obtenerHoraEspanola = (fechaUTC: string): string => {
   const fecha = new Date(fechaUTC);
-  
-  const opciones: Intl.DateTimeFormatOptions = {
-    hour: '2-digit',    // Hora en 2 dígitos (ej: "08" o "14")
-    minute: '2-digit',  // Minutos en 2 dígitos
-    hour12: false,      // Formato 24 horas
+  return fecha.toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
     timeZone: 'Europe/Madrid'
-  };
-
-  // Formatear usando toLocaleTimeString (es-ES para separadores correctos)
-  return fecha.toLocaleTimeString('es-ES', opciones);
+  });
 };
 
-export default function Records({records}: { records: Record[] }) {
+function getHighlightedText(text: string, highlight: string) {
+  if (!highlight) return truncateText(text);
+  const regex = new RegExp(`(.{0,20})(${highlight})(.{0,20})`, 'i');
+  const match = text.match(regex);
+  if (!match) return truncateText(text);
+  const prefix = match[1] ? '...' : '';
+  const suffix = match[3] ? '...' : '';
+  return (
+    <span>
+      {prefix}{match[1]}<mark>{match[2]}</mark>{match[3]}{suffix}
+    </span>
+  );
+}
 
+function truncateText(text: string, length: number = 80) {
+  return text.length > length ? text.substring(0, length) + '...' : text;
+}
+
+export default function Records({ records }: { records: Record[] }) {
   const { user } = usePage<any>().props.auth;
-  useAutoReload(1000);
-    /* useEffect(() => {
-      window.Echo
-        .private(`user.${user.id}`)
-        .listen('.records.update', (e: any) => {
-          router.reload({ showProgress: false });
-        });
+  useAutoReload(10000);
 
-      return () => {
-        window.Echo.leaveChannel(`private-user.${user.id}`);
-      };
-    }, []); */
-    
-    console.log("Records:", records)
-    
-    
-    const groupedRecords = groupByDay(records)
+  const [search, setSearch] = useState('');
 
-    function orderGroups(obj : any) {
-
-      const entries = Object.entries(obj);
-      
-      entries.sort((a, b) => {
-        const dateA = a[0].split(', ')[1];
-        const dateB = b[0].split(', ')[1];
-        
-        return dateB.localeCompare(dateA);
-      });
-      
-      return Object.fromEntries(entries);
-    }
-
-    function groupByDay(records: Record[]) {
-
-        // los grupos van a ser un objeto con la fecha como clave y un array de registros como valor
-        const groups: { [date: string]: Record[] } = {}
-
-        records.forEach((record) => {
-
-            const dateTime = record.image?.file_date ? record.image.file_date : record.created_at
-            console.log("DateTime:", dateTime)
-            const dayTitle = formatFechaEspanola(dateTime)
-            const recordWithLocalTime = { ...record, time: obtenerHoraEspanola(dateTime) }
-            if (!groups[dayTitle]) groups[dayTitle] = []
-            groups[dayTitle].push(recordWithLocalTime)
-        })
-        console.log("Groups:", groups)
-
-        const orderedGroups = orderGroups(groups)
-
-        return orderedGroups
-    }
-
+  const filteredRecords = records.filter(record => {
+    if (!search) return true;
+    const q = search.toLowerCase();
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Records" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <div>
-                <div className="w-full">
-                  {groupedRecords && Object.keys(groupedRecords).length > 0 ? (
-                    Object.entries(groupedRecords).map(([date, records]) => (
-                      <Card className="mb-3" key={date}>
-                        <CardHeader>
-                          <CardTitle>{date}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Table>
-                            <TableBody>
-                              {(records as Record[]).map((record) => (
-                                <TableRow key={record.id} onClick={() => router.visit(`/records/${record.id}`)} className="cursor-pointer">
-                                  <TableCell className="text-left w-[60px]">{record.time}</TableCell>
-                                  <TableCell className="font-medium text-left">{record.title}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <Card>
-                      <CardContent>No hay registros</CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            </div>
-        </AppLayout>
+      record.title.toLowerCase().includes(q) ||
+      record.description?.toLowerCase().includes(q) ||
+      record.image?.generated_description?.toLowerCase().includes(q)
     );
+  });
+
+  function groupByDay(records: Record[]) {
+    const groups: { [date: string]: Record[] } = {};
+    records.forEach((record) => {
+      const dateTime = record.image?.file_date ?? record.created_at;
+      const dayTitle = formatFechaEspanola(dateTime);
+      const recordWithLocalTime = { ...record, time: obtenerHoraEspanola(dateTime) };
+      if (!groups[dayTitle]) groups[dayTitle] = [];
+      groups[dayTitle].push(recordWithLocalTime);
+    });
+    return Object.fromEntries(
+      Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]))
+    );
+  }
+
+  const groupedRecords = groupByDay(filteredRecords);
+
+  const renderField = (field: string, highlight: string) => {
+    if (!field) return null;
+    return getHighlightedText(field, highlight);
+  };
+
+  return (
+    <AppLayout breadcrumbs={breadcrumbs}>
+      <Head title="Records" />
+      <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+        <Input
+          type="search"
+          placeholder="Buscar..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <div className="w-full">
+          {Object.keys(groupedRecords).length > 0 ? (
+            Object.entries(groupedRecords).map(([date, records]) => (
+              <Card className="mb-3" key={date}>
+                <CardHeader>
+                  <CardTitle>{date}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableBody>
+                      {(records as Record[]).map((record) => {
+                        const title = renderField(record.title, search);
+                        const description = renderField(record.description ?? '', search);
+                        const generated = renderField(record.image?.generated_description ?? '', search);
+
+                        const parts = [title, description, generated].filter(Boolean);
+
+                        return (
+                          <TableRow
+                            key={record.id}
+                            onClick={() => router.visit(`/records/${record.id}`)}
+                            className="cursor-pointer"
+                          >
+                            <TableCell className="text-left w-[60px]">{record.time}</TableCell>
+                            <TableCell className="font-medium text-left">
+                              {parts.map((part, i) => (
+                                <span key={i}>
+                                  {i > 0 && ' - '}{part}
+                                </span>
+                              ))}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card>
+              <CardContent>No hay registros</CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </AppLayout>
+  );
 }

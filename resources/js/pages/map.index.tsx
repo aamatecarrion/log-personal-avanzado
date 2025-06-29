@@ -244,14 +244,16 @@ export default function Map({records, record}: { records: Record[], record: Reco
                         </button>
                     </div>
                      {/* Slider de opacidad */}
-                    <div className="absolute top-5 right-5 w-[200px] z-[1000] bg-white/70 rounded-xl shadow px-2">
+                    <div className="absolute top-5 right-5 w-[200px] z-[1000] bg-white/70 rounded-xl shadow px-2"
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onTouchMove={(e) => e.stopPropagation()}>
                         <Slider 
-                        className="cursor-pointer w-full h-5"
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        value={[satelliteOpacity]}
-                        onValueChange={(value) => setSatelliteOpacity(value[0])}
+                            className="cursor-pointer w-full h-5"
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            value={[satelliteOpacity]}
+                            onValueChange={(value) => setSatelliteOpacity(value[0])}
                         />
                     </div>
                     
