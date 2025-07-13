@@ -93,7 +93,19 @@ export default function Records({ records }: { records: Record[] }) {
       record.image?.generated_description?.toLowerCase().includes(q)
     );
   });
+  function orderGroups(obj : any) {
 
+    const entries = Object.entries(obj);
+
+    entries.sort((a, b) => {
+      const dateA = a[0].split(', ')[1];
+      const dateB = b[0].split(', ')[1];
+      
+      return dateB.localeCompare(dateA);
+    });
+
+    return Object.fromEntries(entries);
+  }
   function groupByDay(records: Record[]) {
     const groups: { [date: string]: Record[] } = {};
     records.forEach((record) => {
@@ -103,9 +115,10 @@ export default function Records({ records }: { records: Record[] }) {
       if (!groups[dayTitle]) groups[dayTitle] = [];
       groups[dayTitle].push(recordWithLocalTime);
     });
-    return Object.fromEntries(
-      Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]))
-    );
+
+    const orderedGroups = orderGroups(groups);
+    
+    return orderedGroups;
   }
 
   const groupedRecords = groupByDay(filteredRecords);
