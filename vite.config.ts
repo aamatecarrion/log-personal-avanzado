@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
+import { VitePWA} from 'vite-plugin-pwa';
 
 export default defineConfig({
     plugins: [
@@ -13,6 +14,24 @@ export default defineConfig({
         }),
         react(),
         tailwindcss(),
+        VitePWA({
+            registerType: 'autoUpdate',
+            injectRegister: 'auto',
+            includeAssets: ['favicon.png', 'robots.txt'],
+            manifest: {
+                name: 'Log Personal Avanzado',
+                short_name: 'Log Personal',
+                description: 'Una aplicación para registrar cosas',
+                theme_color: '#ffffff',
+                icons: [
+                {
+                    src: '/favicon.png',
+                    sizes: '512x512',
+                    type: 'image/png',
+                },
+                ],
+            },
+        }),
     ],
     esbuild: {
         jsx: 'automatic',
