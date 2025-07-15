@@ -66,18 +66,41 @@ class GenerateImageTitle implements ShouldQueue
                 return; 
             }
 
-            $rawImage = Storage::disk('private')->get($this->image->image_path);
+            $path = $this->image->image_path;
+            $disk = Storage::disk('private');
+
+            Log::info("Probando acceso a {$path}");
+            Log::info("Ruta absoluta: " . $disk->path($path));
+
+            if (!$disk->exists($path)) {
+                Log::error("No existe el archivo en el disco privado.");
+                return;
+            }
+
+            $rawImage = $disk->get($path);
+
+            if (!$rawImage) {
+                Log::error("No se pudo leer el contenido de la imagen.");
+                return;
+            }
             
             $imageData = base64_encode($rawImage);
-            
-            if ($job->fresh()->status === 'cancelled' ) return;
-            
-            $job->update([
-                'status' => 'processing',
-                'started_at' => now(),
-            ]);
+            Log::info('Base64 preview: ' . substr($imageData, 0, 30));
 
+            Log::info("Actualizando estado a processing");
+            $updated = ImageProcessingJob::where('id', $job->id)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'processing',
+                    'started_at' => now(),
+                ]);
 
+            if (!$updated) {
+                Log::info("El job ya no está pending, se cancela ejecución");
+                return;
+            }
+
+            Log::info("Enviando petición a la API de generación");
             $response = Http::timeout(240)->post('http://'.env('OLLAMA_HOST').':11434/api/generate', [
                 'model' => env('OLLAMA_MODEL'),
                 'prompt' => 'describe esta imagen en menos de 10 palabras (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',

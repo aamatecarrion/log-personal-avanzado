@@ -74,9 +74,27 @@ class GenerateImageDescription implements ShouldQueue
                 ]);
                 return; 
             }
+           
+            $path = $this->image->image_path;
+            $disk = Storage::disk('private');
 
-            $rawImage = Storage::disk('private')->get($this->image->image_path);
+            Log::info("Probando acceso a {$path}");
+            Log::info("Ruta absoluta: " . $disk->path($path));
+
+            if (!$disk->exists($path)) {
+                Log::error("No existe el archivo en el disco privado.");
+                return;
+            }
+
+            $rawImage = $disk->get($path);
+
+            if (!$rawImage) {
+                Log::error("No se pudo leer el contenido de la imagen.");
+                return;
+            }
+            
             $imageData = base64_encode($rawImage);
+            Log::info('Base64 preview: ' . substr($imageData, 0, 30));
 
             Log::info("Actualizando estado a processing");
             $updated = ImageProcessingJob::where('id', $job->id)
