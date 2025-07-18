@@ -1,3 +1,7 @@
+import Pusher from 'pusher-js';
+
+window.Pusher = Pusher;
+
 import Echo from 'laravel-echo';
 
 window.Echo = new Echo({
