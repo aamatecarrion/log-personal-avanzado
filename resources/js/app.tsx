@@ -1,6 +1,6 @@
 import '../css/app.css';
 import 'leaflet/dist/leaflet.css';
-
+import './echo.js';
 
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

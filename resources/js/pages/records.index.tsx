@@ -82,16 +82,18 @@ export default function Records({ records }: { records: Record[] }) {
   const { user } = usePage<any>().props.auth;
   
   useEffect(() => {
-    window.Echo
-      .private(`user.${user.id}`)
-      .listen('.records.update', (e: any) => {
+    if (typeof window !== 'undefined' && window.Echo) {
+      const channel = window.Echo.private(`user.${user.id}`);
+      
+      channel.listen('.records.update', (e: any) => {
         router.reload();
       });
 
-    return () => {
-      window.Echo.leaveChannel(`private-user.${user.id}`);
-    };
-  }, []);
+      return () => {
+        window.Echo.leave(`user.${user.id}`);
+      };
+    }
+  }, [user.id]);
   
   useAutoReload(10000);
 
