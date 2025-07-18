@@ -80,6 +80,19 @@ function truncateText(text: string, length: number = 80) {
 
 export default function Records({ records }: { records: Record[] }) {
   const { user } = usePage<any>().props.auth;
+  
+  useEffect(() => {
+    window.Echo
+      .private(`user.${user.id}`)
+      .listen('.records.update', (e: any) => {
+        router.reload();
+      });
+
+    return () => {
+      window.Echo.leaveChannel(`private-user.${user.id}`);
+    };
+  }, []);
+  
   useAutoReload(10000);
 
   const [search, setSearch] = useState('');

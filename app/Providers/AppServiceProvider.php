@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Route::aliasMiddleware('admin', AdminMiddleware::class);
         
-        #Record::observe(RecordObserver::class);
-        #ImageProcessingJob::observe(ImageProcessingJobObserver::class);
+        Record::observe(RecordObserver::class);
+        ImageProcessingJob::observe(ImageProcessingJobObserver::class);
     }
 }

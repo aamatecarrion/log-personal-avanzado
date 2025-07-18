@@ -43,18 +43,18 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
 
     const user = usePage<any>().props.auth.user;
 
-    useAutoReload(1000);
-    /* useEffect(() => {
+    useAutoReload(30000);
+    useEffect(() => {
       window.Echo
         .private(`user.${user.id}`)
         .listen('.records.update', (e: any) => {
-          router.reload({ showProgress: false });
+          router.reload();
         });
 
       return () => {
         window.Echo.leaveChannel(`private-user.${user.id}`);
       };
-    }, []); */
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

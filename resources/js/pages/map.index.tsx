@@ -29,18 +29,18 @@ export default function Map({records, record}: { records: Record[], record: Reco
 
     
     const user = usePage<any>().props.auth.user;
-    /* useAutoReload(1000); */
-    /* useEffect(() => {
+
+    useEffect(() => {
         window.Echo
         .private(`user.${user.id}`)
         .listen('.records.update', (e: any) => {
-            router.reload({ showProgress: false });
+            router.reload();
         });
 
         return () => {
             window.Echo.leaveChannel(`private-user.${user.id}`);
         };
-    }, []); */
+    }, []);
     
     useEffect(() => {
         if (record) setSelectectMarker(record)

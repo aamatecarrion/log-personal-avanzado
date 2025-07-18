@@ -105,18 +105,17 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
     if (descriptionJob?.status !== 'processing') setEditDescriptionButtonVisible(true)
     else setEditDescriptionButtonVisible(false)
   })
-  useAutoReload(1000);
-  /* useEffect(() => {
-      window.Echo
-        .private(`user.${user.id}`)
-        .listen('.records.update', (e: any) => {
-          router.reload({ showProgress: false });
-        });
+  useAutoReload(30000);
 
-      return () => {
-        window.Echo.leaveChannel(`private-user.${user.id}`);
-      };
-    }, []); */
+  useEffect(() => {
+    window.Echo.private(`user.${user.id}`).listen('.records.update', (e: any) => {
+      router.reload();
+    });
+
+    return () => {
+      window.Echo.leaveChannel(`private-user.${user.id}`);
+    };
+  }, []);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
