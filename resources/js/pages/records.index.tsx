@@ -86,6 +86,7 @@ export default function Records({ records }: { records: Record[] }) {
       const channel = window.Echo.private(`user.${user.id}`);
       
       channel.listen('.records.update', (e: any) => {
+        console.log('Records updated:', e);
         router.reload();
       });
 
