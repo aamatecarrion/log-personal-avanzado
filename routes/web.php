@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExperimentController;
 use App\Http\Controllers\FavoriteController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -39,7 +40,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/image-processing/generate-description/{id}',[ImageProcessingJobController::class, 'generateDescription'])->name('imageprocessing.generate-description');
     Route::put('/image-processing/{job}', [ImageProcessingJobController::class, 'cancel'])->name('imageprocessing.cancel');
     Route::resource('/favorites', FavoriteController::class);
-    
+    Route::get('/experiments', [ExperimentController::class, 'index'])->name('experiments.index');
+    Route::post('/experiments', [ExperimentController::class, 'update'])->name('experiments.update');
 });
     
 

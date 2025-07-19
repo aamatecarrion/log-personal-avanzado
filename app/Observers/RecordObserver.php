@@ -12,8 +12,8 @@ class RecordObserver
      */
     public function created(Record $record): void
     {
-        info($record->user_id);
-        RecordsUpdate::dispatch($record->user_id);
+
+        RecordsUpdate::dispatch($record);
     }
 
     /**
@@ -21,8 +21,8 @@ class RecordObserver
      */
     public function updated(Record $record): void
     {
-        info($record->user_id);
-        RecordsUpdate::dispatch($record->user_id);
+
+        RecordsUpdate::dispatch($record);
 
     }
 
@@ -31,7 +31,7 @@ class RecordObserver
      */
     public function deleted(Record $record): void
     {
-        RecordsUpdate::dispatch($record->user_id);
+        RecordsUpdate::dispatch($record);
     }
 
     /**

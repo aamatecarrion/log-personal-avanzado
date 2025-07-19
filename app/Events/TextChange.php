@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\Record;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -12,14 +11,14 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class RecordsUpdate implements ShouldBroadcastNow
+class TextChange implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public Record $record){}
+    public function __construct(public int $user_id, public string $text){}
 
     /**
      * Get the channels the event should broadcast on.
@@ -29,18 +28,18 @@ class RecordsUpdate implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('user.' . $this->record->user_id),
+            new PrivateChannel('user.' . $this->user_id),
         ];
     }
 
     public function broadcastAs(): string
     {
-        return 'records.update';
+        return 'text.change';
     }
     public function broadcastWith(): array
     {
         return [
-            'record' => $this->record,
+            'text' => $this->text,
         ];
     }
 }

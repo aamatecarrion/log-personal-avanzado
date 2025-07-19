@@ -20,7 +20,6 @@ import { Car, MoreVertical, Search, SearchCheck, Trash } from "lucide-react"
 import { router } from "@inertiajs/react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useAutoReload } from '@/hooks/useAutoReload';
 import { Input } from '@/components/ui/input';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -80,14 +79,25 @@ function truncateText(text: string, length: number = 80) {
 
 export default function Records({ records }: { records: Record[] }) {
   const { user } = usePage<any>().props.auth;
-  
+  const [localRecords, setLocalRecords] = useState<Record[]>(records);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Echo) {
       const channel = window.Echo.private(`user.${user.id}`);
       
       channel.listen('.records.update', (e: any) => {
         console.log('Records updated:', e);
-        router.reload();
+        const updatedRecord = e.record
+        setLocalRecords((prev) => {
+          const found = prev.find(r => r.id === updatedRecord.id);
+          if (found) {
+            // actualizar el record existente
+            return prev.map(r => r.id === updatedRecord.id ? updatedRecord : r);
+          } else {
+            // si es nuevo, lo añadimos
+            return [updatedRecord, ...prev];
+          }
+        });
       });
 
       return () => {
@@ -100,7 +110,7 @@ export default function Records({ records }: { records: Record[] }) {
 
   const [search, setSearch] = useState('');
 
-  const filteredRecords = records.filter(record => {
+  const filteredRecords = localRecords.filter(record => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
