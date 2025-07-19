@@ -1,3 +1,6 @@
+import Pusher from 'pusher-js';
+window.Pusher = Pusher; // 👈 esto es imprescindible para Reverb
+
 import Echo from 'laravel-echo';
 
 window.Echo = new Echo({
@@ -8,7 +11,6 @@ window.Echo = new Echo({
     wssPort: 443,
     forceTLS: true,
     enabledTransports: ['ws', 'wss'],
-    disableStats: true,
     authEndpoint: '/broadcasting/auth',
     wsPath: '/app-reverb',
 });

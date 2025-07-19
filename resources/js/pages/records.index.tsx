@@ -95,7 +95,7 @@ export default function Records({ records }: { records: Record[] }) {
     }
   }, [user.id]);
   
-  useAutoReload(10000);
+  //useAutoReload(10000);
 
   const [search, setSearch] = useState('');
 
