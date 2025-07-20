@@ -36,34 +36,31 @@ class GenerateImageTitle implements ShouldQueue
 
     public function handle()
     {   
+        Log::info("Iniciando job para imagen ID {$this->image->id}");
         $job = ImageProcessingJob::where('image_id', $this->image->id)
                                  ->where('type', 'title')
                                  ->first();
-
         if (!$job) {
-            Log::error("No se encontró el registro de ImageProcessingJob para la imagen ID {$this->image->id}");
+            throw new \Exception("No se encontró el job de procesamiento para la imagen ID {$this->image->id}");
+        }
+        if ($job->status === 'cancelled') {
+            Log::info("Job cancelado para imagen ID {$this->image->id}");
             return;
         }
-        if ($job->status === 'cancelled') return;
 
         try {
             $user = $this->image->record->user;
             if ($user->user_limit && !$user->user_limit?->can_process_images) {
-                $job->update([
-                    'status' => 'cancelled',
-                    'finished_at' => now(),
-                ]);
-                return; 
+                throw new \Exception("El usuario {$user->id} no puede procesar imágenes");
             }
             $dayliLimit = $user->user_limit?->daily_process_limit;
             $key = "user:{$user->id}:daily_image_process";
 
+            $dayliLimit = $user->user_limit?->daily_process_limit;
+            $key = "user:{$user->id}:daily_image_process";
+
             if ($dayliLimit !== null && RateLimiter::attempts($key) >= $dayliLimit) {
-                $job->update([
-                    'status' => 'cancelled',
-                    'finished_at' => now(),
-                ]);
-                return; 
+                throw new \Exception("Límite diario de procesamiento de imágenes alcanzado para el usuario ID {$user->id}");
             }
 
             $path = $this->image->image_path;
@@ -72,17 +69,11 @@ class GenerateImageTitle implements ShouldQueue
             Log::info("Probando acceso a {$path}");
             Log::info("Ruta absoluta: " . $disk->path($path));
 
-            if (!$disk->exists($path)) {
-                Log::error("No existe el archivo en el disco privado.");
-                return;
-            }
+            if (!$disk->exists($path)) throw new \Exception("El archivo de imagen no existe en el disco privado.");
 
             $rawImage = $disk->get($path);
 
-            if (!$rawImage) {
-                Log::error("No se pudo leer el contenido de la imagen.");
-                return;
-            }
+            if (!$rawImage) throw new \Exception("No se pudo leer el contenido de la imagen.");
             
             $imageData = base64_encode($rawImage);
             Log::info('Base64 preview: ' . substr($imageData, 0, 30));
@@ -95,10 +86,7 @@ class GenerateImageTitle implements ShouldQueue
                     'started_at' => now(),
                 ]);
 
-            if (!$updated) {
-                Log::info("El job ya no está pending, se cancela ejecución");
-                return;
-            }
+            if (!$updated) throw new \Exception("El job ya no está pending, se cancela ejecución");
 
             Log::info("Enviando petición a la API de generación");
             $response = Http::timeout(240)->post('http://'.env('OLLAMA_HOST').':11434/api/generate', [
@@ -108,28 +96,22 @@ class GenerateImageTitle implements ShouldQueue
                 'stream' => false,
             ]);
 
-            // Verificar errores HTTP primero
             if ($response->failed()) throw new \Exception("Error en la API: " . $response->body());
-            // Validar respuesta JSON
+
             $responseData = $response->json();
-            if (empty($responseData['response'])) {
-                Log::error("Respuesta vacía", ['response' => $responseData]);
-                throw new \Exception("La IA no generó un título válido");
-            }
 
-            // Sanitizar y truncar respuesta
+            if (empty($responseData['response'])) throw new \Exception("Respuesta vacía de la API");
+
             $generated_title = substr(strip_tags($responseData['response']), 0, 2000);
+            Log::info("Titulo generado: " . $generated_title);
 
-            // Actualizar el título del registro asociado
-            $this->image->record->update([
-                'title' => $generated_title,
-            ]);
+            $this->image->record->update(['title' => $generated_title]);
 
-            $job->update([
-                'status' => 'completed',
-                'finished_at' => now()
-            ]);
+            $job->update(['status' => 'completed', 'error' => null, 'finished_at' => now() ]);
+
             RateLimiter::hit("user:{$this->image->record->user_id}:daily_image_process", 60 * 60 * 24);
+
+            Log::info("Job completado correctamente para imagen ID {$this->image->id}");
             
         } catch (\Throwable $e) {
 
