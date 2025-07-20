@@ -33,6 +33,25 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
   const [editTitleButtonVisible, setEditTitleButtonVisible] = useState(false);
   const [editDescriptionButtonVisible, setEditDescriptionButtonVisible] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Echo) {
+      window.Echo.private(`user.${user.id}`)
+        .listen('.records.update', (e: any) => {
+          console.log('Records updated:', e);
+          router.reload();
+          
+        })
+        .listen('.image-processing-jobs.update', (e: any) => {
+          console.log('Image processing jobs updated:', e);
+          router.reload();
+        });
+
+      return () => {
+        window.Echo.leave(`user.${user.id}`);
+      };
+    }
+  }, [user.id]);
+  
   const handleRegenerateDescription = () => {
     router.post(route('imageprocessing.generate-description',
       { id: record.image.id }))
@@ -51,7 +70,7 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
       setTitleEditOpen(true);
       return;
     }
-
+  
     try {
       await axios.put(route('imageprocessing.cancel', job.id));
       setTitleEditOpen(true); // Cancelado con éxito
@@ -105,17 +124,6 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
     if (descriptionJob?.status !== 'processing') setEditDescriptionButtonVisible(true)
     else setEditDescriptionButtonVisible(false)
   })
-  useAutoReload(30000);
-
-  useEffect(() => {
-    window.Echo.private(`user.${user.id}`).listen('.records.update', (e: any) => {
-      router.reload();
-    });
-
-    return () => {
-      window.Echo.leaveChannel(`private-user.${user.id}`);
-    };
-  }, []);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>

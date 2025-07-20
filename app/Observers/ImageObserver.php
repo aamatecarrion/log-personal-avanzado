@@ -15,10 +15,8 @@ class ImageObserver
         // Carga las relaciones para no hacer muchas consultas
         $image->load('record.user');
 
-        $userId = $image->record->user->id;
-
-        // Dispara el evento para ese usuario
-        RecordsUpdate::dispatch($userId);
+        
+        RecordsUpdate::dispatch($image->record);
     }
 
     /**
@@ -28,10 +26,8 @@ class ImageObserver
     {
         $image->load('record.user');
 
-        $userId = $image->record->user->id;
-
-        // Dispara el evento para ese usuario
-        RecordsUpdate::dispatch($userId);
+        
+        RecordsUpdate::dispatch($image->record);
     }
 
     /**
@@ -41,10 +37,8 @@ class ImageObserver
     {
         $image->load('record.user');
 
-        $userId = $image->record->user->id;
-
-        // Dispara el evento para ese usuario
-        RecordsUpdate::dispatch($userId);
+        
+        RecordsUpdate::dispatch($image->record);
     }
 
     /**

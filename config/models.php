@@ -283,7 +283,6 @@ return [
 
         'except' => [
             'migrations',
-            'failed_jobs',
             'password_resets',
             'personal_access_tokens',
             'password_reset_tokens',
@@ -291,7 +290,6 @@ return [
             'cache',
             'cache_locks',
             'sessions',
-            'jobs',
             'job_batches',
 
         ],

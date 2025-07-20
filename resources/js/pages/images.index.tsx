@@ -31,7 +31,6 @@ export default function Images({ images, upload_limit }: { images: Image[], uplo
         });
     };
     const { user } = auth;
-    useAutoReload(1000);
     useEffect(() => {
         window.Echo
         .private(`user.${user.id}`)

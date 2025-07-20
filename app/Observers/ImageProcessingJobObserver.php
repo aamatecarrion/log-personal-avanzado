@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Events\RecordsUpdate;
+use App\Events\ImageProcessingJobUpdate;
 use App\Models\ImageProcessingJob;
 
 class ImageProcessingJobObserver
@@ -12,13 +12,9 @@ class ImageProcessingJobObserver
      */
     public function created(ImageProcessingJob $job): void
     {
-        // Carga las relaciones para no hacer muchas consultas
         $job->load('image.record.user');
 
-        $userId = $job->image->record->user->id;
-
-        // Dispara el evento para ese usuario
-        RecordsUpdate::dispatch($userId);
+        ImageProcessingJobUpdate::dispatch($job);
     }
 
     /**
@@ -26,13 +22,9 @@ class ImageProcessingJobObserver
      */
     public function updated(ImageProcessingJob $job): void
     {
-        // Carga las relaciones para no hacer muchas consultas
         $job->load('image.record.user');
 
-        $userId = $job->image->record->user->id;
-
-        // Dispara el evento para ese usuario
-        RecordsUpdate::dispatch($userId);
+        ImageProcessingJobUpdate::dispatch($job);
     }
 
     /**
@@ -42,10 +34,7 @@ class ImageProcessingJobObserver
     {
         $job->load('image.record.user');
 
-        $userId = $job->image->record->user->id;
-
-        // Dispara el evento para ese usuario
-        RecordsUpdate::dispatch($userId);
+        ImageProcessingJobUpdate::dispatch($job);
     }
 
     /**

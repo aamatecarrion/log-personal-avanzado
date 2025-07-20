@@ -84,8 +84,6 @@ class ImageProcessingJobController extends Controller
         }
 
         GenerateImageDescription::dispatch($image);
-
-        return redirect()->back()->with('success', 'Trabajo en cola.');
     }
     public function generateTitle(Request $request, $id)
     {   
@@ -96,8 +94,6 @@ class ImageProcessingJobController extends Controller
         }
 
         GenerateImageTitle::dispatch($image);
-
-        return redirect()->back()->with('success', 'Trabajo en cola.');
     }
     public function cancel(Request $request, ImageProcessingJob $job)
     {

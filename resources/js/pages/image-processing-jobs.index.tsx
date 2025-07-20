@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { useAutoReload } from '@/hooks/useAutoReload';
 import { formatFechaEspanola, obtenerHoraEspanola } from '@/lib/utils';
 import Marquee from "react-fast-marquee";
+import axios from 'axios';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -43,18 +44,33 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
 
     const user = usePage<any>().props.auth.user;
 
-    useAutoReload(30000);
     useEffect(() => {
-      window.Echo
-        .private(`user.${user.id}`)
+    if (typeof window !== 'undefined' && window.Echo) {
+      window.Echo.private(`user.${user.id}`)
         .listen('.records.update', (e: any) => {
+          console.log('Records updated:', e);
+          router.reload();
+          
+        })
+        .listen('.image-processing-jobs.update', (e: any) => {
+          console.log('Image processing jobs updated:', e);
           router.reload();
         });
 
       return () => {
-        window.Echo.leaveChannel(`private-user.${user.id}`);
+        window.Echo.leave(`user.${user.id}`);
       };
-    }, []);
+    }
+  }, [user.id]);
+  function handleJobProcess(job: ImageProcessingJob) {
+    if (job.type === 'title') {
+      axios.post(route('imageprocessing.generate-title', job.image.id ))
+
+    } else if (job.type === 'description') {
+      axios.post(route('imageprocessing.generate-description', job.image.id ))
+    }
+
+  }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -70,7 +86,6 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                       <CardContent className="flex flex-row justify-between flex-wrap gap-2">
                         <span>
                           Procesamientos en cola (todos los usuarios): {total_in_queue}
-
                         </span>
                         <span>
                           Procesamientos en cola del usuario: {userJobsInQueue}
@@ -95,11 +110,12 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                               <TableHead className="text-left">Nombre del archivo</TableHead>
                               {userJobsInQueue > 0 && <TableHead className="text-left">Posición</TableHead>}
                               <TableHead className="text-left">Estado</TableHead>
-                              <TableHead className="text-left" >Añadido a la cola</TableHead>
-                              <TableHead className="text-left">Iniciado</TableHead>
-                              <TableHead className="text-left">Finalizado</TableHead>
+                              <TableHead className="text-left" >Queued</TableHead>
+                              <TableHead className="text-left">Started</TableHead>
+                              <TableHead className="text-left">Finished</TableHead>
                               <TableHead className="text-left">Error</TableHead>
                               <TableHead className="text-left">Tipo</TableHead>
+                              <TableHead className="text-left">Acciones</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -137,28 +153,31 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                                   )}
                                 </TableCell>
                                 <TableCell >
-                                  <span className="text-xs text-muted-foreground">
-                                    {formatFechaEspanola(job.queued_at)}, {obtenerHoraEspanola(job.queued_at)}
-                                  </span>
+                                  {job.queued_at && 
+                                    <span className="text-xs text-muted-foreground" title={formatFechaEspanola(job.queued_at)}>
+                                      {obtenerHoraEspanola(job.queued_at)}
+                                    </span>
+                                  }
                                 </TableCell>
                                 <TableCell >
-                                    {job.started_at && 
-                                      <span className="text-xs text-muted-foreground">
-                                          {formatFechaEspanola(job.started_at)}, {obtenerHoraEspanola(job.started_at)}
-                                      </span>
-                                    }
+                                  {job.started_at && 
+                                    <span className="text-xs text-muted-foreground" title={formatFechaEspanola(job.started_at)}>
+                                      {obtenerHoraEspanola(job.started_at)}
+                                    </span>
+                                  }
                                 </TableCell>
                                 <TableCell >
-                                {job.finished_at && (
-                                      <span className="text-xs text-muted-foreground">
-                                        {formatFechaEspanola(job.finished_at)}, {obtenerHoraEspanola(job.finished_at)}
-                                      </span>                                    )}
+                                  {job.finished_at && 
+                                    <span className="text-xs text-muted-foreground" title={formatFechaEspanola(job.finished_at)}>
+                                      {obtenerHoraEspanola(job.finished_at)}
+                                    </span>
+                                  }
                                 </TableCell>
-                                  <TableCell className="text-left">
-                                    {job.error && (
-                                      <span className="text-xs text-muted-foreground">{job.error}</span>
-                                    )}
-                                  </TableCell>
+                                <TableCell className="text-left">
+                                  {job.error && (
+                                    <span className="text-xs text-muted-foreground">{job.error}</span>
+                                  )}
+                                </TableCell>
                                 <TableCell className="text-left">
                                   {job.type === 'title' ? (
                                     <span className="text-xs text-muted-foreground">Título</span>
@@ -169,6 +188,29 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                                   ) : (
                                     <span className="text-xs text-muted-foreground">Desconocido</span>
                                   )}
+                                </TableCell>
+                                <TableCell className="text-left">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                                      <DropdownMenuSeparator />
+                                      {job.status === 'pending' && (
+                                        <DropdownMenuItem onClick={() => axios.put(route('imageprocessing.cancel', job.id))}>
+                                          Cancel
+                                        </DropdownMenuItem>
+                                      )}
+                                      {job.status === 'failed' || job.status === 'cancelled' || job.status === 'completed' && (
+                                        <DropdownMenuItem onClick={() => handleJobProcess(job)}>
+                                          Process
+                                        </DropdownMenuItem>
+                                      )}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </TableCell>
                                 
                               </TableRow>
