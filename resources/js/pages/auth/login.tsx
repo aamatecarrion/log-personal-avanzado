@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
+import { FormEventHandler, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -35,6 +35,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         });
     };
 
+    const [passwordVisible, setPasswordVisible] = useState(false);
+
     return (
         <AuthLayout title="Iniciar sesión" description="Ingrese su correo electrónico y contraseña a continuación para iniciar sesión">
             <Head title="Iniciar sesión" />
@@ -66,16 +68,21 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 </TextLink>
                             )}
                         </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={2}
-                            autoComplete="current-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Contraseña"
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={passwordVisible ? 'text' : 'password'}
+                                required
+                                tabIndex={2}
+                                autoComplete="current-password"
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                                placeholder="Contraseña"
+                            />
+                            <a className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground" 
+                                onClick={() => setPasswordVisible(!passwordVisible)}>{passwordVisible ? <EyeOff width={20}/> : <Eye width={20} />}
+                            </a>
+                        </div>
                         <InputError message={errors.password} />
                     </div>
 

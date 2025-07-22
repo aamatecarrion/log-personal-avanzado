@@ -1,6 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
+import { FormEventHandler, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -23,13 +23,16 @@ export default function Register() {
         password: '',
         password_confirmation: '',
     });
-
+    
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('register'), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };
+    
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
     return (
         <AuthLayout title="Crear una cuenta" description="Ingresa tus datos a continuación para crear tu cuenta">
@@ -71,43 +74,53 @@ export default function Register() {
 
                     <div className="grid gap-2">
                         <Label htmlFor="password">Contraseña</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={3}
-                            autoComplete="new-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            disabled={processing}
-                            placeholder="Contraseña"
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={passwordVisible ? 'text' : 'password'}
+                                required
+                                tabIndex={3}
+                                autoComplete="new-password"
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                                disabled={processing}
+                                placeholder="Contraseña"
+                            />
+                            <a className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground" 
+                                onClick={() => setPasswordVisible(!passwordVisible)}>{passwordVisible ? <EyeOff width={20}/> : <Eye width={20} />}
+                            </a>
+                        </div>
                         <InputError message={errors.password} />
                     </div>
 
                     <div className="grid gap-2">
                         <Label htmlFor="password_confirmation">Confirmar contraseña</Label>
-                        <Input
-                            id="password_confirmation"
-                            type="password"
-                            required
-                            tabIndex={4}
-                            autoComplete="new-password"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            disabled={processing}
-                            placeholder="Confirmar contraseña"
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password_confirmation"
+                                type={confirmPasswordVisible ? 'text' : 'password'}
+                                required
+                                tabIndex={4}
+                                autoComplete="new-password"
+                                value={data.password_confirmation}
+                                onChange={(e) => setData('password_confirmation', e.target.value)}
+                                disabled={processing}
+                                placeholder="Confirmar contraseña"
+                            />
+                            <a className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground" 
+                                onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>{confirmPasswordVisible ? <EyeOff width={20}/> : <Eye width={20} />}
+                            </a>
+                        </div>
                         <InputError message={errors.password_confirmation} />
                     </div>
 
-                    <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
+                    <Button type="submit" className="mt-2 w-full select-none" tabIndex={5} disabled={processing}>
                         {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                         Crear cuenta
                     </Button>
                 </div>
 
-                <div className="text-muted-foreground text-center text-sm">
+                <div className="text-muted-foreground text-center text-sm select-none">
                     ¿Ya tienes una cuenta?{' '}
                     <TextLink href={route('login')} tabIndex={6}>
                         Iniciar sesión
