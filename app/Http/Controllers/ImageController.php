@@ -203,6 +203,10 @@ class ImageController extends Controller {
     private function saveImageAndRecord($file, User $user): Image
     {
         $path = $file->store('images', 'private');
+        $fullPath = Storage::disk('private')->path($path);
+        if (file_exists($fullPath)) {
+            @chmod($fullPath, 0644);
+        }
         $absolutePath = $file->getPathname();
         $exif = @exif_read_data($absolutePath);
 
