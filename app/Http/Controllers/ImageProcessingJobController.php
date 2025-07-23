@@ -115,7 +115,23 @@ class ImageProcessingJobController extends Controller
 
         return response()->json(['message' => 'Job is already finished.'], 410);
     }
+    public function processAllFailed()
+    {
+        $user = Auth::user();
 
+        $failedJobs = ImageProcessingJob::whereIn('status', ['failed', 'cancelled'])
+                        ->whereHas('image.record', fn($q) => $q->where('user_id',$user->id))->get();
+
+        foreach ($failedJobs as $job) {
+            if ($job->type === 'title') {
+                GenerateImageTitle::dispatch($job->image);
+            } elseif ($job->type === 'description') {
+                GenerateImageDescription::dispatch($job->image);
+            }
+        }
+
+        return redirect()->route('imageprocessing.index')->with('success', 'All failed jobs are being reprocessed.');
+    }
 
 
 

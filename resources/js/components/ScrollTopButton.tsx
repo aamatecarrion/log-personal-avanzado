@@ -22,7 +22,7 @@ const ScrollTopButton = () => {
         longPressTriggered.current = false;
         timeoutRef.current = window.setTimeout(() => {
             longPressTriggered.current = true;
-            if (navigator.vibrate) navigator.vibrate(20);
+            if (navigator.vibrate) navigator.vibrate(200);
             router.visit("/favorites");
         }, 600);
     };
@@ -38,15 +38,15 @@ const ScrollTopButton = () => {
 
     return (
         <Button
-        onClick={handleClick}
-        onPointerDown={handlePointerDown}
-        className="cursor-pointer fixed bottom-6 right-6 z-50 rounded-full w-14 h-14 p-0 shadow-xl bg-primary text-white hover:bg-primary/90 transition"
-        title={isAtTop ? "Nuevo registro o favoritos" : "Subir arriba"}
+            onClick={handleClick}
+            onPointerDown={handlePointerDown}
+            className="cursor-pointer fixed bottom-6 right-6 z-50 rounded-full w-14 h-14 p-0 shadow-xl bg-primary text-white hover:bg-primary/90 transition"
+            title={isAtTop ? "Nuevo registro o favoritos" : "Subir arriba"}
         >
         {isAtTop ? (
-            <Plus size={32} className="w-8 h-8" />
+            <Plus className="!w-8 !h-8" />
         ) : (
-            <ArrowUp size={32} className="w-8 h-8" />
+            <ArrowUp className="!w-8 !h-8" />
         )}
         </Button>
     );

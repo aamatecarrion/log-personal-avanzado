@@ -35,10 +35,15 @@ Route::middleware('auth')->group(function () {
     Route::resource('images', ImageController::class);
     
     Route::get('/map', [MapController::class, 'index'])->name('map.index');
-    Route::get('/image-processing', [ImageProcessingJobController::class, 'index'])->name('imageprocessing.index');
-    Route::post('/image-processing/generate-title/{id}',[ImageProcessingJobController::class, 'generateTitle'])->name('imageprocessing.generate-title');
-    Route::post('/image-processing/generate-description/{id}',[ImageProcessingJobController::class, 'generateDescription'])->name('imageprocessing.generate-description');
-    Route::put('/image-processing/{job}', [ImageProcessingJobController::class, 'cancel'])->name('imageprocessing.cancel');
+    
+    Route::prefix('/image-processing')->name('imageprocessing.')->group(function () {
+        Route::get('/', [ImageProcessingJobController::class, 'index'])->name('index');
+        Route::post('generate-title/{id}',[ImageProcessingJobController::class, 'generateTitle'])->name('generate-title');
+        Route::post('generate-description/{id}',[ImageProcessingJobController::class, 'generateDescription'])->name('generate-description');
+        Route::post('process-all-failed', [ImageProcessingJobController::class, 'processAllFailed'])->name('process-all-failed');
+        Route::put('cancel/{job}', [ImageProcessingJobController::class, 'cancel'])->name('cancel');
+    });
+
     Route::resource('/favorites', FavoriteController::class);
     Route::get('/experiments', [ExperimentController::class, 'index'])->name('experiments.index');
     Route::post('/experiments', [ExperimentController::class, 'update'])->name('experiments.update');
