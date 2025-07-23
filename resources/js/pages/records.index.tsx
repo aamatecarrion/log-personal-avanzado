@@ -21,6 +21,7 @@ import { router } from "@inertiajs/react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import ScrollTopButton from '@/components/ScrollTopButton';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -210,6 +211,7 @@ export default function Records({ records }: { records: Record[] }) {
           )}
         </div>
       </div>
+      <ScrollTopButton />
     </AppLayout>
   );
 }
