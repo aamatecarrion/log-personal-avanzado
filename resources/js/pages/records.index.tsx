@@ -175,7 +175,7 @@ export default function Records({ records }: { records: Record[] }) {
                 <CardContent className="overflow-x-auto">
                   <Table className="table-fixed w-full">
                     <TableBody>
-                      {(records as Record[]).map((record) => {
+                      {(records as Record[]).sort((a, b) => new Date(b.image?.file_date ?? b.created_at).getTime() - new Date(a.image?.file_date ?? a.created_at).getTime()).map((record) => {
                         const title = renderField(record.title, search);
                         const description = renderField(record.description ?? '', search);
                         const generated = renderField(record.image?.generated_description ?? '', search);

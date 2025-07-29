@@ -4,9 +4,12 @@ namespace App\Models;
 
 use App\Models\Base\Image as BaseImage;
 use Carbon\Carbon;
+use YMigVal\LaravelModelCache\HasCachedQueries;
 
 class Image extends BaseImage
 {
+	use HasCachedQueries;
+	
 	protected $fillable = [
 		'user_id',
 		'record_id',
