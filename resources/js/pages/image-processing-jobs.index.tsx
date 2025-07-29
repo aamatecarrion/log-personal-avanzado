@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table"
 import { use, useEffect } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Car, CheckCircle, Clock, Hourglass, Loader2, MoreVertical, RefreshCcw, RefreshCw, Search, SearchCheck, Sparkles, Trash, XCircle } from "lucide-react"
+import { Ban, Car, CheckCircle, Clock, Hourglass, Loader2, MoreVertical, RefreshCcw, RefreshCw, Search, SearchCheck, Sparkles, Trash, XCircle } from "lucide-react"
 
 import { router } from "@inertiajs/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +43,7 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
   const userJobsCompleted = jobs.filter((job) => job.status === 'completed').length;
   const userJobsFailed = jobs.filter((job) => job.status === 'failed').length;
   const userJobsProcessing = jobs.filter((job) => job.status === 'processing').length;
+  const userJobsCancelled = jobs.filter((job) => job.status === 'cancelled').length;
 
   const user = usePage<any>().props.auth.user;
 
@@ -162,6 +163,12 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                                   <XCircle className="h-4 w-4" /> Error
                                 </span>
                               )}
+                              {job.status === 'cancelled' && (
+                                <span className="flex items-center  gap-1 text-red-500">
+                                  <Ban className="h-4 w-4" /> Cancelled
+                                </span>
+                              )}
+                              
                             </TableCell>
                             <TableCell >
                               {job.queued_at && 

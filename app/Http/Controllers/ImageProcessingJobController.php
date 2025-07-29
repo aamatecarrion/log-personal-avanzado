@@ -25,11 +25,11 @@ class ImageProcessingJobController extends Controller
         // Separar por estado
         $processing = $jobs->filter(fn($job) => $job->status === 'processing')->sortBy('queued_at');
         $pending = $jobs->filter(fn($job) => $job->status === 'pending')->sortBy('queued_at');
-        $completed = $jobs->filter(fn($job) => in_array($job->status, ['completed', 'failed']))->sortByDesc('finished_at');
+        $ended = $jobs->filter(fn($job) => in_array($job->status, ['completed', 'failed', 'cancelled']))->sortByDesc('finished_at');
 
 
         // Combinar en el orden deseado
-        $jobs = $processing->concat($pending)->concat($completed)->values();
+        $jobs = $processing->concat($pending)->concat($ended)->values();
 
         // Calcular posición en la cola
         $globalQueue = ImageProcessingJob::where('status', 'pending')
