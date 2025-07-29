@@ -155,15 +155,68 @@ class ImageController extends Controller {
         $this->checkUploadLimits($user, $cantidad);
 
         $savedImages = collect();
+        $userImageSizes = $this->getUserImageSizes($user);
 
         foreach ($imagenes as $file) {
-            $savedImages->push($this->saveImageAndRecord($file, $user));
+            $fileSize = $file->getSize();
+            
+            $potentialDuplicate = $this->hasPotentialDuplicate($fileSize, $userImageSizes);
+            
+            if ($potentialDuplicate) {
+                if ($this->isExactDuplicate($file, $user) ) {
+                    continue;
+                }
+            }
+            
+            $image = $this->saveImageAndRecord($file, $user);
+            $savedImages->push($image);
             RateLimiter::hit("upload-images:$user->id", 86400);
         }
 
         $this->dispatchJobsForImages($savedImages);
 
         return redirect()->route('images.index')->with('success', 'Imágenes subidas y procesadas');
+    }
+
+    private function getUserImageSizes(User $user): array
+    {
+        return Image::whereHas('record', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->get()
+            ->mapWithKeys(function ($image) {
+                try {
+                    $size = Storage::disk('private')->size($image->image_path);
+                    return [$image->id => $size];
+                } catch (\Exception $e) {
+                    return [$image->id => 0]; // Si no existe
+                }
+            })
+            ->filter()
+            ->toArray();
+    }
+
+    private function hasPotentialDuplicate(int $fileSize, array $userImageSizes): bool
+    {
+        return in_array($fileSize, $userImageSizes, true);
+    }
+
+    private function isExactDuplicate($file, User $user): bool
+    {
+        $newFileHash = md5_file($file->path());
+        
+        return Image::whereHas('record', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->get()
+            ->contains(function ($image) use ($newFileHash) {
+                try {
+                    $existingContent = Storage::disk('private')->get($image->image_path);
+                    return md5($existingContent) === $newFileHash;
+                } catch (\Exception $e) {
+                    return false;
+                }
+            });
     }
     private function checkUploadPermission(User $user) {
 
