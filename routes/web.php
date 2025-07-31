@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DataController;
 use App\Http\Controllers\ExperimentController;
 use App\Http\Controllers\FavoriteController;
 use Illuminate\Support\Facades\Auth;
@@ -47,6 +48,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('/favorites', FavoriteController::class);
     Route::get('/experiments', [ExperimentController::class, 'index'])->name('experiments.index');
     Route::post('/experiments', [ExperimentController::class, 'update'])->name('experiments.update');
+
+    Route::prefix('/data')->name('data.')->group(function () {
+        Route::get('/', [DataController::class, 'index'])->name('index');
+        Route::post('/import', [DataController::class, 'import'])->name('import');
+        Route::get('/export', [DataController::class, 'export'])->name('export');
+    });
+    
 });
     
 

@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { User, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Cpu, FlaskConical, Folder, ImagePlus, Images, LayoutGrid, Logs, Map, SquarePen, Star, StopCircle, User2, UserRoundCog, UsersRound, WorkflowIcon } from 'lucide-react';
+import { BookOpen, Cpu, Download, FlaskConical, Folder, ImagePlus, Images, LayoutGrid, Logs, Map, SquarePen, Star, StopCircle, User2, UserRoundCog, UsersRound, WorkflowIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useEffect } from 'react';
 
@@ -44,7 +44,11 @@ const mainNavItems: NavItem[] = [
         href: '/experiments',
         icon: FlaskConical,
     },
-    
+    {
+        title: 'Importar/Exportar',
+        href: '/data',
+        icon: Download,
+    },
 ];
 
 const adminNavItems: NavItem[] = [
