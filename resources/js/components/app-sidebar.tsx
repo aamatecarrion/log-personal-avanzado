@@ -44,11 +44,6 @@ const mainNavItems: NavItem[] = [
         href: '/experiments',
         icon: FlaskConical,
     },
-    {
-        title: 'Importar/Exportar',
-        href: '/data',
-        icon: Download,
-    },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -61,7 +56,12 @@ const adminNavItems: NavItem[] = [
         title: 'Límites de usuario',
         href: '/admin/user-limits',
         icon: UserRoundCog,
-    }
+    },
+    {
+        title: 'Importar/Exportar',
+        href: '/admin/data',
+        icon: Download,
+    },
 ];
 
 

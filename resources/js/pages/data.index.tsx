@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { type BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: 'Data', href: '/data' },
+  { title: 'Data', href: '/admin/data' },
 ];
 
 export default function DataPage() {
@@ -13,7 +13,7 @@ export default function DataPage() {
   const [message, setMessage] = useState<string | null>(null);
 
   const handleExport = () => {
-    window.location.href = '/data/export';
+    window.location.href = '/admin/data/export';
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +27,7 @@ export default function DataPage() {
     const formData = new FormData();
     formData.append('archivo_zip', file);
 
-    router.post('/data/import', formData, {
+    router.post('/admin/data/import', formData, {
       forceFormData: true,
       onSuccess: () => setMessage('Importación exitosa'),
       onError: () => setMessage('Error al importar'),

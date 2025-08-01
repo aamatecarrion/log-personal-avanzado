@@ -49,11 +49,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/experiments', [ExperimentController::class, 'index'])->name('experiments.index');
     Route::post('/experiments', [ExperimentController::class, 'update'])->name('experiments.update');
 
-    Route::prefix('/data')->name('data.')->group(function () {
-        Route::get('/', [DataController::class, 'index'])->name('index');
-        Route::post('/import', [DataController::class, 'import'])->name('import');
-        Route::get('/export', [DataController::class, 'export'])->name('export');
-    });
     
 });
     
@@ -61,6 +56,12 @@ Route::middleware('auth')->group(function () {
 Route::prefix('/admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::resource('user-limits', UserLimitController::class);
     Route::resource('user-management', UserManagementController::class);
+    
+    Route::prefix('/data')->name('data.')->group(function () {
+        Route::get('/', [DataController::class, 'index'])->name('index');
+        Route::post('/import', [DataController::class, 'import'])->name('import');
+        Route::get('/export', [DataController::class, 'export'])->name('export');
+    });
 });
 
 
