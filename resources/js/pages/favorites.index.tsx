@@ -24,7 +24,7 @@ export default function Favorites({ favorites }: { favorites: Favorite[] }) {
     setLoadingId(fav.id);
 
     try {
-      const position = await getCurrentPosition({ timeout: 5000 });
+      const position = await getCurrentPosition({ timeout: 30000 });
       router.post(route('records.store'), {
         title: fav.title,
         latitude: position.coords.latitude,
