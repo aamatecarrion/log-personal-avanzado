@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\RecordsDelete;
 use App\Events\RecordsUpdate;
 use App\Models\Record;
 
@@ -31,7 +32,7 @@ class RecordObserver
      */
     public function deleted(Record $record): void
     {
-        RecordsUpdate::dispatch($record);
+        RecordsDelete::dispatch($record);
     }
 
     /**

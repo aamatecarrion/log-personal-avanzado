@@ -25,7 +25,7 @@ class RecordController extends Controller {
             'longitude' => 'nullable|numeric',
         ]);
         Record::create($request->merge(['user_id' => Auth::id()])->all());
-        return redirect()->route('records.index')->with('success', 'Record created successfully');
+        //return redirect()->route('records.index')->with('success', 'Record created successfully');
     }
     public function create() {
         return inertia('records.create');

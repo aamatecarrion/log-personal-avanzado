@@ -36,6 +36,13 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Echo) {
       window.Echo.private(`user.${user.id}`)
+        .listen('.records.delete', (e: any) => {
+            console.log('Record deleted:', e);
+            router.visit(route('records.index'), {
+              preserveScroll: false,
+              preserveState: false,
+            });
+        })
         .listen('.records.update', (e: any) => {
           console.log('Records updated:', e);
           router.reload();
