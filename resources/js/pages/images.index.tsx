@@ -51,9 +51,13 @@ export default function Images({ images, upload_limit }: { images: Image[], uplo
                     {images.map((image: Image) => (
                         <div key={image.id} className="overflow-hidden cursor-pointer" onClick={() => handleImageClick(image)}>
                             <img
-                                src={route('images.show', image.id)}
-                                alt={`Imagen ${image.id}`}
+                                src={route('images.thumbnail', image.id)}
+                                alt={`Miniatura ${image.id}`}
                                 className="w-full h-60 object-cover"
+                                onError={(e) => {
+                                    // Intenta cargar la miniatura con la estructura antigua si falla
+                                    e.currentTarget.src = route('images.show', image.id);
+                                }}
                             />
                         </div>
                     ))}

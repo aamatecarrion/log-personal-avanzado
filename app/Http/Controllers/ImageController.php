@@ -15,6 +15,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image as InterventionImage;
+use Intervention\Image\Encoders\JpegEncoder;
 
 class ImageController extends Controller {
     public function index() {
@@ -257,9 +259,31 @@ class ImageController extends Controller {
     {
         $path = $file->store('images', 'private');
         $fullPath = Storage::disk('private')->path($path);
+        
         if (file_exists($fullPath)) {
             @chmod($fullPath, 0644);
         }
+        
+        // Generar miniatura con estructura de directorios
+        $thumbnailPath = 'thumbnails/' . basename($path);
+        $thumbnailFullPath = Storage::disk('private')->path($thumbnailPath);
+        
+        // Crear directorio de miniaturas si no existe
+        Storage::disk('private')->makeDirectory('thumbnails');
+        
+        try {
+            InterventionImage::read($fullPath)
+                ->scaleDown(300, 300)
+                ->encode(new JpegEncoder(quality: 80))
+                ->save($thumbnailFullPath);
+                
+            if (file_exists($thumbnailFullPath)) {
+                @chmod($thumbnailFullPath, 0644);
+            }
+        } catch (\Exception $e) {
+            logger()->error('Error generando miniatura: ' . $e->getMessage());
+        }
+
         $absolutePath = $file->getPathname();
         $exif = @exif_read_data($absolutePath);
 
@@ -331,6 +355,25 @@ class ImageController extends Controller {
             GenerateImageDescription::dispatch($image);
             $available--;
         }
+    }
+
+    public function showThumbnail($id)
+    {
+        $image = Image::with('record')->findOrFail($id);
+        $this->checkUser($image);
+
+        // Verificar si la miniatura existe en la nueva estructura
+        $thumbnailPath = 'thumbnails/' . basename($image->image_path);
+        
+        // Usar el nuevo campo thumbnail_path si existe, sino la estructura antigua
+        
+
+        if (!Storage::disk('private')->exists($thumbnailPath)) {
+            abort(404, 'Miniatura no encontrada');
+        }
+
+        $path = Storage::disk('private')->path($thumbnailPath) ;
+        return response()->file($path);
     }
 
 }

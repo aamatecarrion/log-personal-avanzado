@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     
     Route::get('images/upload',[ImageController::class, 'create'])->name('images.upload');
     Route::resource('images', ImageController::class);
+    Route::get('/images/thumbnail/{id}', [ImageController::class, 'showThumbnail'])->name('images.thumbnail');
     
     Route::get('/map', [MapController::class, 'index'])->name('map.index');
     
