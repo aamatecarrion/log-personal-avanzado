@@ -361,19 +361,16 @@ class ImageController extends Controller {
     {
         $image = Image::with('record')->findOrFail($id);
         $this->checkUser($image);
-
-        // Verificar si la miniatura existe en la nueva estructura
+        
         $thumbnailPath = 'thumbnails/' . basename($image->image_path);
         
-        // Usar el nuevo campo thumbnail_path si existe, sino la estructura antigua
+        $thumbnailFullPath = storage_path('app/private/' . $thumbnailPath);
         
-
-        if (!Storage::disk('private')->exists($thumbnailPath)) {
-            abort(404, 'Miniatura no encontrada');
+        if (!file_exists($thumbnailFullPath)) {
+            abort(404, 'Miniatura no encontrada');    
         }
 
-        $path = Storage::disk('private')->path($thumbnailPath) ;
-        return response()->file($path);
+        return response()->file($thumbnailFullPath);
     }
 
 }
