@@ -123,3 +123,16 @@ export interface UploadLimit {
   can_upload: boolean
 }
 
+export interface ImageProcessingJob {
+  id: number;
+  image_id: number;
+  type: string;
+  status: string;
+  queued_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+

@@ -7,13 +7,15 @@ import AppLayout from '@/layouts/app-layout';
 import { spanishTimestampConvert } from '@/lib/utils';
 import { Record, type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Clock, Loader2, RefreshCcw, Sparkle, Sparkles, SquarePen, Trash, X } from 'lucide-react';
+import { Ban, Clock, Loader2, RefreshCcw, Sparkle, Sparkles, SquarePen, Trash, X } from 'lucide-react';
 import { title } from 'process';
 import { use, useEffect, useState } from 'react';
 import axios from 'axios';
 import DeleteRecordDialog from '@/components/delete-record-dialog';
 import GenerateTitleDialog from '@/components/generate-title-dialog';
 import { Textarea } from '@/components/ui/textarea';
+import GenerateDescriptionDialog from '@/components/generate-description-dialog';
+import CancelJobDialog from '@/components/cancel-job-dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Registros', href: '/records' },
@@ -58,51 +60,12 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
       };
     }
   }, [user.id]);
-  
-  const handleRegenerateDescription = () => {
-    router.post(route('imageprocessing.generate-description',
-      { id: record.image.id }))
+    
+  const handleTitleEdit = () => {
+    setTitleEditOpen(!titleEditOpen); 
   };
-
-
-  const handleTitleEdit = async () => {
-    if (titleEditOpen) {
-      setTitleEditOpen(false);
-      return;
-    }
-
-    const job = record.image?.image_processing_jobs?.find(job => job.type === 'title');
-
-    if (!job) {
-      setTitleEditOpen(true);
-      return;
-    }
   
-    try {
-      await axios.put(route('imageprocessing.cancel', job.id));
-      setTitleEditOpen(true); // Cancelado con éxito
-    } catch (error: any) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message;
-
-      if (status === 410) {
-        // Job ya terminado: permitir edición
-        console.log('Job terminado, puedes editar:', message);
-        setTitleEditOpen(true);
-      } else if (status === 409) {
-        // Job en proceso: NO permitir edición
-        console.log('Job en proceso, no puedes editar:', message);
-        setTitleEditOpen(false);
-      }
-      else {
-        console.error('Error inesperado:', message || error.message);
-        setTitleEditOpen(false);
-      }
-    }
-    finally {
-      router.reload({ only: ['record'] });
-    }
-  };
+  
   
   const StatusMessage = () => {
     switch (titleJob?.status) {
@@ -172,19 +135,21 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
                   </Button>
                 )}
 
-                {titleJob?.status !== 'pending' && titleJob?.status !== 'processing' && !titleEditOpen && record.image && (
-
-                  <GenerateTitleDialog record={record} />
-                )}
-                {titleJob?.status !== 'processing' &&
-                  <Button variant="secondary" className="cursor-pointer" onClick={handleTitleEdit}>
-                    {titleEditOpen ?
-                      <><X className="h-4 w-4" />Cancelar</>
-                      :
-                      <><SquarePen className="h-4 w-4" />Editar</>
-                    }
-                  </Button>
-                }
+                {titleJob ? (
+                  titleJob.status === 'processing' || titleJob.status === 'pending' ? (
+                    <CancelJobDialog job={titleJob} />
+                  ) : (
+                    <GenerateTitleDialog record={record} />
+                  )
+                ) : null}
+                
+                <Button variant="secondary" className="cursor-pointer" onClick={handleTitleEdit}>
+                  {titleEditOpen ?
+                    <><X className="h-4 w-4" />Cancelar</>
+                    :
+                    <><SquarePen className="h-4 w-4" />Editar</>
+                  }
+                </Button>
 
                 {!titleEditOpen &&
                   !descriptionEditOpen &&
@@ -252,35 +217,18 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
                               <span className="h-4 w-4">❌</span> Generación fallida
                             </span>
                           )}
-                          {(descriptionJob?.status !== 'processing' && descriptionJob?.status !== 'pending') && (
-                            <>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button variant="secondary" className="mt-2 cursor-pointer">
-                                    <Sparkles className="h-5 w-5 cursor-pointer text-yellow-500" />
-                                    Generar descripción
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Generar descripció0n</DialogTitle>
-                                    <DialogDescription>
-                                      ¿Seguro que quieres generar una descripcion?
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <DialogFooter className="flex justify-between">
-                                    <DialogClose asChild>
-                                      <Button variant="secondary" className='cursor-pointer'>Cancelar</Button>
-                                    </DialogClose>
-                                    <Button className='cursor-pointer' onClick={handleRegenerateDescription}>
-                                      <Sparkles className="h-5 w-5 cursor-pointer text-yellow-500" />
-                                      Generar
-                                    </Button>
-                                  </DialogFooter>
-                                </DialogContent>
-                              </Dialog>
-                            </>
+                          {descriptionJob?.status == 'cancelled' && (
+                            <span className="flex items-center gap-1 text-red-500">
+                              <span className="h-4 w-4">🚫</span> Generación cancelada
+                            </span>
                           )}
+                          {descriptionJob ? (
+                            descriptionJob.status === 'processing' || descriptionJob.status === 'pending' ? (
+                              <CancelJobDialog job={descriptionJob} />
+                            ) : (
+                              <GenerateDescriptionDialog record={record} />
+                            )
+                          ) : null}
                         </div>
                       </>
                     )}

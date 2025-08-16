@@ -26,6 +26,7 @@ import Marquee from "react-fast-marquee";
 import axios from 'axios';
 import ProcessFailedDialog from '@/components/process-failed-dialog';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import CancelAllDialog from '@/components/cancel-all-dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -107,6 +108,7 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                   </CardHeader>
                   <CardContent className="flex flex-row justify-between flex-wrap gap-2">
                     <ProcessFailedDialog/>
+                    <CancelAllDialog />
                   </CardContent>
                 </Card>
                   
@@ -122,7 +124,7 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                           <TableHead className="text-left">Nombre del archivo</TableHead>
                           {userJobsInQueue > 0 && <TableHead className="text-left">Posición</TableHead>}
                           <TableHead className="text-left">Estado</TableHead>
-                          <TableHead className="text-left" >Queued</TableHead>
+                          <TableHead className="text-left">Queued</TableHead>
                           <TableHead className="text-left">Started</TableHead>
                           <TableHead className="text-left">Finished</TableHead>
                           <TableHead className="text-left">Error</TableHead>
@@ -209,7 +211,7 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                             </TableCell>
                             <TableCell className="text-left">
                               {job.status === 'pending' && (
-                                <Button variant={"secondary"} onClick={() => axios.put(route('imageprocessing.cancel', job.id))}>
+                                <Button variant={"secondary"} onClick={() => router.put(route('imageprocessing.cancel', job.id))}>
                                   Cancel
                                 </Button>
                               )}

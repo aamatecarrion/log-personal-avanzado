@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
         Route::post('generate-description/{id}',[ImageProcessingJobController::class, 'generateDescription'])->name('generate-description');
         Route::post('process-all-failed', [ImageProcessingJobController::class, 'processAllFailed'])->name('process-all-failed');
         Route::put('cancel/{job}', [ImageProcessingJobController::class, 'cancel'])->name('cancel');
+        Route::put('cancel-all', [ImageProcessingJobController::class, 'cancelAll'])->name('cancel-all');
     });
 
     Route::resource('/favorites', FavoriteController::class);
@@ -52,7 +53,6 @@ Route::middleware('auth')->group(function () {
 
     
 });
-    
 
 Route::prefix('/admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::resource('user-limits', UserLimitController::class);

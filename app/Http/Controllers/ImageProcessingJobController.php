@@ -95,25 +95,14 @@ class ImageProcessingJobController extends Controller
 
         GenerateImageTitle::dispatch($image);
     }
-    public function cancel(Request $request, ImageProcessingJob $job)
+    public function cancel(ImageProcessingJob $job)
     {
         $this->checkUser($job);
 
-        $updated = ImageProcessingJob::where('id', $job->id)
-            ->where('status', 'pending')
+        ImageProcessingJob::where('id', $job->id)
             ->update(['status' => 'cancelled']);
+        return redirect()->back()->with('success', 'Job cancelled successfully.');
 
-        if ($updated) {
-            return response()->json(['message' => 'Job cancelled.'], 200);
-        }
-
-        $job->refresh();
-
-        if ($job->status === 'processing') {
-            return response()->json(['message' => 'Job already processing, cannot cancel.'], 409);
-        }
-
-        return response()->json(['message' => 'Job is already finished.'], 410);
     }
     public function processAllFailed()
     {
@@ -132,8 +121,19 @@ class ImageProcessingJobController extends Controller
 
         return redirect()->route('imageprocessing.index')->with('success', 'All failed jobs are being reprocessed.');
     }
+    public function cancelAll()
+    {
+        $user = Auth::user();
 
-
+        $cancelledJobs = ImageProcessingJob::whereIn('status', ['pending', 'processing'])
+            ->whereHas('image.record', fn($q) => $q->where('user_id',$user->id))->update(['status' => 'cancelled']);
+        if ($cancelledJobs === 0) {
+            return redirect()->route('imageprocessing.index')->with('info', 'No pending or processing jobs to cancel.');
+        } elseif (!$cancelledJobs) {
+            return redirect()->route('imageprocessing.index')->with('error', 'Error cancelling jobs.');
+        }
+        return redirect()->route('imageprocessing.index')->with('success', 'All pending and processing jobs have been cancelled.');
+    }
 
     private function checkUser(ImageProcessingJob $job) {
         if ($job->image->record->user_id !== Auth::id()) {
