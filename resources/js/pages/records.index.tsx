@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScrollTopButton from '@/components/ScrollTopButton';
+import BottomMenu from '@/components/BottomMenu';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -211,7 +212,8 @@ export default function Records({ records }: { records: Record[] }) {
           )}
         </div>
       </div>
-      <ScrollTopButton />
+      <ScrollTopButton className="fixed bottom-6 right-6 hidden md:block" />
+      <BottomMenu />
     </AppLayout>
   );
 }

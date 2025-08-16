@@ -3,7 +3,7 @@ import { router } from "@inertiajs/react";
 import { ArrowUp, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const ScrollTopButton = () => {
+const ScrollTopButton = ({ className }: { className?: string}) => {
     const [isAtTop, setIsAtTop] = useState(true);
     const timeoutRef = useRef<number | null>(null);
     const longPressTriggered = useRef(false);
@@ -40,7 +40,7 @@ const ScrollTopButton = () => {
         <Button
             onClick={handleClick}
             onPointerDown={handlePointerDown}
-            className="cursor-pointer fixed bottom-6 right-6 z-50 rounded-full w-14 h-14 p-0 shadow-xl bg-primary text-white hover:bg-primary/90 transition"
+            className={`cursor-pointer fixed bottom-20 right-5 z-50 rounded-full w-14 h-14 p-0 shadow-xl bg-primary text-white hover:bg-primary/90 transition` + (className ? ` ${className}` : "")}
             title={isAtTop ? "Nuevo registro o favoritos" : "Subir arriba"}
         >
         {isAtTop ? (
