@@ -107,7 +107,7 @@ class GenerateImageDescription implements ShouldQueue
 
                     $response = Http::timeout(240)->post($url, [
                         'model'  => $conn['model'],
-                        'prompt' => 'genera una descripción para esta imagen',
+                        'prompt' => 'genera una descripción para esta imagen, (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
                         'images' => [$imageData],
                         'stream' => false,
                     ]);
