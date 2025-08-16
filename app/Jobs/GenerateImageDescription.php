@@ -45,7 +45,7 @@ class GenerateImageDescription implements ShouldQueue
         if (!$job) {
             throw new \Exception("No se encontró el job de procesamiento para la imagen ID {$this->image->id}");
         }
-        
+
         if ($job->status === 'cancelled') {
             Log::info("Job cancelado para imagen ID {$this->image->id}");
             return;
@@ -56,8 +56,6 @@ class GenerateImageDescription implements ShouldQueue
             if ($user->user_limit && !$user->user_limit?->can_process_images) {
                 throw new \Exception("El usuario {$user->id} no puede procesar imágenes");
             }
-            $dayliLimit = $user->user_limit?->daily_process_limit;
-            $key = "user:{$user->id}:daily_image_process";
 
             $dayliLimit = $user->user_limit?->daily_process_limit;
             $key = "user:{$user->id}:daily_image_process";
@@ -65,19 +63,22 @@ class GenerateImageDescription implements ShouldQueue
             if ($dayliLimit !== null && RateLimiter::attempts($key) >= $dayliLimit) {
                 throw new \Exception("Límite diario de procesamiento de imágenes alcanzado para el usuario ID {$user->id}");
             }
-           
+
             $path = $this->image->image_path;
             $disk = Storage::disk('private');
 
             Log::info("Probando acceso a {$path}");
             Log::info("Ruta absoluta: " . $disk->path($path));
 
-            if (!$disk->exists($path)) throw new \Exception("El archivo de imagen no existe en el disco privado.");
+            if (!$disk->exists($path)) {
+                throw new \Exception("El archivo de imagen no existe en el disco privado.");
+            }
 
             $rawImage = $disk->get($path);
+            if (!$rawImage) {
+                throw new \Exception("No se pudo leer el contenido de la imagen.");
+            }
 
-            if (!$rawImage) throw new \Exception("No se pudo leer el contenido de la imagen.");
-            
             $imageData = base64_encode($rawImage);
             Log::info('Base64 preview: ' . substr($imageData, 0, 30));
 
@@ -85,36 +86,40 @@ class GenerateImageDescription implements ShouldQueue
             $updated = ImageProcessingJob::where('id', $job->id)
                 ->where('status', 'pending')
                 ->update([
-                    'status' => 'processing',
+                    'status'     => 'processing',
                     'started_at' => now(),
                 ]);
 
-            $ollamaHosts = [
-                env('OLLAMA_HOST'),
-                env('OLLAMA_HOST_2'),
-            ];
+            if (!$updated) {
+                throw new \Exception("El job ya no está pending, se cancela ejecución");
+            }
 
-            $response = null;
+            // 🚀 Usamos config/ollama.php en vez de env()
+            $ollamaConnections = config('ollama.connections');
+
+            $response  = null;
             $lastError = null;
 
-            foreach ($ollamaHosts as $host) {
+            foreach ($ollamaConnections as $conn) {
                 try {
-                    Log::info("Intentando conexión con OLLAMA en {$host}");
-                    $response = Http::timeout(240)->post("http://{$host}:11434/api/generate", [
-                        'model' => env('OLLAMA_MODEL'),
-                        'prompt' => 'genera una descripción para esta imagen, (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
+                    $url = "http://{$conn['host']}:{$conn['port']}/api/generate";
+                    Log::info("Intentando conexión con OLLAMA en {$url} usando modelo {$conn['model']}");
+
+                    $response = Http::timeout(240)->post($url, [
+                        'model'  => $conn['model'],
+                        'prompt' => 'genera una descripción para esta imagen',
                         'images' => [$imageData],
-                        'stream' => false
+                        'stream' => false,
                     ]);
 
                     if ($response->successful()) {
-                        break; // Si funcionó, no probar más
+                        break; // ✅ Si funcionó, no probar más
                     }
 
-                    $lastError = "Error en la API ({$host}): " . $response->body();
+                    $lastError = "Error en la API ({$url}): " . $response->body();
                     Log::warning($lastError);
                 } catch (\Throwable $e) {
-                    $lastError = "Excepción con {$host}: " . $e->getMessage();
+                    $lastError = "Excepción con {$conn['host']}: " . $e->getMessage();
                     Log::warning($lastError);
                 }
             }
@@ -124,31 +129,35 @@ class GenerateImageDescription implements ShouldQueue
             }
 
             $responseData = $response->json();
-
-            if (empty($responseData['response'])) throw new \Exception("Respuesta vacía de la API");
+            if (empty($responseData['response'])) {
+                throw new \Exception("Respuesta vacía de la API");
+            }
 
             $generated_description = substr(strip_tags($responseData['response']), 0, 2000);
             Log::info("Descripción generada: " . $generated_description);
 
             $this->image->update(['generated_description' => $generated_description]);
 
-            $job->update(['status' => 'completed', 'error' => null, 'finished_at' => now() ]);
+            $job->update([
+                'status'      => 'completed',
+                'error'       => null,
+                'finished_at' => now(),
+            ]);
 
             RateLimiter::hit("user:{$this->image->record->user_id}:daily_image_process", 60 * 60 * 24);
 
             Log::info("Job completado correctamente para imagen ID {$this->image->id}");
 
         } catch (\Throwable $e) {
-            
             Log::error("Error procesando descripción para imagen ID {$this->image->id}: {$e->getMessage()}", [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             $job->update([
-                'status' => 'failed',
-                'error' => $e->getMessage(),
-                'finished_at' => now()
+                'status'      => 'failed',
+                'error'       => $e->getMessage(),
+                'finished_at' => now(),
             ]);
         }
     }
-
 }

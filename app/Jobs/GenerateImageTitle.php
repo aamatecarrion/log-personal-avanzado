@@ -88,32 +88,31 @@ class GenerateImageTitle implements ShouldQueue
 
             if (!$updated) throw new \Exception("El job ya no está pending, se cancela ejecución");
 
-            $ollamaHosts = [
-                env('OLLAMA_HOST'),
-                env('OLLAMA_HOST_2'),
-            ];
+            $ollamaConnections = config('ollama.connections');
 
             $response = null;
             $lastError = null;
 
-            foreach ($ollamaHosts as $host) {
+            foreach ($ollamaConnections as $conn) {
                 try {
-                    Log::info("Intentando conexión con OLLAMA en {$host}");
-                    $response = Http::timeout(240)->post("http://{$host}:11434/api/generate", [
-                        'model' => env('OLLAMA_MODEL'),
-                        'prompt' => 'describe esta imagen en menos de 10 palabras (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
+                    $url = "http://{$conn['host']}:{$conn['port']}/api/generate";
+                    Log::info("Intentando conexión con OLLAMA en {$url} usando modelo {$conn['model']}");
+
+                    $response = Http::timeout(240)->post($url, [
+                        'model' => $conn['model'],
+                        'prompt' => 'genera un título corto y conciso en menos de 10 palabras',
                         'images' => [$imageData],
                         'stream' => false,
                     ]);
 
                     if ($response->successful()) {
-                        break; // Si funcionó, no probar más
+                        break; // si funcionó, salimos del loop
                     }
 
-                    $lastError = "Error en la API ({$host}): " . $response->body();
+                    $lastError = "Error en la API ({$url}): " . $response->body();
                     Log::warning($lastError);
                 } catch (\Throwable $e) {
-                    $lastError = "Excepción con {$host}: " . $e->getMessage();
+                    $lastError = "Excepción con {$conn['host']}: " . $e->getMessage();
                     Log::warning($lastError);
                 }
             }
