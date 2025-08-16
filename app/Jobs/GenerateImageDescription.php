@@ -89,17 +89,39 @@ class GenerateImageDescription implements ShouldQueue
                     'started_at' => now(),
                 ]);
 
-            if (!$updated) throw new \Exception("El job ya no está pending, se cancela ejecución");
+            $ollamaHosts = [
+                env('OLLAMA_HOST'),
+                env('OLLAMA_HOST_2'),
+            ];
 
-            Log::info("Enviando petición a la API de generación");
-            $response = Http::timeout(240)->post('http://' . env('OLLAMA_HOST') . ':11434/api/generate', [
-                'model' => env('OLLAMA_MODEL'),
-                'prompt' => 'genera una descripción para esta imagen, (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
-                'images' => [$imageData],
-                'stream' => false
-            ]);
+            $response = null;
+            $lastError = null;
 
-            if ($response->failed()) throw new \Exception("Error en la API: " . $response->body());
+            foreach ($ollamaHosts as $host) {
+                try {
+                    Log::info("Intentando conexión con OLLAMA en {$host}");
+                    $response = Http::timeout(240)->post("http://{$host}:11434/api/generate", [
+                        'model' => env('OLLAMA_MODEL'),
+                        'prompt' => 'genera una descripción para esta imagen, (la salida se incluirá en el alt de una imagen, no digas cosas que formen parte de una conversación cómo: aquí hay una descripción, por supuesto o Claro! te describiré la imagen )',
+                        'images' => [$imageData],
+                        'stream' => false
+                    ]);
+
+                    if ($response->successful()) {
+                        break; // Si funcionó, no probar más
+                    }
+
+                    $lastError = "Error en la API ({$host}): " . $response->body();
+                    Log::warning($lastError);
+                } catch (\Throwable $e) {
+                    $lastError = "Excepción con {$host}: " . $e->getMessage();
+                    Log::warning($lastError);
+                }
+            }
+
+            if (!$response || $response->failed()) {
+                throw new \Exception($lastError ?? 'No se pudo conectar con ninguno de los hosts de OLLAMA.');
+            }
 
             $responseData = $response->json();
 
