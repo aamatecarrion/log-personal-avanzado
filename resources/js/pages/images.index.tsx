@@ -152,11 +152,6 @@ export default function Images({ records }: { records: Record[] }) {
 
   const groupedRecords = groupByDay(filteredRecords);
 
-  const renderField = (field: string, highlight: string) => {
-    if (!field) return null;
-    return getHighlightedText(field, highlight);
-  };
-
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Records" />
@@ -186,7 +181,7 @@ export default function Images({ records }: { records: Record[] }) {
                                     className="w-full h-60 object-cover rounded-lg shadow-md cursor-pointer"
                                 />
                                 <span className="text-sm text-muted-foreground">
-                                    {record.image.file_date ?? record.time}
+                                    {record.time}
                                 </span>
                             </div>
                         );

@@ -141,11 +141,10 @@ class GenerateImageTitle implements ShouldQueue
             Log::error("Error procesando título para imagen ID {$this->image->id}: {$e->getMessage()}", [
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+            GenerateImageTitle::dispatch($this->image)->delay(now()->addMinutes(5));
             $job->update([
-                'status' => 'failed',
-                'error' => $e->getMessage(),
-                'finished_at' => now()
+                'status' => 'pending',
+                'error' => $e->getMessage()
             ]);
         }
     }
