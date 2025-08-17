@@ -152,10 +152,11 @@ class GenerateImageDescription implements ShouldQueue
             Log::error("Error procesando descripción para imagen ID {$this->image->id}: {$e->getMessage()}", [
                 'trace' => $e->getTraceAsString(),
             ]);
-            GenerateImageDescription::dispatch($this->image)->delay(now()->addMinutes(5));
+
             $job->update([
                 'status' => 'pending',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'finished_at' => now()
             ]);
         }
     }
