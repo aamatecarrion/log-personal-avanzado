@@ -16,6 +16,8 @@ import GenerateTitleDialog from '@/components/generate-title-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import GenerateDescriptionDialog from '@/components/generate-description-dialog';
 import CancelJobDialog from '@/components/cancel-job-dialog';
+import ScrollTopButton from '@/components/ScrollTopButton';
+import BottomMenu from '@/components/BottomMenu';
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Registros', href: '/records' },
@@ -285,6 +287,8 @@ export default function RecordsShow({ record, total_in_queue }: { record: Record
           </CardContent>
         </Card>
       </div>
+      <ScrollTopButton className="fixed bottom-6 right-6 hidden md:block" />
+      <BottomMenu />
     </AppLayout>
   );
 }

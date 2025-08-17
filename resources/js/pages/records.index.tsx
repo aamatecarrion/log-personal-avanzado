@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table"
 import { useEffect, useState } from "react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Car, MoreVertical, Search, SearchCheck, Trash } from "lucide-react"
+import { Car, Image, MoreVertical, Search, SearchCheck, Trash } from "lucide-react"
 
 import { router } from "@inertiajs/react"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ScrollTopButton from '@/components/ScrollTopButton';
 import BottomMenu from '@/components/BottomMenu';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -184,20 +185,42 @@ export default function Records({ records }: { records: Record[] }) {
                         const parts = [title, description, generated].filter(Boolean);
 
                         return (
-                          <TableRow
-                            key={record.id}
-                            onClick={() => router.visit(`/records/${record.id}`)}
-                            className="cursor-pointer"
-                          >
-                            <TableCell className="text-left w-[60px] whitespace-nowrap">{record.time}</TableCell>
-                            <TableCell className="font-medium text-left whitespace-normal break-words">
-                              {parts.map((part, i) => (
-                                <span key={i} className="inline">
-                                  {i > 0 && ' - '}{part}
-                                </span>
-                              ))}
-                            </TableCell>
-                          </TableRow>
+                          <HoverCard key={record.id} openDelay={0} closeDelay={0}>
+                            <HoverCardTrigger asChild>
+                              <TableRow
+                                onClick={() => router.visit(`/records/${record.id}`)}
+                                className="cursor-pointer flex items-center "
+                              >
+                                <TableCell className="text-left w-[60px] whitespace-nowrap">
+                                  {record.time}
+                                </TableCell>
+
+                                <TableCell className="font-medium text-left whitespace-normal break-words">
+                                  {parts.map((part, i) => (
+                                    <span key={i} className="inline">
+                                      {i > 0 && ' - '}
+                                      {part}
+                                    </span>
+                                  ))}
+                                </TableCell>
+                                {record.image && 
+                                <div className="flex items-center ml-auto">
+                                  <Image className='text-muted-foreground w-12'/>
+                                </div>
+                                }
+                              </TableRow>
+                            </HoverCardTrigger>
+
+                            {record.image?.id && (
+                              <HoverCardContent className="w-80 flex flex-col">
+                                <img
+                                  src={route('images.thumbnail', record.image.id)}
+                                  alt={record.image.generated_description ?? "Imagen"}
+                                  className="rounded-lg shadow-md"
+                                />
+                              </HoverCardContent>
+                            )}
+                          </HoverCard>
                         );
                       })}
                     </TableBody>

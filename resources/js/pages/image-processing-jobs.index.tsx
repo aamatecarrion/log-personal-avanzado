@@ -27,6 +27,8 @@ import axios from 'axios';
 import ProcessFailedDialog from '@/components/process-failed-dialog';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import CancelAllDialog from '@/components/cancel-all-dialog';
+import BottomMenu from '@/components/BottomMenu';
+import ScrollTopButton from '@/components/ScrollTopButton';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -250,6 +252,8 @@ export default function ImageProcessingJobs({jobs, total_in_queue}: { jobs: Imag
                 </Card>
               </div>
             </div>
+            <ScrollTopButton className="fixed bottom-6 right-6 hidden md:block" />
+            <BottomMenu />
         </AppLayout>
     );
 }

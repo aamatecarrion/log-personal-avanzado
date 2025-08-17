@@ -1,10 +1,9 @@
 import { NavFooter } from '@/components/nav-footer';
-import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { User, type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Cpu, Download, FlaskConical, Folder, ImagePlus, Images, LayoutGrid, Logs, Map, SquarePen, Star, StopCircle, User2, UserRoundCog, UsersRound, WorkflowIcon } from 'lucide-react';
+import { Cpu, Download, FlaskConical, Images, ImagesIcon, Logs, Map, SquarePen, Star, UserRoundCog, UsersRound } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useEffect } from 'react';
 
@@ -20,8 +19,8 @@ const mainNavItems: NavItem[] = [
         icon: Logs,
     },
     {
-        title: 'Imágenes',
-        href: '/images',
+        title: 'Subir Imágenes',
+        href: '/images/create',
         icon: Images,
     },
     {
@@ -33,6 +32,11 @@ const mainNavItems: NavItem[] = [
         title: 'Mapa',
         href: '/map',
         icon: Map,
+    },
+    {
+        title: 'Imágenes',
+        href: '/images',
+        icon: ImagesIcon,
     },
     {
         title: 'Procesamientos',

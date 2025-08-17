@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
-import { Images, Star, Map, Cpu } from "lucide-react";
+import { Images,  Map, Cpu, ImagePlus, Logs } from "lucide-react";
 import ScrollTopButton from "./ScrollTopButton";
 
 const bottomNavItems = [
-    { title: "Procesamientos", href: "/image-processing", icon: Cpu },
     { title: "Mapa", href: "/map", icon: Map },
+    { title: "Jobs", href: "/image-processing", icon: Cpu },
+    { title: "Registros", href: "/records", icon: Logs},
     { title: "Imágenes", href: "/images", icon: Images },
-    { title: "Favoritos", href: "/favorites", icon: Star },
+    { title: "Subir", href: "/images/create", icon: ImagePlus },
 ];
 
 export default function BottomMenu({ children }: { children?: React.ReactNode }) {

@@ -19,7 +19,7 @@ use Intervention\Image\Laravel\Facades\Image as InterventionImage;
 use Intervention\Image\Encoders\JpegEncoder;
 
 class ImageController extends Controller {
-    public function index() {
+    public function create() {
         $user = Auth::user();
 
         $images = Image::whereHas('record', function ($query) use ($user) {
@@ -34,9 +34,17 @@ class ImageController extends Controller {
 
         $uploadLimit = $this->getUploadLimit($user);
 
-        return inertia('images.index', ['images' => $images, 'upload_limit' => $uploadLimit]);
+        return inertia('images.upload', ['images' => $images, 'upload_limit' => $uploadLimit]);
     }
-
+    public function index() {
+        if (Auth::user()->is_admin) {
+            $records = Record::withWhereHas('image')->orderBy('created_at', 'desc')->get();
+        } else {
+            $records = Record::withWhereHas('image')->where('user_id', Auth::id())->orderBy('created_at', 'desc')->get();
+        }
+        
+        return inertia('images.index', ['records' => $records]);
+    }
 
     private function getUploadLimit(User $user) {
         
@@ -60,10 +68,6 @@ class ImageController extends Controller {
             'time' => $time ?? null,
             'can_upload' => $can_upload
         ];
-    }
-
-    public function create() {
-        return inertia('images.create');
     }
 
     public function show($id) {
